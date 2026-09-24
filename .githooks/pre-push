@@ -1,0 +1,9 @@
+#!/bin/sh
+# Lance les tests de bout en bout avant chaque publication : un test en échec bloque l'envoi.
+# (Pour passer outre exceptionnellement : git push --no-verify)
+cd "$(git rev-parse --show-toplevel)"
+if [ -d node_modules/@playwright/test ]; then
+  npx playwright test --reporter=line || { echo "Tests en échec : publication annulée."; exit 1; }
+else
+  echo "Tests non installés (npm install) : publication sans tests."
+fi
