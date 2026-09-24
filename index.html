@@ -447,6 +447,7 @@
   }
   .n-card:hover { background: #fafaf9; }
   .n-card.dragging { opacity: .4; }
+  .n-drop-line { height: 3px; border-radius: 2px; background: rgba(35, 131, 226, .6); margin: -5.5px 2px; pointer-events: none; }
   .n-card.hidden-by-search { display: none; }
   .n-card .t { display: flex; gap: 0; align-items: flex-start; font-size: 15px; font-weight: 500; line-height: 22.5px; overflow-wrap: anywhere; }
   .n-card .t .tt { margin-top: .8px; }
@@ -724,7 +725,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.12';
+const APP_VERSION = '2026-09-24.13';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -1359,10 +1360,14 @@ function orderedStatuses(view) {
   return [...known, ...STATUSES.filter(st => !view.order.includes(st.key))];
 }
 
+// Rang manuel d'une carte dans sa colonne (glisser-déposer) ; à défaut, sa date de création
+const rankOf = b => b.rank ?? b.createdAt ?? 0;
+
 function sortedVisions(view) {
   const filters = activeFilters(view);
   let list = Store.list().filter(b => Object.entries(filters).every(([k, sel]) => matchFilter(b, k, sel)));
-  if (view.sort !== 'manual' && (view.sort === 'title' || propDef(view.sort))) {
+  if (view.sort === 'manual') list.sort((a, z) => rankOf(a) - rankOf(z));
+  else if (view.sort === 'title' || propDef(view.sort)) {
     list.sort((a, z) => {
       const x = sortValue(a, view.sort), y = sortValue(z, view.sort);
       if (x === y) return 0;
@@ -1530,7 +1535,7 @@ function renderKanban() {
       openIconPicker(ico, val => { Store.patch(id, { icon: val }); renderKanban(); });
     };
     card.ondragstart = e => { e.dataTransfer.setData('text/plain', id); card.classList.add('dragging'); };
-    card.ondragend = () => card.classList.remove('dragging');
+    card.ondragend = () => { card.classList.remove('dragging'); document.querySelectorAll('.n-drop-line').forEach(l => l.remove()); document.querySelectorAll('.n-cell.drop').forEach(c => c.classList.remove('drop')); };
     card.querySelector('[data-card="rename"]').onclick = e => { e.stopPropagation(); renameInline(card); };
     card.querySelector('[data-card="more"]').onclick = e => {
       e.stopPropagation();
@@ -1547,12 +1552,38 @@ function renderKanban() {
       card.querySelector('.n-card-tools').classList.add('open');
     };
   });
+  // Position d'insertion : avant la première carte dont le milieu est sous le pointeur
+  const dropIndex = (cell, y) => {
+    const cards = [...cell.querySelectorAll('.n-card:not(.dragging)')];
+    const i = cards.findIndex(c => { const r = c.getBoundingClientRect(); return y < r.top + r.height / 2; });
+    return { cards, index: i < 0 ? cards.length : i };
+  };
+  const clearLine = () => document.querySelectorAll('.n-drop-line').forEach(l => l.remove());
   app.querySelectorAll('.n-cell[data-status]').forEach(cell => {
-    cell.ondragover = e => { e.preventDefault(); cell.classList.add('drop'); };
-    cell.ondragleave = () => cell.classList.remove('drop');
+    cell.ondragover = e => {
+      e.preventDefault();
+      cell.classList.add('drop');
+      const { cards, index } = dropIndex(cell, e.clientY);
+      const line = document.querySelector('.n-drop-line') || Object.assign(document.createElement('div'), { className: 'n-drop-line' });
+      const before = cards[index] || cell.querySelector('.n-add');
+      if (before) cell.insertBefore(line, before); else cell.appendChild(line);
+    };
+    cell.ondragleave = e => { if (!cell.contains(e.relatedTarget)) { cell.classList.remove('drop'); clearLine(); } };
     cell.ondrop = e => {
       e.preventDefault();
-      setStatus(Store, e.dataTransfer.getData('text/plain'), cell.dataset.status, cell.dataset.group ? { group: cell.dataset.group } : {});
+      const id = e.dataTransfer.getData('text/plain');
+      const { cards, index } = dropIndex(cell, e.clientY);
+      clearLine();
+      setStatus(Store, id, cell.dataset.status, cell.dataset.group ? { group: cell.dataset.group } : {});
+      if (view.sort === 'manual') {
+        const prev = cards[index - 1] && Store.get(cards[index - 1].dataset.id);
+        const next = cards[index] && Store.get(cards[index].dataset.id);
+        const rank = prev && next ? (rankOf(prev) + rankOf(next)) / 2
+          : prev ? rankOf(prev) + 1000 : next ? rankOf(next) - 1000 : Date.now();
+        Store.patch(id, { rank });
+      } else if (cards.length) {
+        toast('Un tri est actif : retirez-le (Sort → Manuel) pour réordonner à la main');
+      }
       renderKanban();
     };
   });
