@@ -523,6 +523,10 @@ function makeStore(prefix) {
     },
   };
 }
+// À incrémenter à chaque publication : force le tiroir à recharger la dernière version
+// (GitHub Pages met les pages en cache 10 minutes).
+const APP_VERSION = '2026-09-24.2';
+
 const Store = makeStore('kata-sb:');        // Visions (cartes du Kanban)
 const Templates = makeStore('kata-tpl:');   // Templates de Vision
 
@@ -1150,7 +1154,7 @@ function openPeek(kind, id) {
     ]);
   };
 
-  $('#drawerFrame').src = `${baseUrl()}?${isTpl ? 'template' : 'board'}=${encodeURIComponent(id)}&drawer=1`;
+  $('#drawerFrame').src = `${baseUrl()}?${isTpl ? 'template' : 'board'}=${encodeURIComponent(id)}&drawer=1&v=${APP_VERSION}`;
   $('#scrim').classList.add('open');
   $('#drawer').classList.add('open');
   $('#drawer').setAttribute('aria-hidden', 'false');
