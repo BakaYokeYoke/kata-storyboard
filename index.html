@@ -444,7 +444,8 @@
   .n-card.dragging { opacity: .4; }
   .n-card.hidden-by-search { display: none; }
   .n-card .t { display: flex; gap: 6px; align-items: flex-start; font-size: 15px; font-weight: 500; line-height: 22.5px; overflow-wrap: anywhere; }
-  .n-card .t .ico { flex: none; width: 20px; height: 22.5px; display: inline-flex; align-items: center; justify-content: center; }
+  .n-card .t .ico { flex: none; width: 20px; height: 22.5px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
+  .n-card .t .ico:hover { background: rgba(55,53,47,.08); }
   .n-card .t .untitled { color: var(--n-faint); }
   .n-card .t input { flex: 1; min-width: 0; border: none; outline: none; font: inherit; color: inherit; background: transparent; padding: 0; }
   .n-card .prop { font-size: 12px; color: var(--n-muted); line-height: 1.45; margin-top: 7px;
@@ -665,7 +666,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.6';
+const APP_VERSION = '2026-09-24.7';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -898,7 +899,7 @@ function openPop(anchor, items) {
     if (!row) return;
     const it = items[+row.dataset.i];
     if (!it.keepOpen) closePop();
-    it.onClick?.();
+    it.onClick?.(row);
   };
 }
 function closePop() {
@@ -1061,7 +1062,13 @@ function renderKanban() {
   // Cartes : ouverture, boutons ✎ / ⋯, glisser-déposer
   app.querySelectorAll('.n-card').forEach(card => {
     const id = card.dataset.id;
-    card.onclick = e => { if (!e.target.closest('.n-card-tools, input')) openPeek('vision', id); };
+    card.onclick = e => { if (!e.target.closest('.n-card-tools, input, [data-card-icon]')) openPeek('vision', id); };
+    const ico = card.querySelector('[data-card-icon]');
+    if (ico) ico.onclick = e => {
+      e.stopPropagation();
+      closePop();
+      openIconPicker(ico, val => { Store.patch(id, { icon: val }); renderKanban(); });
+    };
     card.ondragstart = e => { e.dataTransfer.setData('text/plain', id); card.classList.add('dragging'); };
     card.ondragend = () => card.classList.remove('dragging');
     card.querySelector('[data-card="rename"]').onclick = e => { e.stopPropagation(); renameInline(card); };
@@ -1098,14 +1105,16 @@ function renderKanban() {
   app.querySelectorAll('[data-col-more]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
     const key = btn.dataset.colMore;
-    const canCreate = !view.noCreate.includes(key);
     openPop(btn, [
-      { icon: 'plus', label: 'Création de cartes', switch: canCreate, onClick: () => {
-        view.noCreate = canCreate ? [...view.noCreate, key] : view.noCreate.filter(k => k !== key);
-        saveView(view); renderKanban();
+      // La bascule garde le menu ouvert ; il se ferme en cliquant ailleurs.
+      { icon: 'plus', label: 'Création de cartes', switch: !view.noCreate.includes(key), keepOpen: true, onClick: row => {
+        const v = loadView();
+        const on = v.noCreate.includes(key);
+        v.noCreate = on ? v.noCreate.filter(k => k !== key) : [...v.noCreate, key];
+        saveView(v); renderKanban();
+        row.querySelector('.n-switch').classList.toggle('on', on);
       } },
       { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hidden.push(key); saveView(view); renderKanban(); } },
-      ...(canCreate ? [{ icon: 'plus', label: 'Nouvelle page', onClick: () => createVision(defaultTemplate(), key) }] : []),
     ]);
   });
   app.querySelectorAll('[data-unhide]').forEach(row => row.onclick = () => {
@@ -1417,7 +1426,7 @@ function visionCard(b, props = []) {
         <button data-card="rename" title="Renommer">${icon('pencil')}</button>
         <button data-card="more" title="Plus d'actions">${icon('dots')}</button>
       </div>
-      <div class="t">${b.icon ? `<span class="ico">${iconHTML(b.icon)}</span>` : ''}${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
+      <div class="t">${b.icon ? `<span class="ico" data-card-icon title="Changer l'icône">${iconHTML(b.icon)}</span>` : ''}${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
       ${parts.join('')}
     </div>`;
 }
@@ -1774,17 +1783,17 @@ function duplicateVision(id) {
   return cloneDoc(src, { title: src.title ? `${src.title} (copie)` : '' });
 }
 
-// Crée une page à partir d'un template (null = Empty), comme Notion :
-// le titre, l'icône et les propriétés viennent du template ; une colonne ou un groupe ciblés priment.
+// Crée une page à partir d'un template (null = Empty) : l'icône, les propriétés et le storyboard
+// viennent du template, le titre reste vide. Une colonne ou un groupe ciblés priment.
 function createVision(tpl, status, group) {
   const b = cloneDoc(tpl, {
-    title: tpl?.name || '',
+    title: '',
     status: status || tpl?.status || 'incoming',
     group: group || tpl?.group || GROUPS[0].key,
   });
   renderKanban();
   openPeek('vision', b.id, { isNew: true });
-  setTimeout(() => { const t = $('#peekTitle'); t.focus(); t.select(); }, 280);
+  setTimeout(() => $('#peekTitle').focus(), 280);
 }
 
 /* ---------- Tiroir (side peek) / fenêtre centrée pour les templates ---------- */
