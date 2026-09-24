@@ -437,7 +437,7 @@
   .n-cell.empty { background: transparent; }
 
   .n-card {
-    position: relative; background: #fff; border-radius: 10px; padding: 8px 10px; cursor: pointer; min-width: 0;
+    position: relative; background: #fff; border-radius: 10px; padding: 8px 10px; min-height: 40px; cursor: pointer; min-width: 0;
     box-shadow: rgba(15,15,15,.1) 0 0 0 1px, rgba(15,15,15,.1) 0 2px 4px;
   }
   .n-card:hover { background: #fafaf9; }
@@ -462,7 +462,7 @@
   .n-chip { font-size: 12px; border-radius: 4px; padding: 1px 6px; background: var(--n-hover); color: var(--n-ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .n-chip.obs { background: rgb(253, 236, 200); color: rgb(64, 44, 27); }
   .n-pill.small { font-size: 12px; padding: 0 7px 0 6px; }
-  .n-add { display: flex; align-items: center; gap: 6px; border: none; background: none; text-align: left; color: var(--col-count); font-size: 14px; padding: 5px 6px; border-radius: 6px; }
+  .n-add { display: flex; align-items: center; gap: 6px; height: 40px; border: 1px solid rgba(55,53,47,.09); background: none; text-align: left; color: var(--col-count); font-size: 14px; padding: 0 10px; border-radius: 10px; font-family: inherit; }
   .n-add:hover { background: var(--n-hover); }
 
   /* Couleurs Notion */
@@ -996,7 +996,7 @@ function renderKanban() {
         </div>
       </div>
       <div class="n-board-wrap">
-        <div class="n-board ${view.colorCols ? '' : 'nocolor'}" style="grid-template-columns: repeat(${nCols}, 260px)">
+        <div class="n-board ${view.colorCols ? '' : 'nocolor'}" style="grid-template-columns: repeat(${nCols}, 276px)">
           ${cols.map(st => `
             <div class="n-head c-${st.color}">
               ${pill(st)}<span class="n-count">${inCell(st.key).length}</span>
