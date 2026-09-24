@@ -580,7 +580,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.3';
+const APP_VERSION = '2026-09-24.4';
 
 const Store = makeStore('kata-sb:');        // Visions (cartes du Kanban)
 const Templates = makeStore('kata-tpl:');   // Templates de Vision
@@ -851,15 +851,6 @@ function renderKanban() {
   if (view.subgroups && view.hideEmptySub) rows = rows.filter(g => visions.some(b => groupOf(b) === g.key));
   const nCols = Math.max(1, cols.length + (hiddenCols.length ? 1 : 0));
 
-  // Lignes de la grille : en-têtes, puis (titre de sous-groupe + cellules) par groupe.
-  // La dernière ligne de cellules prend toute la hauteur restante : colonnes colorées jusqu'en bas.
-  const tracks = ['auto'];
-  rows.forEach(g => {
-    if (g) tracks.push('auto');
-    if (!g || !view.collapsed.includes(g.key)) tracks.push('auto');
-  });
-  const lastCells = rows.length && (!rows.at(-1) || !view.collapsed.includes(rows.at(-1).key));
-  if (lastCells) tracks[tracks.length - 1] = 'minmax(80px, 1fr)';
 
   const cells = g => cols.map(st => `
     <div class="n-cell c-${st.color}" data-status="${st.key}" data-group="${g ? g.key : ''}">
@@ -877,7 +868,6 @@ function renderKanban() {
     <div class="n-page">
       <h1 class="n-title" id="boardTitle" contenteditable="true" spellcheck="false" data-placeholder="Sans titre">${esc(boardTitle())}</h1>
       <div class="n-bar">
-        <span class="n-tab">${icon('board')} Board</span>
         <span class="spacer"></span>
         <button class="n-icon-btn ${nFilters ? 'active' : ''}" id="btnFilter" title="Filtrer">${icon('filter')}</button>
         <button class="n-icon-btn ${view.sort !== 'manual' ? 'active' : ''}" id="btnSort" title="Trier">${icon('sort')}</button>
@@ -890,7 +880,7 @@ function renderKanban() {
         </div>
       </div>
       <div class="n-board-wrap">
-        <div class="n-board ${view.colorCols ? '' : 'nocolor'}" style="grid-template-columns: repeat(${nCols}, 260px); grid-template-rows: ${tracks.join(' ')}">
+        <div class="n-board ${view.colorCols ? '' : 'nocolor'}" style="grid-template-columns: repeat(${nCols}, 260px)">
           ${cols.map(st => `
             <div class="n-head c-${st.color}">
               ${pill(st)}<span class="n-count">${inCell(st.key).length}</span>
@@ -936,10 +926,6 @@ function renderKanban() {
     <div class="emoji-pop" id="emojiPop" hidden>${EMOJIS.map(e => `<button data-emoji="${e}">${e}</button>`).join('')}</div>`;
 
   const app = $('#app');
-
-  // Colonnes colorées jusqu'au bas de la fenêtre
-  const boardEl = $('.n-board');
-  boardEl.style.minHeight = Math.max(200, innerHeight - (boardEl.getBoundingClientRect().top + scrollY) - 24) + 'px';
 
   const titleEl = $('#boardTitle');
   titleEl.oninput = () => {
