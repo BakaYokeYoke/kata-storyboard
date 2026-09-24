@@ -229,6 +229,10 @@
   .frame.readonly [data-act="init"], .frame.readonly .blk-tools, .frame.readonly .conn .side button { display: none !important; }
   .frame.readonly ::placeholder { color: transparent !important; }
   section.experiments.spot { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; scroll-margin-top: 130px; }
+  body.in-drawer { overflow: hidden; }
+  body.in-drawer .sheet { min-height: 0; }
+  body.in-drawer section.experiments.spot { scroll-margin-top: 170px; }
+  body.in-drawer .tb { will-change: transform; }
 
   /* Block diagrams As Is / To Be */
   .diagram { border-top: 1px dashed #d5d8de; padding: 8px 0 4px; min-width: 0; }
@@ -478,16 +482,19 @@
   .c-blue   { --col-bg: rgb(245, 249, 252); --col-pill: rgb(211, 229, 239); --col-text: rgb(51, 126, 169);  --col-dot: rgb(51, 126, 169);  --col-count: rgb(51, 126, 169); }
 
   /* Tiroir (side peek) */
-  .scrim { position: fixed; inset: 0; background: rgba(15,15,15,.25); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+  .scrim { position: fixed; inset: 0; background: rgba(15,15,15,.25); opacity: 0; pointer-events: none; transition: opacity .18s ease-in; z-index: 20; }
+  .scrim.open { transition: opacity .26s ease-out; }
   .scrim.open { opacity: 1; pointer-events: auto; }
   .drawer {
     position: fixed; top: 0; right: 0; bottom: 0; width: min(1180px, 94vw); background: #fff; z-index: 21;
-    transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column;
+    /* Animation façon Notion : entrée décélérée, sortie plus rapide */
+    transform: translateX(100%); transition: transform .18s cubic-bezier(.4, 0, 1, 1); display: flex; flex-direction: column;
     box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px;
+    overflow-y: auto; overscroll-behavior: contain;   /* un seul défilement pour toute la page */
   }
   .drawer:not(.open) { box-shadow: none; }
-  .drawer.open { transform: none; }
-  .peek-top { display: flex; align-items: center; gap: 4px; padding: 8px 12px; }
+  .drawer.open { transform: none; transition: transform .26s cubic-bezier(.16, 1, .3, 1); }
+  .peek-top { display: flex; align-items: center; gap: 4px; padding: 8px 12px; position: sticky; top: 0; z-index: 5; background: #fff; flex: none; }
   .peek-top .spacer { flex: 1; }
   .peek-banner { margin: 0 44px 6px; background: rgb(251, 243, 219); color: rgb(64, 44, 27); border-radius: 6px; padding: 7px 12px; font-size: 13px; }
   .peek-banner[hidden] { display: none; }
@@ -538,7 +545,7 @@
   .add-prop:hover { background: var(--n-hover); color: rgba(55,53,47,.8); }
   .n-pop input.pop-input { width: 100%; font: inherit; font-size: 14px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; background: rgba(242,241,238,.6); }
   .n-pop input.pop-input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
-  .drawer iframe { flex: 1; border: 0; width: 100%; border-top: 1px solid var(--n-line); }
+  .drawer iframe { flex: none; border: 0; width: 100%; min-height: 400px; border-top: 1px solid var(--n-line); display: block; }
 
   /* Sélecteur d'icône (Emoji / Icons / Upload) */
   .ip { position: fixed; z-index: 45; width: 408px; max-width: calc(100vw - 16px); background: #fff; border-radius: 10px; box-shadow: var(--n-shadow-pop, rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px); font-size: 14px; color: rgb(55,53,47);
@@ -717,7 +724,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.11';
+const APP_VERSION = '2026-09-24.12';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -751,6 +758,7 @@ const boardUrl = id => `${baseUrl()}?board=${encodeURIComponent(id)}`;
 const fmtDate = ts => ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
 function toast(msg) {
+  if (inDrawer && window.parent !== window && window.parent.toast) return window.parent.toast(msg);
   const t = $('#toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -2749,10 +2757,38 @@ function openPeek(kind, id, { isNew = false } = {}) {
     ]);
   };
 
+  // Un seul défilement : l'iframe prend la hauteur de son contenu, le tiroir défile ;
+  // le bandeau Lire → Run → Kata reste collé sous la barre du haut.
+  const frame = $('#drawerFrame'), drawer = $('#drawer');
+  drawer.scrollTop = 0;
+  frame.style.height = '';
+  frame.onload = () => {
+    const doc = frame.contentDocument, app = doc?.getElementById('app');
+    if (!app) return;
+    const fit = () => { frame.style.height = Math.ceil(app.getBoundingClientRect().height) + 'px'; stickTimeblock(); };
+    new ResizeObserver(fit).observe(app);
+    fit();
+  };
+  drawer.onscroll = stickTimeblock;
+
   $('#drawerFrame').src = `${baseUrl()}?${isTpl ? 'template' : 'board'}=${encodeURIComponent(id)}&drawer=1&v=${APP_VERSION}`;
-  $('#scrim').classList.add('open');
-  $('#drawer').classList.add('open');
-  $('#drawer').setAttribute('aria-hidden', 'false');
+  // Le tiroir peut venir d'être recréé (nouvelle carte) : on laisse le navigateur peindre
+  // l'état fermé avant d'ouvrir, pour que l'animation se joue toujours.
+  void drawer.offsetWidth;
+  requestAnimationFrame(() => {
+    $('#scrim').classList.add('open');
+    drawer.classList.add('open');
+  });
+  drawer.setAttribute('aria-hidden', 'false');
+}
+
+function stickTimeblock() {
+  const frame = $('#drawerFrame'), drawer = $('#drawer');
+  const tb = frame?.contentDocument?.getElementById('tb');
+  if (!tb) return;
+  const barH = drawer.querySelector('.peek-top').offsetHeight;
+  const offset = drawer.scrollTop + barH - frame.offsetTop;
+  tb.style.transform = offset > 0 ? `translateY(${Math.min(offset, frame.offsetHeight - tb.offsetHeight)}px)` : '';
 }
 
 function closePeek() {
@@ -2897,6 +2933,7 @@ function renderBoard(id) {
   // Un id inconnu crée le storyboard : dupliquer un embed et changer l'id suffit.
   board = migrate(DocStore.get(id) || newBoard(id));
   document.title = board.title || 'Kata Storyboard';
+  document.body.classList.toggle('in-drawer', inDrawer);
 
   const showToolbar = isTplDoc() || !inDrawer;
   $('#app').innerHTML = `
@@ -3124,6 +3161,11 @@ function tbAction(act) {
   scheduleSave();
   renderTimeblock();
   if (board.session.step === 'kata') setTimeout(() => $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  else if (inDrawer && window.frameElement) {
+    const drawer = window.frameElement.closest('.drawer');
+    const top = drawer.querySelector('.peek-top')?.offsetHeight || 0;
+    if (drawer.scrollTop > window.frameElement.offsetTop - top) drawer.scrollTo({ top: window.frameElement.offsetTop - top, behavior: 'smooth' });
+  }
   else scrollTo({ top: 0, behavior: 'smooth' });
 }
 
