@@ -55,10 +55,10 @@
     display: flex; flex-direction: column;
   }
   .head {
-    display: grid; grid-template-columns: 1fr 2fr;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     border-bottom: 3px solid var(--line);
   }
-  .head > div.challenge { position: relative; flex-wrap: wrap; }
+  .head > div.challenge { position: relative; flex-wrap: wrap; min-width: 0; }
   .sentence { flex: 1; min-width: 0; font-size: 16px; line-height: 1.9; }
   .head .sentence input.blank {
     flex: none; border: none; border-bottom: 1.5px dashed #9aa0a8; padding: 0;
@@ -97,13 +97,13 @@
   .body {
     flex: 1;
     display: grid; grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr auto;
     margin-top: 14px;
   }
   .col { padding: 6px 16px; display: flex; flex-direction: column; min-width: 0; }
   .col + .col { border-left: 3px solid var(--line); }
-  .col.cond { grid-row: 1 / span 4; display: grid; grid-template-rows: subgrid; }
-  .col.right { grid-row: 1 / span 4; }
+  .col.cond { grid-row: 1 / span 5; display: grid; grid-template-rows: subgrid; }
+  .col.right { grid-row: 1 / span 5; }
   h2 { font-size: 19px; line-height: 1.2; margin: 4px 0 10px; font-weight: 700; }
   .achieve { display: flex; align-items: center; gap: 6px; font-weight: 700; margin: -4px 0 12px; font-size: 15px; }
   .achieve input { border: none; border-bottom: 2px solid var(--line); outline: none; padding: 2px 2px; font-weight: 400; background: transparent; }
@@ -139,6 +139,43 @@
   .icon.del:hover { color: var(--danger); }
   .add { background: none; border: 1px dashed #c3c7ce; border-radius: 4px; color: var(--muted); padding: 5px 8px; font-size: 12px; width: 100%; text-align: left; }
   .add:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Block diagrams As Is / To Be */
+  .diagram { border-top: 1px dashed #d5d8de; padding: 8px 0 4px; min-width: 0; }
+  .diagram-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; min-height: 22px; }
+  .diagram-head > span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  .diagram-head button { font-size: 11px; padding: 2px 7px; border: 1px solid #c3c7ce; border-radius: 4px; background: #fff; color: var(--muted); }
+  .diagram-head button:hover { border-color: var(--accent); color: var(--accent); }
+  .blk {
+    position: relative; display: flex; align-items: center; gap: 6px;
+    border: 2px solid var(--ink); border-radius: 3px; padding: 5px 8px; background: #fff; min-width: 0;
+  }
+  .blk.obstacle { border-color: var(--danger); background: #fdf3f2; }
+  .blk .warn { color: var(--danger); font-size: 13px; }
+  .blk input { border: none; outline: none; background: transparent; min-width: 0; padding: 1px 0; }
+  .blk .blk-name { flex: 1; font-weight: 700; }
+  .blk .blk-val { width: 34%; text-align: right; color: #333; }
+  .blk input::placeholder, .conn input::placeholder { color: #b4b7bd; font-weight: 400; }
+  .blk-tools {
+    position: absolute; right: 4px; top: -13px; display: none; gap: 1px;
+    background: #fff; border: 1px solid #c3c7ce; border-radius: 4px; padding: 1px; z-index: 2;
+  }
+  .blk:hover .blk-tools, .blk:focus-within .blk-tools { display: flex; }
+  .blk-tools button { border: none; background: none; font-size: 11px; line-height: 1; padding: 3px 5px; border-radius: 3px; color: var(--muted); }
+  .blk-tools button:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+  .blk-tools button:disabled { opacity: .3; cursor: default; }
+  .blk-tools button.on { color: var(--danger); }
+  .conn { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 26px; }
+  .conn .down { font-size: 16px; line-height: 1; color: var(--ink); }
+  .conn .side { display: flex; align-items: center; gap: 3px; padding-left: 8px; min-width: 0; font-size: 12px; }
+  .conn .tri { color: #d08700; }
+  .conn .side input { width: 60px; min-width: 0; border: none; border-bottom: 1px dashed #c3c7ce; outline: none; background: transparent; font-size: 12px; padding: 1px 0; }
+  .conn .side button { border: none; background: none; color: var(--muted); font-size: 11px; padding: 2px 4px; border-radius: 3px; }
+  .conn .side button:hover { background: var(--hover); color: var(--ink); }
+  .conn .add-wait { visibility: hidden; }
+  .conn:hover .add-wait, .conn .add-wait:focus { visibility: visible; }
+  .diagram .add { margin-top: 8px; }
+  .diagram .add:disabled { opacity: .5; cursor: default; }
 
   /* Obstacle en cours, en tête du Record */
   .rec-obs {
@@ -203,9 +240,16 @@
   }
   .toast.show { opacity: 1; }
 
+  @media (max-width: 900px) and (min-width: 521px) {
+    .body { grid-template-columns: 1fr 1fr; }
+    .col.right { grid-column: 1 / -1; grid-row: auto; border-left: none; border-top: 3px solid var(--line); margin-top: 10px; padding: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr; }
+    .right > section.obstacles { border-top: none; border-left: 3px solid var(--line); margin-left: 0; padding: 6px 16px; }
+  }
   @media (max-width: 760px) {
-    .head { grid-template-columns: 1fr; }
+    .head { grid-template-columns: minmax(0, 1fr); }
     .head > div + div { border-left: none; border-top: 3px solid var(--line); margin: 0; }
+  }
+  @media (max-width: 520px) {
     .body { grid-template-columns: 1fr; grid-template-rows: none; }
     .col.cond, .col.right { grid-row: auto; display: flex; flex-direction: column; }
     .col + .col { border-left: none; border-top: 3px solid var(--line); padding-top: 14px; }
@@ -298,6 +342,8 @@ function migrate(b) {
   for (const side of ['target', 'current']) {
     if (typeof b[side] !== 'object' || !b[side]) b[side] = { ...emptyCondition(), pattern: b[side] || '' };
   }
+  b.target.toBe ||= [];
+  b.current.asIs ||= [];
   const active = b.obstacles.find(o => o.focus && !o.done);
   b.experiments.forEach(x => {
     if (x.obstacleId === undefined) x.obstacleId = active ? active.id : null;
@@ -469,10 +515,12 @@ function renderBoard(id) {
               <div class="achieve">Achieve by: <input type="date" data-field="targetDate"></div>
             </div>
             ${conditionFields('target')}
+            <div class="diagram" id="diag-target"></div>
           </div>
           <div class="col cond">
             <div><h2>Current<br>Condition</h2></div>
             ${conditionFields('current')}
+            <div class="diagram" id="diag-current"></div>
           </div>
           <div class="col right">
             <section class="experiments">
@@ -515,6 +563,8 @@ function renderBoard(id) {
     inputs[inputs.length - 1]?.focus();
   };
 
+  renderDiagram('target');
+  renderDiagram('current');
   renderRecord();
   renderObstacles();
 
@@ -528,6 +578,80 @@ function conditionFields(side) {
       <span>${f.label}</span>
       <textarea rows="1" data-field="${side}.${f.key}" placeholder="${esc(f[side])}"></textarea>
     </label>`).join('');
+}
+
+/* ============================================================
+   Block diagrams : To Be (Target) / As Is (Current)
+   ============================================================ */
+const MAX_BLOCKS = 6;
+const DIAGRAMS = {
+  target:  { key: 'toBe', title: 'To Be', canFlag: false },
+  current: { key: 'asIs', title: 'As Is', canFlag: true },
+};
+const blocksOf = side => board[side][DIAGRAMS[side].key];
+
+function renderDiagram(side) {
+  const { title, canFlag } = DIAGRAMS[side];
+  const blocks = blocksOf(side);
+  const el = $('#diag-' + side);
+
+  el.innerHTML = `
+    <div class="diagram-head">
+      <span>${title}</span>
+      ${side === 'target' ? `<button data-act="init" title="Rother : la Target Condition se construit en copiant la Current Condition">Initialiser depuis As Is</button>` : ''}
+    </div>
+    ${blocks.map((b, i) => `
+      <div class="blk ${canFlag && b.isObstacle ? 'obstacle' : ''}" data-i="${i}">
+        ${canFlag && b.isObstacle ? '<span class="warn" title="Obstacle">⚠</span>' : ''}
+        <input class="blk-name" data-k="name" value="${esc(b.name)}" placeholder="Étape">
+        <input class="blk-val" data-k="value" value="${esc(b.value)}" placeholder="valeur">
+        <div class="blk-tools">
+          ${canFlag ? `<button data-act="flag" class="${b.isObstacle ? 'on' : ''}" title="Marquer comme obstacle">⚠</button>` : ''}
+          <button data-act="up" title="Monter" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button data-act="down" title="Descendre" ${i === blocks.length - 1 ? 'disabled' : ''}>↓</button>
+          <button data-act="del" title="Supprimer">✕</button>
+        </div>
+      </div>
+      ${i < blocks.length - 1 ? `
+        <div class="conn" data-i="${i}">
+          <span></span>
+          <span class="down">↓</span>
+          <span class="side">${typeof b.waitAfter === 'string'
+            ? `<span class="tri" title="Attente">▲</span><input data-k="waitAfter" value="${esc(b.waitAfter)}" placeholder="durée"><button data-act="nowait" title="Retirer l'attente">✕</button>`
+            : `<button class="add-wait" data-act="wait">+ attente</button>`}</span>
+        </div>` : ''}`).join('')}
+    <button class="add" data-act="add" ${blocks.length >= MAX_BLOCKS ? 'disabled' : ''}>
+      ${blocks.length >= MAX_BLOCKS ? `Maximum ${MAX_BLOCKS} blocs` : '+ Bloc'}
+    </button>`;
+
+  // Édition inline : on met à jour le modèle sans re-rendre (le focus est conservé).
+  el.querySelectorAll('input[data-k]').forEach(input => {
+    const i = +input.closest('[data-i]').dataset.i;
+    input.oninput = () => { blocks[i][input.dataset.k] = input.value; scheduleSave(); };
+  });
+
+  el.querySelectorAll('[data-act]').forEach(btn => btn.onclick = () => {
+    const i = +btn.closest('[data-i]')?.dataset.i;
+    const act = btn.dataset.act;
+    if (act === 'add') blocks.push({ id: uid(), name: '', value: '', isObstacle: false });
+    if (act === 'del') blocks.splice(i, 1);
+    if (act === 'up' || act === 'down') {
+      const j = act === 'up' ? i - 1 : i + 1;
+      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+    }
+    if (act === 'flag') blocks[i].isObstacle = !blocks[i].isObstacle;
+    if (act === 'wait') blocks[i].waitAfter = '';
+    if (act === 'nowait') delete blocks[i].waitAfter;
+    if (act === 'init') {
+      const src = blocksOf('current');
+      if (!src.length) return toast('Le diagramme As Is est vide');
+      if (blocks.length && !confirm(`Remplacer les ${blocks.length} bloc(s) du To Be par une copie de l'As Is ?`)) return;
+      board.target.toBe = src.map(b => ({ ...b, id: uid(), isObstacle: false }));
+    }
+    renderDiagram(side); scheduleSave();
+    if (act === 'add') el.querySelectorAll('.blk-name')[blocksOf(side).length - 1]?.focus();
+    if (act === 'wait') el.querySelector(`.conn[data-i="${i}"] input`)?.focus();
+  });
 }
 
 const activeObstacle = () => board.obstacles.find(o => o.focus && !o.done);
