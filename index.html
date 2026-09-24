@@ -446,6 +446,7 @@
   .n-card .t { display: flex; gap: 6px; align-items: flex-start; font-size: 15px; font-weight: 500; line-height: 22.5px; overflow-wrap: anywhere; }
   .n-card .t .ico { flex: none; width: 20px; height: 22.5px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
   .n-card .t .ico:hover { background: rgba(55,53,47,.08); }
+  .n-card .t .ico svg.page-default { width: 20px; height: 20px; color: rgba(55,53,47,.65); }
   .n-card .t .untitled { color: var(--n-faint); }
   .n-card .t input { flex: 1; min-width: 0; border: none; outline: none; font: inherit; color: inherit; background: transparent; padding: 0; }
   .n-card .prop { font-size: 12px; color: var(--n-muted); line-height: 1.45; margin-top: 7px;
@@ -1426,7 +1427,7 @@ function visionCard(b, props = []) {
         <button data-card="rename" title="Renommer">${icon('pencil')}</button>
         <button data-card="more" title="Plus d'actions">${icon('dots')}</button>
       </div>
-      <div class="t">${b.icon ? `<span class="ico" data-card-icon title="Changer l'icône">${iconHTML(b.icon)}</span>` : ''}${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
+      <div class="t"><span class="ico" data-card-icon title="Changer l'icône">${iconHTML(b.icon) || DEFAULT_PAGE_ICON}</span>${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
       ${parts.join('')}
     </div>`;
 }
@@ -1532,6 +1533,8 @@ const EMOJI_LIST = [
   ['🧹','ménage rangement'],['🎮','jeu game'],['♟️','échecs stratégie'],['🌙','nuit lune'],['☕','café coffee'],['🍳','cuisine cooking'],
 ];
 const RECENT_KEY = 'kata-recent-icons';
+// Icône de page vide (comme Notion quand aucune icône n'est choisie)
+const DEFAULT_PAGE_ICON = '<svg class="nicon page-default" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round"><path d="M5.5 2.75h5.9l3.85 3.85v9.4a1.25 1.25 0 0 1-1.25 1.25h-8.5A1.25 1.25 0 0 1 4.25 16V4A1.25 1.25 0 0 1 5.5 2.75z"/><path d="M11.25 2.9v3.1a.75.75 0 0 0 .75.75h3.1M7.25 10.25h5.5M7.25 13.25h5.5"/></svg>';
 
 function iconHTML(val, cls = '') {
   if (!val) return '';
