@@ -212,26 +212,59 @@
   .obs.focus input[type=text] { font-weight: 700; }
   .list { margin-bottom: 8px; }
 
-  /* ---------- Index ---------- */
-  .index { max-width: 860px; margin: 0 auto; padding: 24px 16px 40px; }
-  .index h1 { font-size: 24px; margin: 0 0 4px; }
-  .index p.sub { color: var(--muted); margin: 0 0 20px; }
-  .create { display: flex; gap: 8px; margin-bottom: 22px; }
-  .create input { flex: 1; padding: 8px 10px; border: 1px solid #c3c7ce; border-radius: 6px; outline: none; }
-  .create input:focus { border-color: var(--accent); }
-  .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+  /* ---------- Kanban ---------- */
+  body.kanban-page { background: #f4f5f7; min-height: 100vh; }
+  .kb-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 18px 20px 6px; }
+  .kb-top h1 { font-size: 22px; margin: 0; }
+  .kb-top .sub { color: var(--muted); font-size: 13px; }
+  .kb-top .spacer { flex: 1; }
+  .btn { padding: 7px 13px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; font-size: 13px; }
   .btn.ghost { background: #fff; color: var(--ink); border-color: #c3c7ce; }
-  .btn.small { padding: 4px 9px; font-size: 12px; }
-  .cards { display: grid; gap: 10px; }
-  .card { border: 1px solid #d5d8de; border-left: 5px solid var(--frame); border-radius: 6px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .card .info { flex: 1; min-width: 200px; }
-  .card .title { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
-  .card .title:hover { text-decoration: underline; }
-  .card .meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
-  .card .meta code { background: #f2f3f5; padding: 1px 4px; border-radius: 3px; }
-  .card .actions { display: flex; gap: 6px; }
-  .empty { color: var(--muted); padding: 30px; text-align: center; border: 1px dashed #c3c7ce; border-radius: 6px; }
-  .footer { margin-top: 28px; display: flex; gap: 8px; }
+  .btn.danger { background: #fff; color: var(--danger); border-color: #e3b3af; }
+  .board-cols {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+    padding: 12px 20px 24px; align-items: start;
+  }
+  .kb-col { background: #ebecf0; border-radius: 8px; padding: 8px; min-height: 160px; display: flex; flex-direction: column; gap: 8px; }
+  .kb-col.drop { outline: 2px dashed var(--accent); outline-offset: -2px; background: #e3e8f6; }
+  .kb-col-head { display: flex; align-items: center; gap: 6px; padding: 2px 4px 4px; font-weight: 700; font-size: 13px; }
+  .kb-col-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .kb-col-head .count { color: var(--muted); font-weight: 400; }
+  .kb-card {
+    background: #fff; border-radius: 6px; padding: 10px 11px; cursor: pointer;
+    box-shadow: 0 1px 0 rgba(9,30,66,.2); border-left: 4px solid var(--frame); min-width: 0;
+  }
+  .kb-card:hover { box-shadow: 0 2px 6px rgba(9,30,66,.2); }
+  .kb-card.dragging { opacity: .4; }
+  .kb-card .t { font-weight: 700; font-size: 14px; margin-bottom: 3px; overflow-wrap: anywhere; }
+  .kb-card .fp { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+  .kb-card .ch { font-size: 12px; line-height: 1.4; color: #333; margin-bottom: 8px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .kb-card .obs-now { font-size: 12px; background: var(--active-bg); border: 1px solid var(--active-line); border-radius: 4px; padding: 3px 6px; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .kb-card .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .kb-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 14px 4px; }
+  .kb-foot { padding: 0 20px 24px; display: flex; gap: 8px; }
+  .kb-foot .btn { font-size: 12px; padding: 4px 9px; }
+
+  /* Tiroir */
+  .scrim { position: fixed; inset: 0; background: rgba(9,30,66,.35); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(1180px, 94vw); background: #fff; z-index: 21;
+    transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column;
+    box-shadow: -8px 0 24px rgba(0,0,0,.15);
+  }
+  .drawer:not(.open) { box-shadow: none; }
+  .drawer.open { transform: none; }
+  .drawer-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #e3e5e8; }
+  .drawer-head h2 { margin: 0; font-size: 17px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drawer-head select { font: inherit; font-size: 13px; padding: 4px 6px; border: 1px solid #c3c7ce; border-radius: 6px; background: #fff; }
+  .drawer-head .close { border: none; background: none; font-size: 22px; line-height: 1; color: var(--muted); padding: 2px 6px; border-radius: 4px; }
+  .drawer-head .close:hover { background: var(--hover); color: var(--ink); }
+  .drawer iframe { flex: 1; border: 0; width: 100%; }
+
+  @media (max-width: 900px) { .board-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .board-cols { grid-template-columns: minmax(0, 1fr); } .drawer { width: 100vw; } }
 
   .toast {
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -371,70 +404,96 @@ function fitWidth(el) {
 /* ============================================================
    Routage : ?board=<id> → storyboard, sinon → liste
    ============================================================ */
+const inDrawer = new URLSearchParams(location.search).has('drawer');
+
 function route() {
   const id = new URLSearchParams(location.search).get('board');
-  if (id) renderBoard(id); else renderIndex();
+  if (id) renderBoard(id); else renderKanban();
 }
 
 /* ============================================================
-   Vue liste
+   Vue Kanban
    ============================================================ */
-function renderIndex() {
+const STATUSES = [
+  { key: 'todo',   label: 'À démarrer', color: '#9aa0a8' },
+  { key: 'doing',  label: 'En cours',   color: '#1f4fb5' },
+  { key: 'paused', label: 'En pause',   color: '#e0a100' },
+  { key: 'done',   label: 'Atteint',    color: '#1d7a3a' },
+];
+const statusOf = b => STATUSES.some(s => s.key === b.status) ? b.status : 'todo';
+
+function challengeText(b) {
+  if (!b.challengeResult) return '';
+  return `D'ici ${b.challengeBy || '…'}, ${b.challengeResult}${b.challengeVision ? `, afin de ${b.challengeVision}` : ''}.`;
+}
+
+function renderKanban() {
   document.title = 'Kata Storyboards';
+  document.body.classList.add('kanban-page');
+  if (!Store.list().length) seedDemo();
   const boards = Store.list();
+
   $('#app').innerHTML = `
-    <div class="index">
+    <div class="kb-top">
       <h1>Storyboards</h1>
-      <p class="sub">${boards.length} storyboard${boards.length > 1 ? 's' : ''} · stockés dans ce navigateur</p>
-
-      <form class="create" id="create">
-        <input id="newName" placeholder="Nom du nouveau storyboard (ex : Ligne 3 – changement de série)" autocomplete="off">
-        <button class="btn" type="submit">Créer</button>
-      </form>
-
-      <div class="cards">
-        ${boards.length ? boards.map(b => `
-          <div class="card">
-            <div class="info">
-              <a class="title" href="${esc(boardUrl(b.id))}">${esc(b.title || b.id)}</a>
-              <div class="meta">
-                ${b.focusProcess ? esc(b.focusProcess) + ' · ' : ''}
-                ${b.experiments.length} expérience${b.experiments.length > 1 ? 's' : ''} ·
-                modifié ${fmtDate(b.updatedAt)} · <code>${esc(b.id)}</code>
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn ghost small" data-copy="${esc(b.id)}">Copier l'URL d'embed</button>
-              <button class="btn ghost small" data-del="${esc(b.id)}" title="Supprimer">Supprimer</button>
-            </div>
-          </div>`).join('') : `<div class="empty">Aucun storyboard pour l'instant. Créez-en un ci-dessus.</div>`}
+      <span class="sub">${boards.length} storyboard${boards.length > 1 ? 's' : ''}</span>
+      <span class="spacer"></span>
+      <button class="btn" id="newBoard">+ Nouveau storyboard</button>
+    </div>
+    <div class="board-cols">
+      ${STATUSES.map(st => {
+        const cards = boards.filter(b => statusOf(b) === st.key);
+        return `
+          <div class="kb-col" data-status="${st.key}">
+            <div class="kb-col-head"><span class="dot" style="background:${st.color}"></span>${st.label} <span class="count">${cards.length}</span></div>
+            ${cards.map(kanbanCard).join('') || '<div class="kb-empty">Glissez une carte ici</div>'}
+          </div>`;
+      }).join('')}
+    </div>
+    <div class="kb-foot">
+      <button class="btn ghost" id="resetDemo">Réinitialiser la démo</button>
+      <button class="btn ghost" id="export">Exporter (JSON)</button>
+    </div>
+    <div class="scrim" id="scrim"></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <h2 id="drawerTitle"></h2>
+        <button class="btn danger" id="drawerDelete">Supprimer</button>
+        <button class="close" id="drawerClose" title="Fermer (Échap)">×</button>
       </div>
+      <iframe id="drawerFrame" title="Storyboard"></iframe>
+    </aside>`;
 
-      <div class="footer">
-        <button class="btn ghost small" id="export">Exporter (JSON)</button>
-        <button class="btn ghost small" id="import">Importer</button>
-        <input type="file" id="importFile" accept="application/json" hidden>
-      </div>
-    </div>`;
-
-  $('#create').onsubmit = e => {
-    e.preventDefault();
-    const name = $('#newName').value.trim();
-    if (!name) return $('#newName').focus();
-    const id = `${slug(name) || 'board'}-${uid()}`;
-    Store.save(newBoard(id, name));
-    location.href = boardUrl(id);
-  };
-
-  $('#app').querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copy(boardUrl(b.dataset.copy)));
-  $('#app').querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
-    const board = Store.get(b.dataset.del);
-    if (confirm(`Supprimer « ${board?.title || b.dataset.del} » ? Cette action est définitive.`)) {
-      Store.remove(b.dataset.del);
-      renderIndex();
-    }
+  // Ouverture au clic + glisser-déposer entre colonnes
+  $('#app').querySelectorAll('.kb-card').forEach(card => {
+    card.onclick = () => openDrawer(card.dataset.id);
+    card.ondragstart = e => { e.dataTransfer.setData('text/plain', card.dataset.id); card.classList.add('dragging'); };
+    card.ondragend = () => card.classList.remove('dragging');
+  });
+  $('#app').querySelectorAll('.kb-col').forEach(col => {
+    col.ondragover = e => { e.preventDefault(); col.classList.add('drop'); };
+    col.ondragleave = () => col.classList.remove('drop');
+    col.ondrop = e => {
+      e.preventDefault();
+      const b = Store.get(e.dataTransfer.getData('text/plain'));
+      if (b && b.status !== col.dataset.status) { b.status = col.dataset.status; Store.save(b); }
+      renderKanban();
+    };
   });
 
+  $('#newBoard').onclick = () => {
+    const name = prompt('Nom du storyboard :');
+    if (!name || !name.trim()) return;
+    const id = `${slug(name) || 'board'}-${uid()}`;
+    Store.save({ ...newBoard(id, name.trim()), status: 'todo' });
+    renderKanban();
+    openDrawer(id);
+  };
+  $('#resetDemo').onclick = () => {
+    if (!confirm('Remplacer tous les storyboards par les données de démo ?')) return;
+    Store.list().forEach(b => Store.remove(b.id));
+    seedDemo(); renderKanban();
+  };
   $('#export').onclick = () => {
     const blob = new Blob([JSON.stringify(Store.list(), null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -442,18 +501,144 @@ function renderIndex() {
     a.download = `storyboards-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
   };
-  $('#import').onclick = () => $('#importFile').click();
-  $('#importFile').onchange = async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const data = JSON.parse(await file.text());
-      const list = Array.isArray(data) ? data : [data];
-      list.forEach(b => { if (b && b.id) localStorage.setItem(PREFIX + b.id, JSON.stringify(b)); });
-      toast(`${list.length} storyboard(s) importé(s)`);
-      renderIndex();
-    } catch (err) { alert('Fichier invalide'); }
+
+  $('#scrim').onclick = closeDrawer;
+  $('#drawerClose').onclick = closeDrawer;
+  document.onkeydown = e => { if (e.key === 'Escape') closeDrawer(); };
+}
+
+function kanbanCard(b) {
+  const active = (b.obstacles || []).find(o => o.focus && !o.done);
+  const nExp = (b.experiments || []).length;
+  const nObs = (b.obstacles || []).filter(o => !o.done).length;
+  const due = b.targetDate ? new Date(b.targetDate + 'T00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '';
+  return `
+    <div class="kb-card" draggable="true" data-id="${esc(b.id)}">
+      <div class="t">${esc(b.title || b.id)}</div>
+      ${b.focusProcess ? `<div class="fp">${esc(b.focusProcess)}</div>` : ''}
+      ${challengeText(b) ? `<div class="ch">${esc(challengeText(b))}</div>` : ''}
+      ${active ? `<div class="obs-now">➜ ${esc(active.text)}</div>` : ''}
+      <div class="meta">
+        ${due ? `<span title="Target Condition">🎯 ${due}</span>` : ''}
+        <span>${nExp} exp.</span>
+        <span>${nObs} obstacle${nObs > 1 ? 's' : ''} ouvert${nObs > 1 ? 's' : ''}</span>
+      </div>
+    </div>`;
+}
+
+let drawerId = null;
+
+function openDrawer(id) {
+  const b = Store.get(id);
+  if (!b) return;
+  drawerId = id;
+  $('#drawerTitle').textContent = b.title || id;
+  $('#drawerFrame').src = boardUrl(id) + '&drawer=1';
+  $('#drawerDelete').onclick = () => {
+    if (!confirm(`Supprimer « ${b.title || id} » ? Cette action est définitive.`)) return;
+    $('#drawerFrame').src = 'about:blank';   // coupe toute sauvegarde en attente dans l'iframe
+    Store.remove(id);
+    closeDrawer();
   };
+  $('#scrim').classList.add('open');
+  $('#drawer').classList.add('open');
+  $('#drawer').setAttribute('aria-hidden', 'false');
+}
+
+function closeDrawer() {
+  if (!drawerId) return;
+  drawerId = null;
+  $('#scrim').classList.remove('open');
+  $('#drawer').classList.remove('open');
+  $('#drawer').setAttribute('aria-hidden', 'true');
+  // Laisse l'iframe terminer sa sauvegarde, puis rafraîchit les cartes.
+  setTimeout(() => { $('#drawerFrame').src = 'about:blank'; renderKanban(); }, 350);
+}
+
+/* ============================================================
+   Données de démo
+   ============================================================ */
+function seedDemo() {
+  const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
+  const blk = (name, value, extra = {}) => ({ id: uid(), name, value, isObstacle: false, ...extra });
+  const exp = (obstacleId, date, step, expect, happened, learned) => ({ id: uid(), obstacleId, date: d(date), step, expect, happened, learned });
+
+  const boards = [
+    {
+      id: 'demo-ligne-3', title: 'Ligne 3 – Changement de série', status: 'doing',
+      focusProcess: 'Changement de série presse P12',
+      challengeBy: 'juin 2027', challengeResult: 'changer de série en moins de 10 min', challengeVision: 'produire en petits lots au rythme du client',
+      targetDate: d(21),
+      target:  { outcome: '≤ 25 min sur 9 changements / 10', process: '100 % des outils prêts avant l\'arrêt', pattern: 'Préparation en temps masqué par le régleur, arrêt presse uniquement pour l\'échange d\'outil.', toBe: [] },
+      current: { outcome: 'Moyenne 48 min (35–70 min)', process: 'Outils prêts avant l\'arrêt : 3 fois / 10', pattern: 'Le régleur arrête la presse puis va chercher outils et fiches.', asIs: [
+        blk('Arrêt presse', '0 min'), blk('Recherche outils', '14 min', { isObstacle: true, waitAfter: '5 min' }),
+        blk('Démontage', '9 min'), blk('Montage', '11 min'), blk('Réglages / essais', '14 min', { isObstacle: true }),
+      ] },
+      obstacles: [
+        { id: 'o-l3-1', text: 'Outils dispersés dans l\'atelier', done: true, focus: false },
+        { id: 'o-l3-2', text: 'Pas de standard de réglage', done: false, focus: true },
+        { id: 'o-l3-3', text: 'Pièces d\'essai non disponibles', done: false, focus: false },
+      ],
+    },
+    {
+      id: 'demo-support', title: 'Support client – Délai de 1re réponse', status: 'doing',
+      focusProcess: 'Tickets entrants niveau 1',
+      challengeBy: 'mars 2027', challengeResult: '95 % des tickets reçoivent une 1re réponse utile en moins de 2 h', challengeVision: 'faire du support un argument de fidélisation',
+      targetDate: d(14),
+      target:  { outcome: '80 % des tickets < 4 h', process: 'File triée toutes les heures', pattern: 'Un agent « triage » par demi-journée, réponses types pour les 5 motifs principaux.', toBe: [] },
+      current: { outcome: '52 % des tickets < 4 h', process: 'File triée 2 fois / jour', pattern: 'Chaque agent pioche dans la file quand il est disponible.', asIs: [
+        blk('Réception ticket', '—', { waitAfter: '3 h' }), blk('Tri', '10 min', { isObstacle: true }), blk('Rédaction réponse', '15 min'), blk('Envoi', '1 min'),
+      ] },
+      obstacles: [
+        { id: 'o-sup-1', text: 'Personne n\'est responsable du tri', done: false, focus: true },
+        { id: 'o-sup-2', text: 'Motifs de contact mal catégorisés', done: false, focus: false },
+      ],
+    },
+    {
+      id: 'demo-peinture', title: 'Atelier peinture – Retouches', status: 'todo',
+      focusProcess: 'Cabine de peinture C2',
+      challengeBy: 'décembre 2027', challengeResult: 'moins de 2 % de pièces retouchées', challengeVision: 'livrer du « bon du premier coup »',
+      targetDate: '', target: { outcome: '', process: '', pattern: '', toBe: [] },
+      current: { outcome: '11 % de retouches (mois dernier)', process: '', pattern: '', asIs: [] },
+      obstacles: [],
+    },
+    {
+      id: 'demo-picking', title: 'Préparation commandes – Erreurs de picking', status: 'paused',
+      focusProcess: 'Picking zone B',
+      challengeBy: 'septembre 2027', challengeResult: '0 erreur de picking remontée par les clients sur un mois', challengeVision: 'supprimer les retours logistiques',
+      targetDate: d(30),
+      target:  { outcome: '< 5 erreurs / semaine', process: 'Contrôle code-barres sur 100 % des lignes', pattern: 'Scan systématique à la prise.', toBe: [] },
+      current: { outcome: '18 erreurs / semaine', process: 'Scan sur 40 % des lignes', pattern: 'Scan seulement en fin de commande.', asIs: [] },
+      obstacles: [{ id: 'o-pk-1', text: 'Douchettes en nombre insuffisant', done: false, focus: false }],
+    },
+    {
+      id: 'demo-onboarding', title: 'Onboarding dev – Première PR', status: 'done',
+      focusProcess: 'Arrivée d\'un·e nouveau·elle développeur·se',
+      challengeBy: 'janvier 2027', challengeResult: 'première PR mergée dès le 2e jour', challengeVision: 'rendre chaque arrivant autonome vite',
+      targetDate: d(-10),
+      target:  { outcome: 'PR mergée à J+3', process: 'Poste prêt à J0', pattern: 'Script d\'installation + ticket « good first issue » préparé.', toBe: [] },
+      current: { outcome: 'PR mergée à J+3', process: 'Poste prêt à J0', pattern: 'Atteint sur les 3 dernières arrivées.', asIs: [] },
+      obstacles: [{ id: 'o-on-1', text: 'Installation locale manuelle (1 jour)', done: true, focus: false }],
+    },
+  ];
+
+  // Expériences de démo (rattachées à leur obstacle)
+  boards[0].experiments = [
+    exp('o-l3-1', -12, 'Chariot outils préparé en temps masqué', '< 40 min', '42 min', 'Il manque les clés de 13 sur le chariot'),
+    exp('o-l3-1', -8, 'Chariot + check-list des outils', '< 38 min', '36 min', 'La check-list suffit, obstacle levé'),
+    exp('o-l3-2', -3, 'Fiche de réglage plastifiée au poste', 'Réglages < 10 min', '12 min', 'Les valeurs de la fiche sont fausses pour la réf. B'),
+    exp('o-l3-2', -1, 'Fiche corrigée avec le régleur senior', 'Réglages < 10 min', '', ''),
+  ];
+  boards[0].target.toBe = boards[0].current.asIs.map(b => ({ ...b, id: uid(), isObstacle: false }));
+  boards[1].experiments = [
+    exp('o-sup-1', -2, 'Agent « triage » le matin uniquement', '70 % < 4 h le matin', '74 %', 'L\'après-midi reste le problème'),
+  ];
+  boards[1].target.toBe = [blk('Réception ticket', '—', { waitAfter: '30 min' }), blk('Tri', '2 min'), blk('Réponse type', '5 min'), blk('Envoi', '1 min')];
+  boards[2].experiments = [];
+  boards[3].experiments = [];
+  boards[4].experiments = [exp('o-on-1', -40, 'Script d\'installation en une commande', 'Poste prêt en 2 h', '1 h 30', 'Le script couvre 90 % des cas')];
+
+  boards.forEach(b => Store.save({ ...newBoard(b.id, b.title), ...b }));
 }
 
 /* ============================================================
@@ -477,12 +662,12 @@ function renderBoard(id) {
 
   $('#app').innerHTML = `
     <div class="toolbar">
-      <a href="${esc(baseUrl())}">☰ Tous les storyboards</a>
-      <span>·</span>
-      <strong style="color:var(--ink)">${esc(board.title)}</strong>
+      ${inDrawer ? '' : `
+        <a href="${esc(baseUrl())}">☰ Kanban</a>
+        <span>·</span>
+        <strong style="color:var(--ink)">${esc(board.title)}</strong>`}
       <span class="spacer"></span>
       <span class="status" id="status"></span>
-      <button id="copyUrl">Copier l'URL d'embed</button>
     </div>
     <div class="frame">
       <div class="sheet">
@@ -555,7 +740,6 @@ function renderBoard(id) {
   rules.onclick = e => e.stopPropagation();
   document.onclick = () => { rules.hidden = true; };
 
-  $('#copyUrl').onclick = () => copy(boardUrl(board.id));
   $('#addObs').onclick = () => {
     board.obstacles.push({ id: uid(), text: '', done: false, focus: false });
     renderObstacles(); scheduleSave();
