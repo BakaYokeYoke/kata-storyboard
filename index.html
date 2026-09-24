@@ -332,8 +332,8 @@
   .n-search.open input { width: 150px; opacity: 1; padding: 0 4px; }
 
   .n-new { position: relative; display: inline-flex; margin-left: 8px; }
-  .n-new button { display: inline-flex; align-items: center; border: none; background: var(--n-blue); color: #fff; font-size: 14px; font-weight: 500; padding: 5px 10px; }
-  .n-new button:hover { background: #0077d4; }
+  .n-new > button { display: inline-flex; align-items: center; border: none; background: var(--n-blue); color: #fff; font-size: 14px; font-weight: 500; padding: 5px 10px; }
+  .n-new > button:hover { background: #0077d4; }
   .n-new .main { border-radius: 6px 0 0 6px; }
   .n-new .caret { border-radius: 0 6px 6px 0; border-left: 1px solid rgba(255,255,255,.3); padding: 5px 5px; }
 
@@ -499,6 +499,91 @@
   .peek-props .v { color: var(--n-ink); padding: 5px 0; }
   .drawer iframe { flex: 1; border: 0; width: 100%; border-top: 1px solid var(--n-line); }
 
+  /* Sélecteur d'icône (Emoji / Icons / Upload) */
+  .ip { position: fixed; z-index: 45; width: 408px; max-width: calc(100vw - 16px); background: #fff; border-radius: 10px; box-shadow: var(--n-shadow-pop, rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px); font-size: 14px; color: rgb(55,53,47);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif; }
+  .ip-tabs { display: flex; align-items: center; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid rgba(55,53,47,.09); }
+  .ip-tabs button { border: none; background: none; font: inherit; font-size: 14px; color: rgba(55,53,47,.65); padding: 6px 8px 8px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .ip-tabs button.on { color: rgb(55,53,47); border-bottom-color: rgb(55,53,47); }
+  .ip-tabs button:hover { color: rgb(55,53,47); }
+  .ip-tabs .spacer { flex: 1; }
+  .ip-search { display: flex; gap: 6px; padding: 8px; align-items: center; }
+  .ip-search .field { flex: 1; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 4px 8px; background: rgba(242,241,238,.6); color: rgba(55,53,47,.45); }
+  .ip-search .field:focus-within { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
+  .ip-search input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font: inherit; font-size: 14px; color: rgb(55,53,47); }
+  .ip-sq { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(55,53,47,.16); background: #fff; display: inline-flex; align-items: center; justify-content: center; color: rgba(55,53,47,.65); padding: 0; flex: none; }
+  .ip-sq:hover { background: rgba(55,53,47,.06); }
+  .ip-sq .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .ip-body { max-height: 300px; overflow-y: auto; padding: 0 8px 10px; }
+  .ip-label { font-size: 12px; color: rgba(55,53,47,.65); font-weight: 500; padding: 8px 4px 4px; }
+  .ip-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1px; }
+  .ip-grid button { border: none; background: none; padding: 0; height: 32px; border-radius: 6px; font-size: 22px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  .ip-grid button:hover { background: rgba(55,53,47,.08); }
+  .ip-grid svg.nicon { width: 22px; height: 22px; }
+  .ip-colors { position: absolute; right: 8px; top: 86px; display: flex; gap: 4px; padding: 6px; background: #fff; border-radius: 8px; box-shadow: rgba(15,15,15,.1) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 8px; z-index: 2; }
+  .ip-colors[hidden] { display: none; }
+  .ip-colors button { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; padding: 0; box-shadow: 0 0 0 1px rgba(55,53,47,.16); }
+  .ip-colors button.on { box-shadow: 0 0 0 2px #2383e2; }
+  .ip-upload { padding: 16px 8px 18px; text-align: center; }
+  .ip-upload label { display: inline-block; padding: 7px 14px; border-radius: 6px; border: 1px solid rgba(55,53,47,.16); cursor: pointer; }
+  .ip-upload label:hover { background: rgba(55,53,47,.06); }
+  .ip-upload p { color: rgba(55,53,47,.5); font-size: 12px; margin: 8px 0 0; }
+  svg.nicon { display: inline-block; vertical-align: middle; }
+  img.nicon { display: inline-block; vertical-align: middle; object-fit: cover; border-radius: 3px; }
+  .n-card .t .ico svg.nicon, .n-card .t .ico img.nicon { width: 18px; height: 18px; }
+  .peek-icon svg.nicon, .peek-icon img.nicon { width: 72px; height: 72px; }
+  .peek-icon .add-icon { font-size: 14px; color: rgba(55,53,47,.45); display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px; }
+  .tm-ico svg.nicon, .tm-ico img.nicon { width: 18px; height: 18px; }
+
+  /* Menu des templates (New ▾) */
+  .n-menu.tm { width: 330px; padding: 6px 6px 6px; }
+  .tm-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 6px; color: rgba(55,53,47,.65); font-size: 14px; font-weight: 500; }
+  .tm-help { width: 20px; height: 20px; border-radius: 50%; border: 1.3px solid rgba(55,53,47,.45); background: none; color: rgba(55,53,47,.55); font-size: 12px; font-weight: 600; padding: 0; line-height: 17px; cursor: help; }
+  .tm-row { display: flex; align-items: center; gap: 8px; padding: 0 6px 0 4px; min-height: 32px; border-radius: 6px; cursor: pointer; }
+  .tm-row:hover { background: rgba(55,53,47,.06); }
+  .tm-row .grip { display: inline-flex; color: rgba(55,53,47,.35); visibility: hidden; cursor: grab; }
+  .tm-row:hover .grip { visibility: visible; }
+  .tm-row .grip.none { visibility: hidden !important; }
+  .tm-ico { display: inline-flex; width: 20px; justify-content: center; font-size: 17px; color: rgba(55,53,47,.85); }
+  .tm-row .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tm-row .default { font-size: 12px; color: rgba(55,53,47,.5); background: rgba(55,53,47,.06); border-radius: 4px; padding: 1px 6px; }
+  .tm-row .more { border: none; background: none; color: rgba(55,53,47,.45); padding: 3px; border-radius: 4px; display: inline-flex; }
+  .tm-row .more:hover { background: rgba(55,53,47,.12); color: rgb(55,53,47); }
+  .tm-row.new-tpl { color: rgba(55,53,47,.65); gap: 10px; padding-left: 8px; }
+  .tm-row.drop-before { box-shadow: inset 0 2px 0 #2383e2; }
+  .tm-sep { border-top: 1px solid rgba(55,53,47,.09); margin: 5px 2px; }
+  .n-pop .row .val { margin-left: auto; color: rgba(55,53,47,.45); font-size: 13px; }
+
+  /* Édition d'un template : fenêtre centrée (center peek) */
+  .drawer.center {
+    top: 72px; bottom: 72px; left: 50%; right: auto; width: min(1150px, calc(100vw - 48px));
+    border-radius: 12px; overflow: hidden; transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .drawer.center.open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+  .drawer.center.full { top: 0; bottom: 0; width: 100vw; border-radius: 0; }
+  .scrim.center { background: rgba(15,15,15,.45); }
+  .drawer.center .peek-banner {
+    margin: 0; border-radius: 0; text-align: center; padding: 10px 16px; font-size: 14px;
+    background: rgb(251, 243, 219); color: rgb(203, 145, 47); display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+  }
+  .peek-banner b { font-weight: 500; color: rgb(203, 145, 47); border-bottom: 1px solid rgba(203,145,47,.4); display: inline-flex; align-items: center; gap: 4px; }
+  .peek-banner .repeat-btn { border: 1px solid rgba(203,145,47,.45); background: none; color: rgb(203, 145, 47); border-radius: 6px; padding: 3px 8px; font: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; }
+  .peek-banner .repeat-btn:hover { background: rgba(203,145,47,.08); }
+  .drawer.center .peek-head { padding: 34px min(12vw, 150px) 10px; }
+
+  /* Sous-groupes : outils au survol et « New group » */
+  .n-group .n-group-tools { display: inline-flex; gap: 1px; visibility: hidden; }
+  .n-group:hover .n-group-tools { visibility: visible; }
+  .n-group .n-group-tools .n-icon-btn { padding: 3px; }
+  .n-newgroup { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; color: rgba(55,53,47,.45); font-size: 14px; padding: 14px 6px 8px; cursor: pointer; border-radius: 6px; width: max-content; }
+  .n-newgroup:hover { color: rgba(55,53,47,.8); }
+  .n-newgroup input { font: inherit; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 3px 6px; outline: none; width: 200px; }
+  .c-orange { --col-bg: rgb(252, 247, 242); --col-pill: rgb(250, 222, 201); --col-text: rgb(217, 115, 13); --col-dot: rgb(217, 115, 13); --col-count: rgb(217, 115, 13); }
+  .c-pink   { --col-bg: rgb(252, 246, 249); --col-pill: rgb(245, 224, 233); --col-text: rgb(193, 76, 138); --col-dot: rgb(193, 76, 138); --col-count: rgb(193, 76, 138); }
+  .c-red    { --col-bg: rgb(253, 246, 245); --col-pill: rgb(255, 226, 221); --col-text: rgb(212, 76, 71);  --col-dot: rgb(212, 76, 71);  --col-count: rgb(212, 76, 71); }
+  .c-brown  { --col-bg: rgb(250, 247, 245); --col-pill: rgb(238, 224, 218); --col-text: rgb(159, 107, 83); --col-dot: rgb(159, 107, 83); --col-count: rgb(159, 107, 83); }
+
   .emoji-pop { position: absolute; z-index: 31; display: grid; grid-template-columns: repeat(8, 32px); gap: 2px; padding: 8px; background: #fff; border-radius: 10px;
     box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px; }
   .emoji-pop[hidden] { display: none; }
@@ -580,7 +665,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.5';
+const APP_VERSION = '2026-09-24.6';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -706,15 +791,20 @@ const STATUSES = [
   { key: 'wip',      label: 'Ongoing WIP',   emoji: '✋', color: 'yellow' },
   { key: 'success',  label: 'Daily Success', emoji: '✅', color: 'green' },
 ];
-const GROUPS = [
-  { key: 'perso', label: 'Perso', color: 'gray' },
-  { key: 'pro',   label: 'Pro',   color: 'blue' },
-];
+// Sous-groupes (Pro/Perso) : modifiables, comme les options d'une propriété Notion.
+const GROUPS_KEY = 'kata-groups';
+const GROUP_COLORS = ['gray', 'blue', 'purple', 'green', 'yellow', 'orange', 'pink', 'red', 'brown'];
+function loadGroups() {
+  try { const g = JSON.parse(localStorage.getItem(GROUPS_KEY)); if (Array.isArray(g) && g.length) return g; } catch (e) {}
+  return [{ key: 'perso', label: 'Perso', color: 'gray' }, { key: 'pro', label: 'Pro', color: 'blue' }];
+}
+let GROUPS = loadGroups();
+function saveGroups() { try { localStorage.setItem(GROUPS_KEY, JSON.stringify(GROUPS)); } catch (e) {} }
 // Statuts de la version précédente → nouvelles colonnes
 const OLD_STATUS = { todo: 'incoming', doing: 'wip', paused: 'tomorrow', done: 'success' };
-const EMOJIS = ['🧭','🌱','🏃','🎹','💼','🏭','☀️','📚','🧠','💪','🎯','🚀','🧘','✍️','🎨','🛠️','💡','🌍','❤️','🏔️','⛵','🎸','📈','🧩'];
+
 const statusOf = b => STATUSES.some(s => s.key === b.status) ? b.status : (OLD_STATUS[b.status] || 'incoming');
-const groupOf = b => GROUPS.some(g => g.key === b.group) ? b.group : 'perso';
+const groupOf = b => GROUPS.some(g => g.key === b.group) ? b.group : GROUPS[0].key;
 const statusDef = key => STATUSES.find(s => s.key === key);
 const groupDef = key => GROUPS.find(g => g.key === key);
 const pill = def => `<span class="n-pill c-${def.color}"><span class="dot"></span>${def.emoji ? def.emoji + ' ' : ''}${esc(def.label)}</span>`;
@@ -756,6 +846,13 @@ const ICONS = {
   select: '<circle cx="8" cy="8" r="5.5"/><path d="M5.8 7L8 9.2 10.2 7"/>',
   subgroup:'<rect x="2.5" y="2.5" width="3" height="3" rx=".5"/><rect x="6.5" y="2.5" width="3" height="3" rx=".5"/><rect x="10.5" y="2.5" width="3" height="3" rx=".5"/><rect x="2.5" y="10.5" width="3" height="3" rx=".5"/><rect x="6.5" y="10.5" width="3" height="3" rx=".5"/><rect x="10.5" y="10.5" width="3" height="3" rx=".5"/><path d="M2.5 8h11"/>',
   timer:  '<circle cx="8" cy="9" r="5"/><path d="M8 9V6.5M6.5 2h3"/>',
+  flag:   '<path d="M3.5 14V2.5M3.5 3h8l-1.5 3 1.5 3h-8"/>',
+  edit:   '<path d="M13 9v3.5a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1H7"/><path d="M11 2l3 3-5.5 5.5H5.5v-3z"/>',
+  repeat: '<path d="M2.5 7V6a2 2 0 0 1 2-2h9M11 1.5L13.5 4 11 6.5M13.5 9v1a2 2 0 0 1-2 2h-9M5 14.5L2.5 12 5 9.5"/>',
+  expand: '<path d="M9.5 2.5h4v4M13.5 2.5L9 7M6.5 13.5h-4v-4M2.5 13.5L7 9"/>',
+  shuffle:'<path d="M2 4.5h2.5c3 0 4 7 7 7H14M12 9.5l2 2-2 2M2 11.5h2.5c1 0 1.8-.8 2.4-1.8M9.1 6.3c.6-1 1.4-1.8 2.4-1.8H14M12 2.5l2 2-2 2"/>',
+  smile:  '<circle cx="8" cy="8" r="6"/><path d="M5.5 9.5c.6 1 1.4 1.5 2.5 1.5s1.9-.5 2.5-1.5"/><circle cx="6" cy="6.5" r=".6" fill="currentColor"/><circle cx="10" cy="6.5" r=".6" fill="currentColor"/>',
+  db:     '<ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>',
 };
 const icon = name => `<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
 
@@ -767,6 +864,7 @@ function loadView() {
     props: ['challenge', 'obstacle', 'due', 'experiments'],   // propriétés visibles, dans l'ordre
     order: STATUSES.map(st => st.key),                        // ordre des colonnes
     hideEmptyCols: false, colorCols: true, hideEmptySub: false, hiddenSub: [],
+    noCreate: [],                                             // colonnes où l'on ne crée pas de carte
   };
   try { return { ...base, ...JSON.parse(localStorage.getItem(VIEW_KEY) || '{}') }; } catch (e) { return base; }
 }
@@ -784,6 +882,7 @@ function openPop(anchor, items) {
     return `<div class="row ${it.danger ? 'danger' : ''}" data-i="${i}">
       ${it.icon ? `<span class="ic">${icon(it.icon)}</span>` : ''}
       ${it.html || `<span class="name">${esc(it.label)}</span>`}
+      ${it.value ? `<span class="val">${esc(it.value)}</span>` : ''}
       ${it.switch !== undefined ? `<span class="n-switch ${it.switch ? 'on' : ''}"></span>` : ''}
       ${it.checked ? `<span class="check">${icon('check')}</span>` : ''}
     </div>`;
@@ -855,6 +954,7 @@ function renderKanban() {
   document.body.classList.add('kanban-page');
   if (!Store.list().length && !localStorage.getItem('kata-demo-seeded')) seedDemo();
   if (!Templates.list().length) seedTemplates();
+  runRecurringTemplates();
   migrateVisions();
 
   const view = loadView();
@@ -871,7 +971,7 @@ function renderKanban() {
   const cells = g => cols.map(st => `
     <div class="n-cell c-${st.color}" data-status="${st.key}" data-group="${g ? g.key : ''}">
       ${inCell(st.key, g?.key).map(b => visionCard(b, view.props)).join('')}
-      <button class="n-add" data-new="${st.key}" data-group="${g ? g.key : 'perso'}">${icon('plus')} New page</button>
+      ${view.noCreate.includes(st.key) ? '' : `<button class="n-add" data-new="${st.key}" data-group="${g ? g.key : GROUPS[0].key}">${icon('plus')} New page</button>`}
     </div>`).join('') + (hiddenCols.length ? '<div class="n-cell empty"></div>' : '');
 
   const nFilters = view.groups.length + view.statuses.length;
@@ -902,7 +1002,7 @@ function renderKanban() {
               ${pill(st)}<span class="n-count">${inCell(st.key).length}</span>
               <span class="n-head-tools">
                 <button class="n-icon-btn" data-col-more="${st.key}" title="Options du groupe">${icon('dots')}</button>
-                <button class="n-icon-btn" data-col-add="${st.key}" title="Nouvelle page">${icon('plus')}</button>
+                ${view.noCreate.includes(st.key) ? '' : `<button class="n-icon-btn" data-col-add="${st.key}" title="Nouvelle page">${icon('plus')}</button>`}
               </span>
             </div>`).join('')}
           ${hiddenCols.length ? `
@@ -918,9 +1018,14 @@ function renderKanban() {
               <div class="n-group ${collapsed ? 'collapsed' : ''}">
                 <button class="toggle" data-toggle="${g.key}" title="${collapsed ? 'Déplier' : 'Replier'}">${icon('tri')}</button>
                 <span class="n-pill c-${g.color}">${esc(g.label)}</span><span class="n-count">${n}</span>
+                <span class="n-group-tools">
+                  <button class="n-icon-btn" data-group-more="${g.key}" title="Options du groupe">${icon('dots')}</button>
+                  <button class="n-icon-btn" data-group-add="${g.key}" title="Nouvelle page">${icon('plus')}</button>
+                </span>
               </div>
               ${collapsed ? '' : cells(g)}`;
           }).join('')}
+          ${view.subgroups ? `<div class="n-newgroup" id="newGroup">${icon('plus')} New group</div>` : ''}
         </div>
       </div>
     </div>
@@ -928,18 +1033,18 @@ function renderKanban() {
     <aside class="drawer" id="drawer" aria-hidden="true">
       <div class="peek-top">
         <button class="n-icon-btn" id="drawerClose" title="Fermer (Échap)">${icon('close')}</button>
+        <button class="n-icon-btn" id="peekExpand" title="Agrandir" hidden>${icon('expand')}</button>
         <span class="spacer"></span>
         <button class="n-icon-btn" id="peekMore" title="Plus d'actions">${icon('dots')}</button>
       </div>
-      <div class="peek-banner" id="peekBanner" hidden>Vous modifiez un template. Les nouvelles Visions créées avec ce template reprendront ce contenu.</div>
+      <div class="peek-banner" id="peekBanner" hidden></div>
       <div class="peek-head">
         <button class="peek-icon" id="peekIcon" title="Changer l'icône"></button>
         <input class="peek-title" id="peekTitle" placeholder="Sans titre" autocomplete="off">
         <div class="peek-props" id="peekProps"></div>
       </div>
       <iframe id="drawerFrame" title="Storyboard"></iframe>
-    </aside>
-    <div class="emoji-pop" id="emojiPop" hidden>${EMOJIS.map(e => `<button data-emoji="${e}">${e}</button>`).join('')}</div>`;
+    </aside>`;
 
   const app = $('#app');
 
@@ -989,13 +1094,18 @@ function renderKanban() {
   app.querySelectorAll('[data-new]').forEach(btn => btn.onclick = () => createVision(defaultTemplate(), btn.dataset.new, btn.dataset.group));
 
   // En-têtes de colonne : ⋯ et +
-  app.querySelectorAll('[data-col-add]').forEach(btn => btn.onclick = () => createVision(defaultTemplate(), btn.dataset.colAdd, GROUPS[0].key));
+  app.querySelectorAll('[data-col-add]').forEach(btn => btn.onclick = () => createVision(defaultTemplate(), btn.dataset.colAdd));
   app.querySelectorAll('[data-col-more]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
     const key = btn.dataset.colMore;
+    const canCreate = !view.noCreate.includes(key);
     openPop(btn, [
+      { icon: 'plus', label: 'Création de cartes', switch: canCreate, onClick: () => {
+        view.noCreate = canCreate ? [...view.noCreate, key] : view.noCreate.filter(k => k !== key);
+        saveView(view); renderKanban();
+      } },
       { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hidden.push(key); saveView(view); renderKanban(); } },
-      { icon: 'plus', label: 'Nouvelle page', onClick: () => createVision(defaultTemplate(), key, GROUPS[0].key) },
+      ...(canCreate ? [{ icon: 'plus', label: 'Nouvelle page', onClick: () => createVision(defaultTemplate(), key) }] : []),
     ]);
   });
   app.querySelectorAll('[data-unhide]').forEach(row => row.onclick = () => {
@@ -1006,6 +1116,52 @@ function renderKanban() {
     view.collapsed = view.collapsed.includes(k) ? view.collapsed.filter(x => x !== k) : [...view.collapsed, k];
     saveView(view); renderKanban();
   });
+
+  // Sous-groupes : ⋯, + et « New group »
+  app.querySelectorAll('[data-group-add]').forEach(btn => btn.onclick = () => createVision(defaultTemplate(), cols.find(c => !view.noCreate.includes(c.key))?.key || 'incoming', btn.dataset.groupAdd));
+  app.querySelectorAll('[data-group-more]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const g = groupDef(btn.dataset.groupMore);
+    openPop(btn, [
+      { icon: 'pencil', label: 'Renommer', onClick: () => {
+        const name = prompt('Nom du groupe', g.label);
+        if (name && name.trim()) { g.label = name.trim(); saveGroups(); renderKanban(); }
+      } },
+      { header: 'Couleur' },
+      ...GROUP_COLORS.map(c => ({ html: `<span class="n-pill c-${c}" style="border-radius:4px">${esc(g.label)}</span>`, checked: g.color === c, onClick: () => { g.color = c; saveGroups(); renderKanban(); } })),
+      { sep: true },
+      { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hiddenSub.push(g.key); saveView(view); renderKanban(); } },
+      { icon: 'trash', label: 'Supprimer le groupe', danger: true, onClick: () => {
+        if (GROUPS.length === 1) return toast('Il faut garder au moins un groupe');
+        const n = Store.list().filter(b => groupOf(b) === g.key).length;
+        if (!confirm(`Supprimer le groupe « ${g.label} » ?${n ? ` Ses ${n} carte(s) passeront dans « ${GROUPS.find(x => x !== g).label} ».` : ''}`)) return;
+        GROUPS = GROUPS.filter(x => x !== g); saveGroups();
+        Store.list().filter(b => b.group === g.key).forEach(b => Store.patch(b.id, { group: GROUPS[0].key }));
+        renderKanban();
+      } },
+    ]);
+  });
+  const newGroup = $('#newGroup');
+  if (newGroup) newGroup.onclick = e => {
+    e.stopPropagation();
+    if (newGroup.querySelector('input')) return;
+    newGroup.innerHTML = `${icon('plus')}<input placeholder="Nom du groupe" autocomplete="off">`;
+    const input = newGroup.querySelector('input');
+    input.focus();
+    let done = false;
+    const commit = save => {
+      if (done) return; done = true;
+      const label = input.value.trim();
+      if (save && label) {
+        const used = GROUPS.map(g => g.color);
+        GROUPS.push({ key: 'g-' + uid(), label, color: GROUP_COLORS.find(c => !used.includes(c)) || 'gray' });
+        saveGroups();
+      }
+      renderKanban();
+    };
+    input.onkeydown = ev => { if (ev.key === 'Enter') commit(true); if (ev.key === 'Escape') { ev.stopPropagation(); commit(false); } };
+    input.onblur = () => commit(true);
+  };
 
   // Barre d'outils : filtre, tri et réglages ouvrent le panneau « View settings »
   const togglePanel = page => e => { e.stopPropagation(); closePop(); panelPage === page ? closePanel() : openPanel(page); };
@@ -1030,16 +1186,15 @@ function renderKanban() {
     ]);
   };
 
-  $('#newMain').onclick = () => createVision(defaultTemplate(), 'incoming', GROUPS[0].key);
+  $('#newMain').onclick = () => createVision(defaultTemplate());
   $('#newCaret').onclick = e => { e.stopPropagation(); closePop(); closePanel(); toggleTemplateMenu(); };
 
   $('#scrim').onclick = closePeek;
   $('#drawerClose').onclick = closePeek;
-  $('#emojiPop').onclick = e => e.stopPropagation();
-  document.onclick = () => { $('#tplMenu').hidden = true; $('#emojiPop').hidden = true; closePop(); closePanel(); };
+  document.onclick = () => { $('#tplMenu').hidden = true; closeIconPicker(); closePop(); closePanel(); };
   document.onkeydown = e => {
     if (e.key !== 'Escape') return;
-    if ($('#nPop') || !$('#tplMenu').hidden || !$('#emojiPop').hidden) { closePop(); $('#tplMenu').hidden = true; $('#emojiPop').hidden = true; return; }
+    if ($('#nPop') || !$('#tplMenu').hidden || $('#iconPicker')) { closePop(); $('#tplMenu').hidden = true; closeIconPicker(); return; }
     if (panelPage) return closePanel();
     closePeek();
   };
@@ -1262,7 +1417,7 @@ function visionCard(b, props = []) {
         <button data-card="rename" title="Renommer">${icon('pencil')}</button>
         <button data-card="more" title="Plus d'actions">${icon('dots')}</button>
       </div>
-      <div class="t"><span class="ico">${esc(b.icon || '🧭')}</span>${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
+      <div class="t">${b.icon ? `<span class="ico">${iconHTML(b.icon)}</span>` : ''}${b.title ? `<span class="tt">${esc(b.title)}</span>` : '<span class="tt untitled">Sans titre</span>'}</div>
       ${parts.join('')}
     </div>`;
 }
@@ -1302,67 +1457,304 @@ function resetDemo() {
   seedDemo(); seedTemplates(); renderKanban();
 }
 
-/* ---------- Templates ---------- */
-const defaultTemplate = () => Templates.list().find(t => t.isDefault) || Templates.list()[0];
+/* ---------- Icônes de page (emoji, icône Notion colorée ou image) ---------- */
+// Valeur stockée : un emoji ("🏃"), "icon:<nom>:<couleur>" ou "img:<data-url>".
+const ICON_COLORS = {
+  gray: '#787774', brown: '#9f6b53', orange: '#d9730d', yellow: '#cb912f', green: '#448361',
+  blue: '#337ea9', purple: '#9065b0', pink: '#c14c8a', red: '#d44c47',
+};
+const ICONSET = {
+  routine: '<path d="M5.5 13a6.5 6.5 0 0 1 12-3.5"/><path d="M18.5 4.5v5h-5"/><circle cx="6" cy="18" r="2.2"/><circle cx="17.5" cy="18" r="2.2" fill="currentColor"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  star: '<path d="M12 3l2.8 6 6.2.5-4.7 4.1 1.5 6.4L12 16.6 6.2 20l1.5-6.4L3 9.5 9.2 9z"/>',
+  heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+  book: '<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM8 7h7"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 13h18"/>',
+  rocket: '<path d="M12 3c3 2 5 6 5 10l-2 3H9l-2-3c0-4 2-8 5-10z"/><circle cx="12" cy="10" r="1.8"/><path d="M9 16l-2 4 3-1M15 16l2 4-3-1"/>',
+  mountain: '<path d="M3 20l6-10 4 6 3-4 5 8z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  chart: '<path d="M4 20h16M7 20v-6M12 20V8M17 20V10"/>',
+  trend: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  gear: '<circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.9.7 1.5 1.6 1.5 2.6V17h4v-.5c0-1 .6-1.9 1.5-2.6A6 6 0 0 0 12 3z"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  piano: '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M7.5 4v9M12 4v9M16.5 4v9M7.5 13v7M12 13v7M16.5 13v7"/>',
+  run: '<circle cx="14" cy="4.5" r="1.8"/><path d="M9 21l3-6-3-3 4-4 3 4h3M12 15l3 1 1 5M6 11l3-3"/>',
+  dumbbell: '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+  leaf: '<path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15zM5 19l8-8"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+  home: '<path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/>',
+  factory: '<path d="M3 21V10l5 3v-3l5 3v-3l5 3V4h3v17z"/>',
+  database: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.9 3.1-6 7-6s7 2.1 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.8 0 5 1.6 5 5"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  pencil: '<path d="M4 20l1-4L16 5l3 3L8 19z"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  pin: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4c0 3 2 4 4 4M16 6h4c0 3-2 4-4 4M12 13v4M9 21h6v-4H9z"/>',
+  fire: '<path d="M12 21c-4 0-6-3-6-6 0-4 4-6 4-10 3 2 4 4 4 6 1-1 2-2 2-4 2 2 2 5 2 8 0 3-2 6-6 6z"/>',
+  coffee: '<path d="M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h2a2 2 0 0 1 0 4h-2M8 2v3M12 2v3"/>',
+  camera: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l2-3h4l2 3"/><circle cx="12" cy="13" r="3.5"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2 0-1.5-1.5-2 0-3.5 1-1 7 1 7-4a9 9 0 0 0-9-8.5z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10" cy="7" r="1.2" fill="currentColor"/><circle cx="14.5" cy="7" r="1.2" fill="currentColor"/>',
+  doc: '<path d="M6 3h8l4 4v14H6zM14 3v4h4"/>',
+  checklist: '<path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/>',
+  loop: '<path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/>',
+  graduation: '<path d="M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5M22 9v6"/>',
+  money: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 9v.01M18 15v.01"/>',
+};
+const EMOJI_LIST = [
+  ['🎯','cible objectif target'],['🏃','course running sport'],['🎹','piano musique'],['💼','travail pro job'],['🏭','usine factory'],
+  ['☀️','soleil matin sun'],['🌱','pousse habitude grow'],['🚀','fusée lancement rocket'],['📚','livres lecture book'],['🧠','cerveau apprendre brain'],
+  ['💪','force muscle'],['🧘','méditation calme yoga'],['✍️','écrire write'],['🎨','art dessin'],['🛠️','outils tools'],['💡','idée idea'],
+  ['🌍','monde world'],['❤️','coeur love'],['🏔️','montagne mountain'],['⛵','voile bateau'],['🎸','guitare musique'],['📈','croissance chart'],
+  ['🧩','puzzle'],['🧭','boussole compass'],['🏆','trophée victoire'],['🔥','feu motivation fire'],['⭐','étoile star'],['✅','fait done check'],
+  ['📅','calendrier date'],['⏰','réveil alarme'],['🏋️','haltère sport'],['🚴','vélo bike'],['🏊','natation swim'],['🥗','salade nutrition'],
+  ['💤','sommeil sleep'],['🗣️','parler langue'],['🇯🇵','japon japonais'],['📝','note notes'],['💻','ordinateur code'],['📊','statistiques data'],
+  ['🎓','diplôme étude'],['💰','argent money'],['🏠','maison home'],['👨‍👩‍👧','famille family'],['🤝','accord partenariat'],['🎤','micro parler'],
+  ['📷','photo camera'],['🎬','film vidéo'],['✈️','voyage avion'],['🌊','vague mer'],['🌳','arbre nature'],['🍎','pomme santé'],
+  ['⚡','énergie éclair'],['🔑','clé key'],['🧪','expérience test'],['🔬','science recherche'],['📦','livraison colis'],['⚙️','process réglage'],
+  ['🧹','ménage rangement'],['🎮','jeu game'],['♟️','échecs stratégie'],['🌙','nuit lune'],['☕','café coffee'],['🍳','cuisine cooking'],
+];
+const RECENT_KEY = 'kata-recent-icons';
+
+function iconHTML(val, cls = '') {
+  if (!val) return '';
+  if (val.startsWith('icon:')) {
+    const [, name, color] = val.split(':');
+    if (!ICONSET[name]) return '';
+    return `<svg class="nicon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:${ICON_COLORS[color] || ICON_COLORS.gray}">${ICONSET[name]}</svg>`;
+  }
+  if (val.startsWith('img:')) return `<img class="nicon ${cls}" src="${esc(val.slice(4))}" alt="">`;
+  return `<span class="emoji ${cls}">${esc(val)}</span>`;
+}
+
+let iconPickerState = null;
+function closeIconPicker() { $('#iconPicker')?.remove(); iconPickerState = null; }
+
+// Sélecteur d'icône façon Notion : onglets Emoji / Icons / Upload, filtre, aléatoire, couleur, récents.
+function openIconPicker(anchor, onPick) {
+  closeIconPicker();
+  let recent = [];
+  try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch (e) {}
+  const st = iconPickerState = { tab: 'icons', color: 'gray', q: '', onPick };
+  const el = document.createElement('div');
+  el.className = 'ip';
+  el.id = 'iconPicker';
+  document.body.appendChild(el);
+  const r = anchor.getBoundingClientRect();
+  el.style.left = Math.max(8, Math.min(r.left, innerWidth - 416)) + 'px';
+  el.style.top = Math.min(r.bottom + 6, innerHeight - 420) + 'px';
+
+  const pick = val => {
+    recent = [val, ...recent.filter(v => v !== val)].slice(0, 24);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch (e) {}
+    closeIconPicker();
+    onPick(val);
+  };
+  const cell = val => `<button data-val="${esc(val)}" title="${esc(val.startsWith('icon:') ? val.split(':')[1] : val)}">${iconHTML(val)}</button>`;
+
+  const render = () => {
+    const q = st.q.toLowerCase();
+    let body = '';
+    if (st.tab === 'emoji') {
+      const list = EMOJI_LIST.filter(([e, k]) => !q || k.includes(q)).map(([e]) => e);
+      const rec = recent.filter(v => !v.startsWith('icon:') && !v.startsWith('img:'));
+      body = `${!q && rec.length ? `<div class="ip-label">Recent</div><div class="ip-grid">${rec.map(cell).join('')}</div>` : ''}
+        <div class="ip-label">Emoji</div><div class="ip-grid">${list.map(cell).join('') || ''}</div>`;
+    } else if (st.tab === 'icons') {
+      const names = Object.keys(ICONSET).filter(n => !q || n.includes(q));
+      const rec = recent.filter(v => v.startsWith('icon:'));
+      body = `${!q && rec.length ? `<div class="ip-label">Recent</div><div class="ip-grid">${rec.map(cell).join('')}</div>` : ''}
+        <div class="ip-label">Icons</div><div class="ip-grid">${names.map(n => cell(`icon:${n}:${st.color}`)).join('')}</div>`;
+    } else {
+      body = `<div class="ip-upload"><label>Choisir une image<input type="file" accept="image/*" hidden id="ipFile"></label><p>L'image est réduite à 128 px et stockée avec la page.</p></div>`;
+    }
+    el.innerHTML = `
+      <div class="ip-tabs">
+        ${['emoji', 'icons', 'upload'].map(t => `<button data-tab="${t}" class="${st.tab === t ? 'on' : ''}">${{ emoji: 'Emoji', icons: 'Icons', upload: 'Upload' }[t]}</button>`).join('')}
+        <span class="spacer"></span>
+        <button data-remove>Remove</button>
+      </div>
+      ${st.tab !== 'upload' ? `
+        <div class="ip-search">
+          <label class="field">${icon('search')}<input id="ipFilter" placeholder="Filter…" value="${esc(st.q)}" autocomplete="off"></label>
+          <button class="ip-sq" data-random title="Aléatoire">${icon('shuffle')}</button>
+          ${st.tab === 'icons' ? `<button class="ip-sq" data-colors title="Couleur"><span class="dot" style="background:${ICON_COLORS[st.color]}"></span></button>` : ''}
+        </div>
+        <div class="ip-colors" id="ipColors" hidden>${Object.entries(ICON_COLORS).map(([k, c]) => `<button data-color="${k}" class="${st.color === k ? 'on' : ''}" style="background:${c}" title="${k}"></button>`).join('')}</div>` : ''}
+      <div class="ip-body">${body}</div>`;
+    const f = $('#ipFilter');
+    if (f) { f.oninput = () => { st.q = f.value; const pos = f.selectionStart; render(); const nf = $('#ipFilter'); nf.focus(); nf.setSelectionRange(pos, pos); }; }
+    const file = $('#ipFile');
+    if (file) file.onchange = () => {
+      const fl = file.files[0];
+      if (!fl) return;
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas'); c.width = c.height = 128;
+        const s = Math.min(img.width, img.height);
+        c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 128, 128);
+        pick('img:' + c.toDataURL('image/png'));
+      };
+      img.src = URL.createObjectURL(fl);
+    };
+  };
+  el.onclick = e => {
+    e.stopPropagation();
+    const t = e.target.closest('[data-tab],[data-remove],[data-random],[data-colors],[data-color],[data-val]');
+    if (!t) return;
+    const d = t.dataset;
+    if (d.tab) { st.tab = d.tab; st.q = ''; return render(); }
+    if ('remove' in d) { closeIconPicker(); return onPick(null); }
+    if ('colors' in d) { $('#ipColors').hidden = !$('#ipColors').hidden; return; }
+    if (d.color) { st.color = d.color; return render(); }
+    if ('random' in d) {
+      if (st.tab === 'emoji') return pick(EMOJI_LIST[Math.floor(Math.random() * EMOJI_LIST.length)][0]);
+      const names = Object.keys(ICONSET);
+      return pick(`icon:${names[Math.floor(Math.random() * names.length)]}:${st.color}`);
+    }
+    if (d.val) pick(d.val);
+  };
+  render();
+  $('#ipFilter')?.focus();
+}
+
+/* ---------- Templates (menu New ▾, comme Notion) ---------- */
+const REPEATS = { off: 'Off', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+const tplOrder = () => Templates.list().sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+// Template par défaut ; null = « Empty » (page vide)
+const defaultTemplate = () => Templates.list().find(t => t.isDefault) || null;
+const setDefaultTemplate = id => Templates.list().forEach(t => Templates.patch(t.id, { isDefault: t.id === id }));
+
+function repeatMenu(anchor, id, after) {
+  const t = Templates.get(id);
+  openPop(anchor, Object.entries(REPEATS).map(([k, l]) => ({
+    label: l, checked: (t.repeat || 'off') === k,
+    onClick: () => { Templates.patch(id, { repeat: k, lastRepeat: todayISO() }); after?.(); },
+  })));
+}
+
+function templateMore(anchor, id) {
+  if (id === 'empty') {
+    return openPop(anchor, [
+      { icon: 'flag', label: 'Set as default', checked: !defaultTemplate(), onClick: () => { setDefaultTemplate(null); reopenTemplateMenu(); } },
+    ]);
+  }
+  const t = Templates.get(id);
+  openPop(anchor, [
+    { icon: 'repeat', label: 'Duplicate every…', value: `${REPEATS[t.repeat || 'off']} ▾`, keepOpen: true, onClick: () => repeatMenu(anchor, id, reopenTemplateMenu) },
+    { icon: 'flag', label: 'Set as default', checked: !!t.isDefault, onClick: () => { setDefaultTemplate(id); reopenTemplateMenu(); } },
+    { icon: 'edit', label: 'Edit', onClick: () => { $('#tplMenu').hidden = true; openPeek('template', id); } },
+    { icon: 'copy', label: 'Duplicate', onClick: () => {
+      const src = Templates.get(id);
+      Templates.save({ ...JSON.parse(JSON.stringify(src)), id: 'tpl-' + uid() + uid(), isDefault: false, repeat: 'off', order: (src.order ?? 0) + 0.5, createdAt: Date.now() });
+      renumberTemplates(); reopenTemplateMenu();
+    } },
+    { icon: 'trash', label: 'Delete', onClick: () => {
+      if (!confirm(`Supprimer le template « ${t.name || 'Untitled'} » ?`)) return;
+      Templates.remove(id); reopenTemplateMenu();
+    } },
+  ]);
+}
+
+function renumberTemplates() { tplOrder().forEach((t, i) => Templates.patch(t.id, { order: i + 1 })); }
+function reopenTemplateMenu() { const m = $('#tplMenu'); m.hidden = true; toggleTemplateMenu(); }
 
 function toggleTemplateMenu() {
   const menu = $('#tplMenu');
   if (!menu.hidden) { menu.hidden = true; return; }
-  const tpls = Templates.list();
+  const tpls = tplOrder();
+  const noDefault = !defaultTemplate();
+  menu.classList.add('tm');
   menu.innerHTML = `
-    <div class="label">Templates de Vision</div>
+    <div class="tm-head"><span>Templates for ${esc(boardTitle() || 'Untitled')}</span>
+      <button class="tm-help" title="Un template pré-remplit les nouvelles pages : icône, titre, propriétés et storyboard.">?</button></div>
     ${tpls.map(t => `
-      <div class="row" data-tpl="${esc(t.id)}">
-        <span>${esc(t.icon || '🧭')}</span>
-        <span class="name">${esc(t.name || 'Template sans nom')}</span>
-        ${t.isDefault ? '<span class="default">Par défaut</span>' : ''}
-        <span class="tools">
-          ${t.isDefault ? '' : `<button data-act="default" title="Définir par défaut">${icon('star')}</button>`}
-          <button data-act="edit" title="Modifier">${icon('pencil')}</button>
-          <button data-act="dup" title="Dupliquer">${icon('copy')}</button>
-          <button data-act="del" title="Supprimer">${icon('trash')}</button>
-        </span>
+      <div class="tm-row" draggable="true" data-tpl="${esc(t.id)}">
+        <span class="grip">${icon('grip')}</span>
+        <span class="tm-ico">${iconHTML(t.icon) || iconHTML('icon:doc:gray')}</span>
+        <span class="name">${esc(t.name || 'Untitled')}</span>
+        ${t.repeat && t.repeat !== 'off' ? `<span class="default" title="Duplicate every…">${icon('repeat')}</span>` : ''}
+        ${t.isDefault ? '<span class="default">Default</span>' : ''}
+        <button class="more" data-more="${esc(t.id)}" title="Options">${icon('dots')}</button>
       </div>`).join('')}
-    <hr>
-    <div class="row new-tpl" id="tplAdd">${icon('plus')} Nouveau template</div>`;
+    <div class="tm-row" data-tpl="empty">
+      <span class="grip none">${icon('grip')}</span>
+      <span class="tm-ico">${iconHTML('icon:doc:gray')}</span>
+      <span class="name">Empty</span>
+      ${noDefault ? '<span class="default">Default</span>' : ''}
+      <button class="more" data-more="empty" title="Options">${icon('dots')}</button>
+    </div>
+    <div class="tm-sep"></div>
+    <div class="tm-row new-tpl" id="tplAdd">${icon('plus')} New template</div>`;
   menu.hidden = false;
   menu.onclick = e => e.stopPropagation();
 
   menu.querySelectorAll('[data-tpl]').forEach(row => {
     const id = row.dataset.tpl;
     row.onclick = e => {
-      const act = e.target.closest('[data-act]')?.dataset.act;
+      const more = e.target.closest('[data-more]');
+      if (more) { e.stopPropagation(); return templateMore(more, id); }
       menu.hidden = true;
-      if (!act) return createVision(Templates.get(id), 'incoming', GROUPS[0].key);
-      if (act === 'edit') return openPeek('template', id);
-      if (act === 'default') Templates.list().forEach(t => Templates.patch(t.id, { isDefault: t.id === id }));
-      if (act === 'dup') {
-        const src = Templates.get(id);
-        Templates.save({ ...src, id: 'tpl-' + uid() + uid(), name: `${src.name} (copie)`, isDefault: false, createdAt: Date.now() });
-      }
-      if (act === 'del') {
-        if (Templates.list().length === 1) return toast('Il faut garder au moins un template');
-        if (!confirm(`Supprimer le template « ${Templates.get(id).name} » ?`)) return;
-        const wasDefault = Templates.get(id).isDefault;
-        Templates.remove(id);
-        if (wasDefault) Templates.patch(Templates.list()[0].id, { isDefault: true });
-      }
-      toggleTemplateMenu();
+      closePop();
+      createVision(id === 'empty' ? null : Templates.get(id));
+    };
+    if (id === 'empty') return;
+    row.ondragstart = e => e.dataTransfer.setData('text/plain', id);
+    row.ondragover = e => { e.preventDefault(); row.classList.add('drop-before'); };
+    row.ondragleave = () => row.classList.remove('drop-before');
+    row.ondrop = e => {
+      e.preventDefault();
+      const src = e.dataTransfer.getData('text/plain');
+      const ids = tplOrder().map(t => t.id).filter(x => x !== src);
+      ids.splice(ids.indexOf(id), 0, src);
+      ids.forEach((x, i) => Templates.patch(x, { order: i + 1 }));
+      reopenTemplateMenu();
     };
   });
   $('#tplAdd').onclick = () => {
     menu.hidden = true;
     const id = 'tpl-' + uid() + uid();
-    Templates.save({ ...newBoard(id, ''), name: 'Nouveau template', icon: '🧭', isDefault: false });
+    Templates.save({ ...newBoard(id, ''), name: '', icon: null, isDefault: false, status: 'incoming', group: GROUPS[0].key, order: tpls.length + 1 });
     openPeek('template', id);
+    setTimeout(() => $('#peekTitle').focus(), 250);
   };
+}
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+// « Duplicate every… » : crée la page du jour / de la semaine / du mois à l'ouverture du Kanban.
+let recurringChecked = false;
+function runRecurringTemplates() {
+  if (recurringChecked) return;
+  recurringChecked = true;
+  const today = todayISO();
+  Templates.list().forEach(t => {
+    if (!t.repeat || t.repeat === 'off') return;
+    const last = t.lastRepeat || today;
+    const days = (new Date(today) - new Date(last)) / 86400000;
+    const due = t.repeat === 'daily' ? days >= 1
+      : t.repeat === 'weekly' ? days >= 7
+      : today.slice(0, 7) !== last.slice(0, 7);
+    if (!due) { if (!t.lastRepeat) Templates.patch(t.id, { lastRepeat: today }); return; }
+    const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+    cloneDoc(t, { title: `${t.name || 'Untitled'} – ${date}`, status: t.status || 'incoming', group: t.group || GROUPS[0].key });
+    Templates.patch(t.id, { lastRepeat: today });
+  });
 }
 
 // Copie profonde d'une Vision ou d'un template, avec de nouveaux identifiants.
 function cloneDoc(src, fields) {
   const b = JSON.parse(JSON.stringify(src || newBoard('')));
   const idMap = {};
-  delete b.name; delete b.isDefault;
+  ['name', 'isDefault', 'repeat', 'lastRepeat', 'order'].forEach(k => delete b[k]);
   Object.assign(b, { id: 'v-' + uid() + uid(), createdAt: Date.now() }, fields);
   b.obstacles = (b.obstacles || []).map(o => { const id = uid(); idMap[o.id] = id; return { ...o, id }; });
   b.experiments = (b.experiments || []).map(x => ({ ...x, id: uid(), obstacleId: idMap[x.obstacleId] ?? null }));
@@ -1382,15 +1774,20 @@ function duplicateVision(id) {
   return cloneDoc(src, { title: src.title ? `${src.title} (copie)` : '' });
 }
 
-// Crée une Vision à partir d'un template dans la colonne / le groupe donnés, puis l'ouvre.
-function createVision(tpl, status, group = 'perso') {
-  const b = cloneDoc(tpl, { status, group, title: '' });
+// Crée une page à partir d'un template (null = Empty), comme Notion :
+// le titre, l'icône et les propriétés viennent du template ; une colonne ou un groupe ciblés priment.
+function createVision(tpl, status, group) {
+  const b = cloneDoc(tpl, {
+    title: tpl?.name || '',
+    status: status || tpl?.status || 'incoming',
+    group: group || tpl?.group || GROUPS[0].key,
+  });
   renderKanban();
   openPeek('vision', b.id, { isNew: true });
-  setTimeout(() => $('#peekTitle').focus(), 280);
+  setTimeout(() => { const t = $('#peekTitle'); t.focus(); t.select(); }, 280);
 }
 
-/* ---------- Tiroir (side peek) ---------- */
+/* ---------- Tiroir (side peek) / fenêtre centrée pour les templates ---------- */
 let peek = null;   // { kind: 'vision' | 'template', id }
 
 function openPeek(kind, id, { isNew = false } = {}) {
@@ -1400,56 +1797,67 @@ function openPeek(kind, id, { isNew = false } = {}) {
   peek = { kind, id, isNew };   // isNew : carte tout juste créée, abandonnée si le titre reste vide
   const isTpl = kind === 'template';
 
-  $('#peekBanner').hidden = !isTpl;
-  $('#peekIcon').textContent = doc.icon || '🧭';
+  // Les templates s'ouvrent au centre, avec le bandeau « You're editing a template »
+  $('#drawer').classList.toggle('center', isTpl);
+  $('#drawer').classList.remove('full');
+  $('#scrim').classList.toggle('center', isTpl);
+  $('#peekExpand').hidden = !isTpl;
+  $('#peekExpand').onclick = () => $('#drawer').classList.toggle('full');
+  const banner = $('#peekBanner');
+  banner.hidden = !isTpl;
+  const renderBanner = () => {
+    const t = Templates.get(id);
+    banner.innerHTML = `You're editing a template in <b>${icon('db')} ${esc(boardTitle() || 'Untitled')}</b>
+      <span class="tm-help" title="Chaque nouvelle page créée avec ce template reprend son icône, son titre, ses propriétés et son storyboard." style="display:inline-block;border-color:rgba(203,145,47,.6);color:rgb(203,145,47)">?</span>
+      <button class="repeat-btn" id="repeatBtn">${t.repeat && t.repeat !== 'off' ? `Duplicate ${REPEATS[t.repeat].toLowerCase()}` : 'Duplicate every…'} ${icon('chevron')}</button>`;
+    $('#repeatBtn').onclick = e => { e.stopPropagation(); repeatMenu(e.currentTarget, id, renderBanner); };
+  };
+  if (isTpl) renderBanner();
+
+  const renderIcon = () => {
+    const d = S.get(id);
+    $('#peekIcon').innerHTML = iconHTML(d.icon) || `<span class="add-icon">${icon('smile')} Add icon</span>`;
+  };
+  renderIcon();
   const titleKey = isTpl ? 'name' : 'title';
   $('#peekTitle').value = doc[titleKey] || '';
-  $('#peekTitle').placeholder = isTpl ? 'Nom du template' : 'Sans titre';
+  $('#peekTitle').placeholder = 'Untitled';
   $('#peekTitle').oninput = e => { S.patch(id, { [titleKey]: e.target.value }); };
 
   const renderProps = () => {
     const d = S.get(id);
-    $('#peekProps').innerHTML = isTpl
-      ? `<span class="k">${icon('star')} Type</span><span class="v">Template de Vision${d.isDefault ? ' · par défaut' : ''}</span>`
-      : `<span class="k">${icon('status')} Statut</span><button class="val" id="propStatus">${pill(statusDef(statusOf(d)))}</button>
-         <span class="k">${icon('group')} Groupe</span><button class="val" id="propGroup"><span class="n-pill c-${groupDef(groupOf(d)).color}" style="border-radius:4px">${groupDef(groupOf(d)).label}</span></button>`;
-    if (isTpl) return;
+    const g = groupDef(groupOf(d));
+    $('#peekProps').innerHTML = `
+      <span class="k">${icon('status')} Status</span><button class="val" id="propStatus">${pill(statusDef(statusOf(d)))}</button>
+      <span class="k">${icon('select')} Pro/Perso</span><button class="val" id="propGroup"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>`;
     $('#propStatus').onclick = e => {
       e.stopPropagation();
       openPop(e.currentTarget, STATUSES.map(st => ({ html: pill(st), checked: statusOf(S.get(id)) === st.key, onClick: () => { S.patch(id, { status: st.key }); renderProps(); } })));
     };
     $('#propGroup').onclick = e => {
       e.stopPropagation();
-      openPop(e.currentTarget, GROUPS.map(g => ({ html: `<span class="n-pill c-${g.color}" style="border-radius:4px">${g.label}</span>`, checked: groupOf(S.get(id)) === g.key, onClick: () => { S.patch(id, { group: g.key }); renderProps(); } })));
+      openPop(e.currentTarget, GROUPS.map(gr => ({ html: `<span class="n-pill c-${gr.color}" style="border-radius:4px">${esc(gr.label)}</span>`, checked: groupOf(S.get(id)) === gr.key, onClick: () => { S.patch(id, { group: gr.key }); renderProps(); } })));
     };
   };
   renderProps();
 
   $('#peekIcon').onclick = e => {
     e.stopPropagation();
-    const pop = $('#emojiPop'), r = e.currentTarget.getBoundingClientRect();
-    pop.style.left = r.left + 'px'; pop.style.top = (r.bottom + 6) + 'px';
-    pop.hidden = !pop.hidden;
-    pop.querySelectorAll('[data-emoji]').forEach(btn => btn.onclick = () => {
-      S.patch(id, { icon: btn.dataset.emoji });
-      $('#peekIcon').textContent = btn.dataset.emoji;
-      pop.hidden = true;
-    });
+    closePop();
+    openIconPicker(e.currentTarget, val => { S.patch(id, { icon: val }); renderIcon(); });
   };
 
   const remove = () => {
-    if (isTpl && Templates.list().length === 1) return toast('Il faut garder au moins un template');
-    if (!confirm(`Supprimer ${isTpl ? 'ce template' : 'cette Vision'} ? Cette action est définitive.`)) return;
+    if (!confirm(`Supprimer ${isTpl ? 'ce template' : 'cette page'} ? Cette action est définitive.`)) return;
     $('#drawerFrame').src = 'about:blank';   // coupe toute sauvegarde en attente dans l'iframe
     S.remove(id);
-    if (isTpl && doc.isDefault) Templates.patch(Templates.list()[0].id, { isDefault: true });
     closePeek();
   };
   $('#peekMore').onclick = e => {
     e.stopPropagation();
     openPop(e.currentTarget, isTpl ? [
-      ...(S.get(id).isDefault ? [] : [{ icon: 'star', label: 'Définir par défaut', onClick: () => { Templates.list().forEach(t => Templates.patch(t.id, { isDefault: t.id === id })); renderProps(); } }]),
-      { icon: 'trash', label: 'Supprimer le template', danger: true, onClick: remove },
+      { icon: 'flag', label: 'Set as default', checked: !!S.get(id).isDefault, onClick: () => setDefaultTemplate(id) },
+      { icon: 'trash', label: 'Delete', danger: true, onClick: remove },
     ] : [
       { icon: 'copy', label: 'Dupliquer', onClick: () => { const c = duplicateVision(id); closePeek(); setTimeout(() => openPeek('vision', c.id), 400); } },
       { icon: 'trash', label: 'Supprimer', danger: true, onClick: remove },
@@ -1466,6 +1874,7 @@ function closePeek() {
   if (!peek) return;
   const { kind, id, isNew } = peek;
   peek = null;
+  closeIconPicker();
   $('#scrim').classList.remove('open');
   $('#drawer').classList.remove('open');
   $('#drawer').setAttribute('aria-hidden', 'true');
@@ -1485,16 +1894,16 @@ function closePeek() {
    ============================================================ */
 function seedTemplates() {
   const blk = (name, value) => ({ id: uid(), name, value, isObstacle: false });
-  const base = (id, fields) => ({ ...newBoard(id, ''), ...fields });
-  Templates.save(base('tpl-vide', { name: 'Vision vide', icon: '🧭', isDefault: true, createdAt: 1 }));
+  const base = (id, fields) => ({ ...newBoard(id, ''), status: 'incoming', group: GROUPS[0].key, ...fields });
+  Templates.save(base('tpl-projection', { name: 'Devenir {Projection}', icon: 'icon:routine:gray', isDefault: true, order: 1, createdAt: 1 }));
   Templates.save(base('tpl-habitude', {
-    name: 'Vision perso – habitude', icon: '🌱', isDefault: false, createdAt: 2,
+    name: 'Habitude : {…}', icon: 'icon:leaf:green', isDefault: false, order: 2, createdAt: 2,
     focusProcess: 'Routine quotidienne',
     target:  { outcome: '', process: 'Routine réalisée X jours / 7', pattern: '', toBe: [] },
     current: { outcome: '', process: 'Routine réalisée … jours / 7', pattern: '', asIs: [blk('Déclencheur', ''), blk('Routine', ''), blk('Récompense', '')] },
   }));
   Templates.save(base('tpl-process', {
-    name: 'Vision pro – process', icon: '🏭', isDefault: false, createdAt: 3,
+    name: 'Process : {…}', icon: 'icon:factory:brown', group: GROUPS[1]?.key || GROUPS[0].key, isDefault: false, order: 3, createdAt: 3,
     target:  { outcome: 'Lead time : …', process: '', pattern: '', toBe: [] },
     current: { outcome: 'Lead time : …', process: '', pattern: '', asIs: [blk('Entrée', ''), blk('Traitement', ''), blk('Contrôle', ''), blk('Sortie', '')] },
   }));
@@ -1585,7 +1994,7 @@ function seedDemo() {
    ============================================================ */
 let board, saveTimer;
 // Champs édités par le Kanban / le tiroir, jamais par l'éditeur de storyboard.
-const SHELL_FIELDS = ['title', 'icon', 'status', 'name', 'isDefault'];
+const SHELL_FIELDS = ['title', 'icon', 'status', 'group', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
 
 function scheduleSave() {
   if ($('#status')) $('#status').textContent = '…';
