@@ -14,6 +14,8 @@ const BUILTIN_PROPS = [
   { key: 'obstacle',    label: 'Obstacle en cours',   icon: 'text',     kind: 'story' },
   { key: 'experiments', label: 'Expériences',         icon: 'hash',     kind: 'story' },
   { key: 'step',        label: 'Étape du time block', icon: 'timer',    kind: 'story' },
+  { key: 'runEvery',    label: 'Every x days (Run)',  icon: 'repeat',   kind: 'recur' },
+  { key: 'runDue',      label: 'Due Date (Run)',      icon: 'calendar', kind: 'recur' },
 ];
 const PROP_TYPES = {
   text:         { label: 'Text',             icon: 'text' },
@@ -37,7 +39,40 @@ const PROP_TYPES = {
   edited_by:    { label: 'Last edited by',   icon: 'userUI',   readOnly: true },
   id:           { label: 'ID',               icon: 'idUI',     readOnly: true },
   streak:       { label: 'Streak',           icon: 'streakUI' },
+  button:       { label: 'Button',           icon: 'cursor' },
 };
+
+// Dates locales (le jour change à minuit chez vous, pas à minuit UTC)
+const localISO = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDaysISO = (iso, n) => { const d = new Date(iso + 'T00:00'); d.setDate(d.getDate() + n); return localISO(d); };
+function relDay(iso) {
+  const diff = Math.round((new Date(iso + 'T00:00') - new Date(localISO() + 'T00:00')) / 86400000);
+  if (diff === 0) return "aujourd'hui";
+  if (diff === 1) return 'demain';
+  if (diff === -1) return 'hier';
+  if (diff > 1 && diff < 7) return `dans ${diff} j`;
+  if (diff < -1) return `il y a ${-diff} j`;
+  return new Date(iso + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
+/* ---------- Runs récurrents et bouton « Set as Done » ---------- */
+// Valide le run du jour : alimente le Streak, passe la carte en Daily Success, replanifie la prochaine date.
+function markRunDone(St, id) {
+  if (typeof peek !== 'undefined' && peek?.id === id) flushBoardSave();
+  const d = St.get(id);
+  if (!d) return;
+  const now = Date.now();
+  const timeblocks = [...(d.timeblocks || []), { id: uid(), cardId: id, step: 'kata', startedAt: now, durationMin: 0, runStatus: 'done', endedAt: now, quick: true }];
+  const recur = d.recur?.every ? { ...d.recur, due: addDaysISO(localISO(), d.recur.every) } : d.recur;
+  St.patch(id, { timeblocks, recur, ...(statusOf(d) !== 'success' ? { status: 'success', statusSince: now } : {}) });
+  if (typeof board !== 'undefined' && board?.id === id) board.timeblocks = timeblocks;
+  toast(recur?.due ? `Run validé · prochain ${relDay(recur.due)}` : 'Run validé');
+}
+function executeButton(St, id, cp) {
+  const a = cp.action || { type: 'run_done' };
+  if (a.type === 'status' && a.status) { setStatus(St, id, a.status); toast(`Déplacé vers ${statusDef(a.status).label}`); }
+  else markRunDone(St, id);
+}
 
 // Streak : réussite (run validé, ou correction manuelle) sur chacune des N dernières occurrences.
 // Chaque carte définit sa fréquence : une occurrence tous les « every » jours.
@@ -115,6 +150,8 @@ function rawValue(b, key, depth = 0) {
     case 'obstacle': return (b.obstacles || []).find(o => o.focus && !o.done)?.text || '';
     case 'experiments': return (b.experiments || []).length;
     case 'step': return { run: 'Run en cours', kata: 'Kata' }[b.session?.step] || '';
+    case 'runEvery': return b.recur?.every ?? null;
+    case 'runDue': return toDate(b.recur?.due);
   }
   const cp = customDef(key);
   if (!cp) return null;
@@ -134,6 +171,7 @@ function rawValue(b, key, depth = 0) {
     case 'created_by': case 'edited_by': return ME;
     case 'id': return b.seq ?? null;
     case 'streak': return streakData(b, cp).hits;
+    case 'button': return null;
     default: return v ?? '';
   }
 }
@@ -316,6 +354,8 @@ function valueHTML(b, key, ctx = 'card') {
     case 'obstacle': { const v = rawValue(b, key); return v ? chip(`➜ ${esc(v)}`, 'obs') : ''; }
     case 'experiments': { const n = rawValue(b, key); return n ? chip(`${n} exp.`) : ''; }
     case 'step': { const v = rawValue(b, key); return v ? chip(v === 'Kata' ? '● Kata' : '▶ Run en cours') : ''; }
+    case 'runEvery': return b.recur?.every ? chip(`↻ tous les ${b.recur.every} j`) : '';
+    case 'runDue': { const due = b.recur?.due; if (!due) return ''; return chip(`↻ ${esc(relDay(due))}`, due < localISO() ? 'late' : due === localISO() ? 'today' : ''); }
   }
   const cp = customDef(key);
   if (!cp) return '';
@@ -335,6 +375,7 @@ function valueHTML(b, key, ctx = 'card') {
     case 'created_time': case 'edited_time': { const d = rawValue(b, key); return d ? chip(esc(fmtDateTime(d))) : ''; }
     case 'created_by': case 'edited_by': return chip(ME);
     case 'id': return b.seq != null ? chip(`${esc(cp.prefix || '')}${b.seq}`) : '';
+    case 'button': return `<button class="n-btn-prop" data-btn-prop="${cp.key}" data-btn-card="${esc(b.id)}" title="${esc(cp.action?.type === 'status' ? `Passer en ${statusDef(cp.action.status)?.label}` : 'Valider le run du jour')}">${esc(cp.name)}</button>`;
     case 'streak': { const sd = streakData(b, cp); return ctx === 'card' ? `<span class="n-chip streak-chip" title="${esc(cp.name)} : ${sd.hits}/${sd.n} · série en cours ${sd.current}">${streakHTML(sd)}</span>` : streakHTML(sd); }
     case 'formula': case 'rollup': case 'number': { const r = rawValue(b, key); return isEmptyVal(r) && !(r instanceof Error) ? '' : chip(fmt(r)); }
     default: return v ? (ctx === 'card' ? esc(v) : esc(v)) : '';

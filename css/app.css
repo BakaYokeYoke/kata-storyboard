@@ -685,3 +685,11 @@ button.n-agg:hover { background: rgba(55,53,47,.08); }
   .frame { margin: 0 4px 4px; padding: 5px; }
   .sheet { padding: 0 6px 10px; }
 }
+
+/* Runs récurrents et bouton de propriété */
+.n-chip.late { background: rgba(212,76,71,.1); color: rgb(212, 76, 71); }
+.n-chip.today { background: rgba(35,131,226,.1); color: rgb(35, 131, 226); }
+.n-btn-prop { border: 1px solid rgba(55,53,47,.16); background: #fff; border-radius: 6px; padding: 1px 8px; font: inherit; font-size: 12px; color: rgb(55,53,47); cursor: pointer; }
+.n-btn-prop:hover { background: rgba(55,53,47,.06); }
+.peek-props .n-btn-prop { font-size: 14px; padding: 3px 10px; }
+.peek-props .pv-unit { color: rgba(55,53,47,.5); font-size: 13px; white-space: nowrap; }

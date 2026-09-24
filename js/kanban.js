@@ -65,6 +65,8 @@ const ICONS = {
   select: '<circle cx="8" cy="8" r="5.5"/><path d="M5.8 7L8 9.2 10.2 7"/>',
   subgroup:'<rect x="2.5" y="2.5" width="3" height="3" rx=".5"/><rect x="6.5" y="2.5" width="3" height="3" rx=".5"/><rect x="10.5" y="2.5" width="3" height="3" rx=".5"/><rect x="2.5" y="10.5" width="3" height="3" rx=".5"/><rect x="6.5" y="10.5" width="3" height="3" rx=".5"/><rect x="10.5" y="10.5" width="3" height="3" rx=".5"/><path d="M2.5 8h11"/>',
   timer:  '<circle cx="8" cy="9" r="5"/><path d="M8 9V6.5M6.5 2h3"/>',
+  bolt:   '<path d="M9 1.5L3.5 9H8l-1 5.5L12.5 7H8z"/>',
+  cursor: '<path d="M3.5 2.5l9 4-4 1.3-1.3 4z"/><path d="M8.5 7.8l3.5 3.5"/>',
   flag:   '<path d="M3.5 14V2.5M3.5 3h8l-1.5 3 1.5 3h-8"/>',
   edit:   '<path d="M13 9v3.5a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1H7"/><path d="M11 2l3 3-5.5 5.5H5.5v-3z"/>',
   repeat: '<path d="M2.5 7V6a2 2 0 0 1 2-2h9M11 1.5L13.5 4 11 6.5M13.5 9v1a2 2 0 0 1-2 2h-9M5 14.5L2.5 12 5 9.5"/>',
@@ -96,6 +98,7 @@ function loadView() {
     props: ['challenge', 'obstacle', 'due', 'experiments'],   // propriétés visibles, dans l'ordre
     order: STATUSES.map(st => st.key),                        // ordre des colonnes
     hideEmptyCols: false, colorCols: true, hideEmptySub: false, hiddenSub: [],
+    autoTomorrow: true, autoSuccess: true, autoRecur: true,  // automatisations du matin
     noCreate: [],                                             // colonnes où l'on ne crée pas de carte
     cf: {},                                                   // filtres sur les autres propriétés { clé: [valeurs] }
     agg: {},                                                  // calcul affiché par colonne { colonne: { fn, prop } }
@@ -183,6 +186,7 @@ function renderKanban() {
   if (!Store.list().length && !localStorage.getItem('kata-demo-seeded')) seedDemo();
   if (!Templates.list().length) seedTemplates();
   runRecurringTemplates();
+  runDailyAutomation();
   migrateVisions();
 
   const view = loadView();
@@ -261,6 +265,7 @@ function renderKanban() {
         <span class="spacer"></span>
         <button class="n-icon-btn ${nFilters ? 'active' : ''}" id="btnFilter" title="Filtrer">${icon('filter')}</button>
         <button class="n-icon-btn ${view.sort !== 'manual' ? 'active' : ''}" id="btnSort" title="Trier">${icon('sort')}</button>
+        <button class="n-icon-btn ${view.autoTomorrow || view.autoSuccess || view.autoRecur ? 'active' : ''}" id="btnAuto" title="Automations">${icon('bolt')}</button>
         <span class="n-search" id="search"><button class="n-icon-btn" id="btnSearch" title="Rechercher">${icon('search')}</button><input id="searchInput" placeholder="Rechercher…"></span>
         <button class="n-icon-btn ${panelPage ? 'on' : ''}" id="btnSettings" title="Paramètres de la vue">${icon('sliders')}</button>
         <div class="n-new">
@@ -321,6 +326,10 @@ function renderKanban() {
   // Cartes : ouverture, boutons ✎ / ⋯, glisser-déposer
   app.querySelectorAll('.n-card').forEach(card => {
     const id = card.dataset.id;
+    card.querySelectorAll('[data-btn-prop]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      executeButton(Store, id, customDef(btn.dataset.btnProp)); renderKanban();
+    });
     card.onclick = e => { if (!card.dataset.justDragged && !e.target.closest('.n-card-tools, input, [data-card-icon]')) openPeek('vision', id); };
     const ico = card.querySelector('[data-card-icon]');
     if (ico) ico.onclick = e => {
@@ -476,6 +485,7 @@ function renderKanban() {
   const togglePanel = page => e => { e.stopPropagation(); closePop(); panelPage === page ? closePanel() : openPanel(page); };
   $('#btnFilter').onclick = togglePanel('filter');
   $('#btnSort').onclick = togglePanel('sort');
+  $('#btnAuto').onclick = togglePanel('automations');
   $('#btnSettings').onclick = togglePanel('root');
   $('#btnSearch').onclick = e => {
     e.stopPropagation();
@@ -672,3 +682,41 @@ function enableTouchDrag(root) {
     card.addEventListener('contextmenu', e => { if (drag || timer) e.preventDefault(); });
   });
 }
+
+/* ---------- Automatisations du matin (au premier affichage de la journée) ---------- */
+const DAILY_KEY = 'kata-daily-run';
+function runDailyAutomation(force = false) {
+  const today = localISO(), tomorrow = addDaysISO(today, 1);
+  const last = localStorage.getItem(DAILY_KEY);
+  if (!force && last === today) return;
+  localStorage.setItem(DAILY_KEY, today);
+  if (!last && !force) return;   // tout premier lancement : on ne déplace rien
+  const v = loadView();
+  const cards = Store.list();
+  const nSuccess = cards.filter(b => statusOf(b) === 'success').length;
+  const nLeft = cards.filter(b => statusOf(b) === 'goal').length;
+  const moves = [];
+  cards.forEach(b => {
+    const st = statusOf(b), due = b.recur?.due;
+    let to = null;
+    if (v.autoRecur && due) {
+      if (due <= today && !['goal', 'wip'].includes(st)) to = 'goal';
+      else if (due === tomorrow && ['incoming', 'success'].includes(st)) to = 'tomorrow';
+    }
+    if (!to && v.autoTomorrow && st === 'tomorrow') to = 'goal';
+    if (!to && v.autoSuccess && st === 'success') to = 'incoming';
+    if (to && to !== st) moves.push([b.id, to]);
+  });
+  if (!moves.length) return force && toast('Aucune carte à déplacer');
+  recordSnapshot();   // état d'avant : « Annuler » y revient
+  backupNow('daily');
+  moves.forEach(([id, to]) => setStatus(Store, id, to));
+  setTimeout(() => toast(`Nouvelle journée : ${moves.length} carte${moves.length > 1 ? 's' : ''} déplacée${moves.length > 1 ? 's' : ''} · hier ${nSuccess} succès, ${nLeft} objectif${nLeft > 1 ? 's' : ''} restant${nLeft > 1 ? 's' : ''}`,
+    { action: 'Annuler', onAction: undo, ms: 10000 }), 300);
+}
+// Passage de minuit pendant que l'app est ouverte
+setInterval(() => {
+  if (!document.body.classList.contains('kanban-page') || localStorage.getItem(DAILY_KEY) === localISO()) return;
+  if (typeof peek !== 'undefined' && peek) return;
+  runDailyAutomation(); renderKanban();
+}, 60000);

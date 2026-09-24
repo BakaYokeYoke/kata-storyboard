@@ -140,3 +140,21 @@ test('templates : édition dans la fenêtre centrée et création depuis le temp
   await expect(page.locator('#focusProcess')).toHaveValue('Routine du matin');
   await expect(page.locator('#peekTitle')).toHaveValue('');
 });
+
+test('run récurrent : « Set as Done » valide, passe en Daily Success et replanifie', async ({ page }) => {
+  await card(page, 'demo-marathon').locator('[data-btn-prop]').click();
+  const b = await store(page, 'demo-marathon');
+  expect(b.status).toBe('success');
+  expect(b.timeblocks.at(-1).runStatus).toBe('done');
+  const expected = await page.evaluate(() => addDaysISO(localISO(), 2));
+  expect(b.recur.due).toBe(expected);
+});
+
+test('automatisation du matin : déplace les cartes et « Annuler » revient en arrière', async ({ page }) => {
+  const before = await page.evaluate(() => Store.list().map(b => b.status).join());
+  await page.evaluate(() => { localStorage.setItem('kata-daily-run', addDaysISO(localISO(), -1)); runDailyAutomation(); renderKanban(); });
+  await expect(page.locator('#toast')).toContainText('Nouvelle journée');
+  expect((await store(page, 'demo-usine')).status).toBe('goal');   // Tomorrow → Daily Goal
+  await page.click('.toast-act');
+  expect(await page.evaluate(() => Store.list().map(b => b.status).join())).toBe(before);
+});

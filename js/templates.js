@@ -99,7 +99,7 @@ function toggleTemplateMenu() {
   };
 }
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => localISO();
 
 // « Duplicate every… » : crée la page du jour / de la semaine / du mois à l'ouverture du Kanban.
 let recurringChecked = false;

@@ -119,9 +119,16 @@ function tbAction(act) {
     toast('Obstacle ajouté au Parking Lot');
   }
   if (act === 'save') {
-    board.timeblocks.push({ ...s, endedAt: Date.now() });
+    // Historique et récurrence : écrits directement dans le stockage (champs partagés avec la page)
+    const stored = DocStore.get(board.id) || board;
+    const timeblocks = [...(stored.timeblocks || []), { ...s, endedAt: Date.now() }];
+    const fields = { timeblocks };
+    if (s.runStatus === 'done' && stored.recur?.every) fields.recur = { ...stored.recur, due: addDaysISO(localISO(), stored.recur.every) };
+    if (s.runStatus === 'done' && ['goal', 'wip'].includes(statusOf(stored))) Object.assign(fields, { status: 'success', statusSince: Date.now() });
+    DocStore.patch(board.id, fields);
+    board.timeblocks = timeblocks;
     board.session = newSession(board.id, s.durationMin);
-    toast('Cycle enregistré');
+    toast(fields.recur ? `Cycle enregistré · prochain run ${relDay(fields.recur.due)}` : 'Cycle enregistré');
   }
   scheduleSave();
   renderTimeblock();

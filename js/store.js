@@ -69,7 +69,7 @@ const blobToDataURL = blob => new Promise(r => { const f = new FileReader(); f.o
 const dataURLToBlob = url => fetch(url).then(r => r.blob());
 
 /* ---------- État complet (toutes les clés de l'app) : annulation, sauvegardes, export ---------- */
-const UNTRACKED = ['kata-recent-icons', 'kata-last-export'];
+const UNTRACKED = ['kata-recent-icons', 'kata-last-export', 'kata-daily-run'];
 const isTracked = k => k.startsWith('kata-') && !UNTRACKED.includes(k);
 function snapshotState() {
   const o = {};

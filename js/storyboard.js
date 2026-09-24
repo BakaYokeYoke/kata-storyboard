@@ -5,7 +5,7 @@
    ============================================================ */
 let board, saveTimer;
 // Champs édités par le Kanban / le tiroir, jamais par l'éditeur de storyboard.
-const SHELL_FIELDS = ['title', 'icon', 'status', 'group', 'props', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
+const SHELL_FIELDS = ['title', 'icon', 'status', 'statusSince', 'group', 'props', 'recur', 'timeblocks', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
 
 function saveBoardNow() {
   clearTimeout(saveTimer);

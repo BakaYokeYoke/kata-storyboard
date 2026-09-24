@@ -21,6 +21,11 @@ function seedTemplates() {
 }
 
 function seedDemo() {
+  // Propriété « Set as Done (Run) » et affichage des runs sur les cartes
+  if (!customDef('p-done')) { CUSTOM_PROPS.push({ key: 'p-done', name: 'Set as Done (Run)', type: 'button', action: { type: 'run_done' }, options: [], pageVis: 'show' }); saveCustomProps(); }
+  const v = loadView();
+  ['runDue', 'p-done'].forEach(k => { if (!v.props.includes(k)) v.props.push(k); });
+  saveView(v);
   localStorage.setItem('kata-demo-seeded', '1');
   const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
   const blk = (name, value, extra = {}) => ({ id: uid(), name, value, isObstacle: false, ...extra });
@@ -30,6 +35,7 @@ function seedDemo() {
 
   vision({
     id: 'demo-marathon', icon: '🏃', title: 'Vivre en athlète d\'endurance', status: 'wip', group: 'perso',
+    recur: { every: 2, due: localISO() },
     run: { mode: 'routine', items: [], routine: [
       { id: uid(), label: 'Échauffement 15 min', done: false },
       { id: uid(), label: '8 × 400 m à 4:20 / km, récup 1 min 30', done: false },
@@ -56,6 +62,7 @@ function seedDemo() {
   });
   vision({
     id: 'demo-piano', icon: '🎹', title: 'Jouer du piano pour le plaisir, sans partition', status: 'goal', group: 'perso',
+    recur: { every: 1, due: addDaysISO(localISO(), 1) },
     run: { mode: 'routine', items: [], routine: [
       { id: uid(), label: 'Gammes 5 min', done: false },
       { id: uid(), label: 'Mesures 7–8 en boucle × 10 à 40 bpm', done: false },

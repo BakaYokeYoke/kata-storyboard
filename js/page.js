@@ -47,11 +47,14 @@ function propEditorHTML(d, p) {
   if (p.key === 'status') return `<button class="val" data-edit="status">${pill(statusDef(statusOf(d)))}</button>`;
   if (p.key === 'group') { const g = groupDef(groupOf(d)); return `<button class="val" data-edit="group"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>`; }
   if (p.kind === 'story') return `<span class="v ro" title="Vient du storyboard (lecture seule)">${valueHTML(d, p.key, 'page') || empty}</span>`;
+  if (p.key === 'runEvery') return `<span class="pv-wrap"><input class="pv" type="number" min="1" data-recur="every" value="${esc(d.recur?.every ?? '')}" placeholder="Empty">${d.recur?.every ? '<span class="pv-unit">jours</span>' : ''}</span>`;
+  if (p.key === 'runDue') return `<span class="pv-wrap"><input class="pv" type="date" data-recur="due" value="${esc(d.recur?.due ?? '')}">${d.recur?.due ? `<span class="pv-unit">${esc(relDay(d.recur.due))}</span>` : ''}</span>`;
   const cp = customDef(p.key), v = d.props?.[p.key], t = cp.type;
   if (t === 'checkbox') return `<label class="pv-check"><input type="checkbox" data-pv="${cp.key}" ${v ? 'checked' : ''}></label>`;
   if (PROP_TYPES[t].options) return `<button class="val" data-pv-select="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
   if (t === 'files') return `<button class="val" data-pv-files="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
   if (t === 'relation') return `<button class="val" data-pv-rel="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
+  if (t === 'button') return `<span class="v">${valueHTML(d, cp.key, 'page')}</span>`;
   if (t === 'streak') {
     const sd = streakData(d, cp);
     return `<span class="streak-edit">${streakHTML(sd, true)}
@@ -124,6 +127,22 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
       inp.oninput = () => setVal(inp.dataset.pv, customDef(inp.dataset.pv).type === 'number' ? (inp.value === '' ? null : Number(inp.value)) : inp.value);
       inp.onchange = rerender;   // met à jour le lien ↗ et les propriétés calculées
     }
+  });
+
+  // Runs récurrents : fréquence et prochaine date
+  root.querySelectorAll('[data-recur]').forEach(inp => inp.onchange = () => {
+    const recur = { ...(S.get(id).recur || {}) };
+    if (inp.dataset.recur === 'every') {
+      const n = parseInt(inp.value, 10);
+      recur.every = n > 0 ? n : undefined;
+      if (recur.every && !recur.due) recur.due = localISO();   // planifié dès aujourd'hui
+    } else recur.due = inp.value || undefined;
+    S.patch(id, { recur }); rerender();
+  });
+  // Bouton (Set as Done…)
+  root.querySelectorAll('[data-btn-prop]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    executeButton(S, id, customDef(btn.dataset.btnProp)); rerender();
   });
 
   // Status / Pro/Perso
@@ -268,6 +287,10 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
         const n = parseInt(prompt('Nombre d\'occurrences affichées', cp.streakLength || 7), 10);
         if (n > 0) { cp.streakLength = Math.min(60, n); saveCustomProps(); rerender(); }
       } }] : []),
+      ...(cp.type === 'button' ? [{ header: 'Action du bouton' },
+        { icon: 'check', label: 'Valider le run (Set as Done)', checked: (cp.action?.type || 'run_done') === 'run_done', onClick: () => { cp.action = { type: 'run_done' }; saveCustomProps(); rerender(); } },
+        ...STATUSES.map(st => ({ html: `<span class="name">Passer en</span> ${pill(st)}`, checked: cp.action?.type === 'status' && cp.action.status === st.key, onClick: () => { cp.action = { type: 'status', status: st.key }; saveCustomProps(); rerender(); } })),
+      ] : []),
       ...(cp.type === 'id' ? [{ icon: 'idUI', label: 'Préfixe', value: cp.prefix || '—', onClick: () => {
         const pr = prompt('Préfixe de l\'ID (ex. : VIS-)', cp.prefix || '');
         if (pr !== null) { cp.prefix = pr; saveCustomProps(); rerender(); }
@@ -306,6 +329,7 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
     const create = type => {
       const cp = { key: 'p-' + uid() + uid(), name: typed.trim() || PROP_TYPES[type].label, type, options: DEFAULT_OPTIONS[type] ? DEFAULT_OPTIONS[type]() : [], pageVis: 'show' };
       if (type === 'streak') cp.streakLength = 7;
+      if (type === 'button') { cp.action = { type: 'run_done' }; if (!typed.trim()) cp.name = 'Set as Done'; }
       CUSTOM_PROPS.push(cp); saveCustomProps(); rerender();
       if (type === 'formula') { editFormula(cp, S.get(id)); rerender(); }
       if (type === 'rollup') configureRollup(cp, rerender);
@@ -368,7 +392,7 @@ function openPeek(kind, id, { isNew = false } = {}) {
     const rowsAll = allProps().map(p => {
       const vis = pageVisOf(p.key);
       const v = p.key === 'status' || p.key === 'group' ? 1 : rawValue(d, p.key);
-      const empty = isEmptyVal(v) && !(v instanceof Error) && customDef(p.key)?.type !== 'streak';
+      const empty = isEmptyVal(v) && !(v instanceof Error) && !['streak', 'button'].includes(customDef(p.key)?.type);
       return { p, hidden: vis === 'hide' || (vis === 'empty' && empty) };
     });
     const shown = rowsAll.filter(r => !r.hidden), more = rowsAll.filter(r => r.hidden);

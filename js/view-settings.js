@@ -52,7 +52,19 @@ function renderPanel() {
       ${row('filter', 'Filter', nFilters || '', 'filter')}
       ${row('sort', 'Sort', view.sort !== 'manual' ? 1 : '', 'sort')}
       ${row('board', 'Group', 'Status', 'group')}
-      ${row('subgroup', 'Sub-group', view.subgroups ? 'Pro/Perso' : 'None', 'subgroup')}`,
+      ${row('subgroup', 'Sub-group', view.subgroups ? 'Pro/Perso' : 'None', 'subgroup')}
+      <div class="vp-sep"></div>
+      ${row('bolt', 'Automations', [view.autoTomorrow, view.autoSuccess, view.autoRecur].filter(Boolean).length || 'Off', 'automations')}`,
+
+    automations: () => `
+      ${head('Automations', true)}
+      <div class="vp-label">Chaque matin, au premier affichage de la journée</div>
+      ${toggle('Tomorrow → Daily Goal', 'autoTomorrow')}
+      ${toggle('Daily Success → Incoming', 'autoSuccess')}
+      ${toggle('Runs récurrents : Daily Goal le jour J, Tomorrow la veille', 'autoRecur')}
+      <div class="vp-sep"></div>
+      <div class="vp-row" data-act="runAuto"><span class="ic">${icon('bolt')}</span><span class="lbl">Lancer maintenant</span></div>
+      <div class="vp-label">Dernier passage : ${esc(localStorage.getItem('kata-daily-run') || 'jamais')}. Un bilan s'affiche, avec « Annuler ».</div>`,
 
     props: () => {
       const hidden = allProps().filter(p => !view.props.includes(p.key));
@@ -158,6 +170,7 @@ function renderPanel() {
     if (d.act === 'hideAllSub') view.hiddenSub = GROUPS.map(g => g.key);
     if (d.act === 'showAllSub') view.hiddenSub = [];
     if (d.act === 'removeSub') view.subgroups = false;
+    if (d.act === 'runAuto') { closePanel(); runDailyAutomation(true); return renderKanban(); }
     if (d.act === 'subBy') {
       return openPop(t, [
         { label: 'None', checked: !view.subgroups, onClick: () => { view.subgroups = false; commit(); } },
