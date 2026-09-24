@@ -443,10 +443,12 @@
   .n-card:hover { background: #fafaf9; }
   .n-card.dragging { opacity: .4; }
   .n-card.hidden-by-search { display: none; }
-  .n-card .t { display: flex; gap: 6px; align-items: flex-start; font-size: 15px; font-weight: 500; line-height: 22.5px; overflow-wrap: anywhere; }
-  .n-card .t .ico { flex: none; width: 20px; height: 22.5px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
+  .n-card .t { display: flex; gap: 0; align-items: flex-start; font-size: 15px; font-weight: 500; line-height: 22.5px; overflow-wrap: anywhere; }
+  .n-card .t .tt { margin-top: .8px; }
+  /* Mesures Notion : case 24 × 24, marge 0 4px 0 -2px, dessin 19,2 px (18 px pour la page vide) */
+  .n-card .t .ico { flex: none; width: 24px; height: 24px; margin: 0 4px 0 -2px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
   .n-card .t .ico:hover { background: rgba(55,53,47,.08); }
-  .n-card .t .ico svg.page-default { width: 20px; height: 20px; color: rgba(55,53,47,.65); }
+  .n-card .t .ico svg.nicon.page-default { width: 18px; height: 18px; color: rgba(55,53,47,.65); }
   .n-card .t .untitled { color: var(--n-faint); }
   .n-card .t input { flex: 1; min-width: 0; border: none; outline: none; font: inherit; color: inherit; background: transparent; padding: 0; }
   .n-card .prop { font-size: 12px; color: var(--n-muted); line-height: 1.45; margin-top: 7px;
@@ -532,7 +534,8 @@
   .ip-upload p { color: rgba(55,53,47,.5); font-size: 12px; margin: 8px 0 0; }
   svg.nicon { display: inline-block; vertical-align: middle; }
   img.nicon { display: inline-block; vertical-align: middle; object-fit: cover; border-radius: 3px; }
-  .n-card .t .ico svg.nicon, .n-card .t .ico img.nicon { width: 18px; height: 18px; }
+  .n-card .t .ico svg.nicon, .n-card .t .ico img.nicon { width: 19.2px; height: 19.2px; }
+  .n-card .t .ico .emoji { font-size: 17px; line-height: 19.2px; width: 19.2px; height: 19.2px; display: inline-flex; align-items: center; justify-content: center; }
   .peek-icon svg.nicon, .peek-icon img.nicon { width: 72px; height: 72px; }
   .peek-icon .add-icon { font-size: 14px; color: rgba(55,53,47,.45); display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px; }
   .tm-ico svg.nicon, .tm-ico img.nicon { width: 18px; height: 18px; }
