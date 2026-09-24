@@ -52,9 +52,37 @@
     display: flex; flex-direction: column;
   }
   .head {
-    display: grid; grid-template-columns: 1fr 1fr;
+    display: grid; grid-template-columns: 1fr 2fr;
     border-bottom: 3px solid var(--line);
   }
+  .head > div.challenge { position: relative; flex-wrap: wrap; }
+  .sentence { flex: 1; min-width: 0; font-size: 16px; line-height: 1.9; }
+  .head .sentence input.blank {
+    flex: none; border: none; border-bottom: 1.5px dashed #9aa0a8; padding: 0;
+    font-size: 16px; min-width: 3ch; max-width: 100%;
+    margin: 0;
+  }
+  .head textarea.focus-input {
+    flex: 1; min-width: 0; border: none; outline: none; resize: none; font-size: 16px;
+    line-height: 1.4; padding: 2px 0; background: transparent; overflow: hidden;
+  }
+  .head .sentence input.blank:focus { border-bottom: 1.5px solid var(--accent); }
+  .head .sentence input.blank:not(:placeholder-shown) { border-bottom-color: transparent; }
+  .head .sentence input.blank:not(:placeholder-shown):focus { border-bottom-color: var(--accent); }
+  .help-btn { font-size: 13px; color: var(--muted); border: 1px solid #c3c7ce; border-radius: 50%; width: 20px; height: 20px; padding: 0; line-height: 18px; background: #fff; align-self: center; }
+  .help-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .rules {
+    position: absolute; right: 8px; top: 100%; z-index: 10; width: min(520px, 90vw);
+    background: #fff; border: 1px solid #c3c7ce; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    padding: 12px 14px; font-size: 13px; line-height: 1.45;
+  }
+  .rules[hidden] { display: none; }
+  .rules table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; }
+  .rules th, .rules td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #eceef1; vertical-align: top; }
+  .rules th { font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .rules .good { color: #1d7a3a; }
+  .rules .bad { color: var(--danger); }
+  .rules p { margin: 4px 0; }
   .head > div { padding: 14px 16px 12px; display: flex; gap: 8px; align-items: baseline; }
   .head > div + div { border-left: 3px solid var(--line); margin: 8px 0; padding-top: 6px; padding-bottom: 4px; }
   .head > div:first-child { margin: 8px 0; padding-top: 6px; padding-bottom: 4px; }
@@ -209,7 +237,7 @@ async function copy(text) {
 function newBoard(id, title) {
   return {
     id, title: title || id,
-    focusProcess: '', challenge: '',
+    focusProcess: '', challengeBy: '', challengeResult: '', challengeVision: '',
     targetDate: '', target: '', current: '',
     experiments: [], obstacles: [],
     createdAt: Date.now(), updatedAt: Date.now(),
@@ -217,6 +245,14 @@ function newBoard(id, title) {
 }
 
 function autoGrow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+// Élargit un trou de la phrase Challenge à la taille de son texte (ou du placeholder).
+const measureCtx = document.createElement('canvas').getContext('2d');
+function fitWidth(el) {
+  const cs = getComputedStyle(el);
+  measureCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  el.style.width = Math.ceil(measureCtx.measureText(el.value || el.placeholder).width) + 1 + 'px';
+}
 
 /* ============================================================
    Routage : ?board=<id> → storyboard, sinon → liste
@@ -323,6 +359,9 @@ function scheduleSave() {
 function renderBoard(id) {
   // Un id inconnu crée le storyboard : dupliquer un embed et changer l'id suffit.
   board = Store.get(id) || newBoard(id);
+  // Ancien format : Challenge en texte libre → repris dans le résultat mesurable.
+  if (board.challenge && !board.challengeResult) board.challengeResult = board.challenge;
+  delete board.challenge;
   document.title = board.title || 'Kata Storyboard';
 
   $('#app').innerHTML = `
@@ -337,8 +376,26 @@ function renderBoard(id) {
     <div class="frame">
       <div class="sheet">
         <div class="head">
-          <div><label for="focusProcess">Focus Process:</label><input id="focusProcess" data-field="focusProcess"></div>
-          <div><label for="challenge">Challenge:</label><input id="challenge" data-field="challenge"></div>
+          <div><label for="focusProcess">Focus Process:</label><textarea class="focus-input" id="focusProcess" data-field="focusProcess" rows="1"></textarea></div>
+          <div class="challenge">
+            <label for="challengeBy">Challenge:</label>
+            <div class="sentence">
+              D'ici <input class="blank" id="challengeBy" data-field="challengeBy" placeholder="avril 2027">, <input class="blank" data-field="challengeResult" placeholder="résultat mesurable">, afin de <input class="blank" data-field="challengeVision" placeholder="lien avec la Vision">.
+            </div>
+            <button class="help-btn" id="helpBtn" title="Règles d'un bon Challenge">i</button>
+            <div class="rules" id="rules" hidden>
+              <strong>4 règles pour valider la phrase</strong>
+              <table>
+                <tr><th>Règle</th><th>Bon</th><th>Mauvais</th></tr>
+                <tr><td>Décrire un état, pas une action</td><td class="good">« Finir en &lt; 3h »</td><td class="bad">« M'entraîner plus »</td></tr>
+                <tr><td>Mesurable sans interprétation</td><td class="good">« 66 bpm sans arrêt »</td><td class="bad">« Bien jouer »</td></tr>
+                <tr><td>Sans solution dedans</td><td class="good">« Signer chez Bain »</td><td class="bad">« Faire 50 cases pour signer chez Bain »</td></tr>
+                <tr><td>Au-delà de ta capacité actuelle</td><td class="good">Tu ne sais pas encore comment y arriver</td><td class="bad">Tu sais déjà exactement quoi faire</td></tr>
+              </table>
+              <p><strong>La dernière règle est la plus importante :</strong> si le chemin est connu, ce n'est pas un Challenge Kata, c'est un plan à exécuter.</p>
+              <p style="color:var(--muted)">Ex. : D'ici avril 2027, finir un marathon en moins de 3h00 (aujourd'hui : 10 km en 46 min), afin de …</p>
+            </div>
+          </div>
         </div>
         <div class="body">
           <div class="col">
@@ -369,8 +426,20 @@ function renderBoard(id) {
   // Champs simples
   $('#app').querySelectorAll('[data-field]').forEach(el => {
     el.value = board[el.dataset.field] || '';
-    el.oninput = () => { board[el.dataset.field] = el.value; scheduleSave(); };
+    el.oninput = () => {
+      board[el.dataset.field] = el.value;
+      if (el.classList.contains('blank')) fitWidth(el);
+      if (el.id === 'focusProcess') autoGrow(el);
+      scheduleSave();
+    };
   });
+  $('#app').querySelectorAll('input.blank').forEach(fitWidth);
+  autoGrow($('#focusProcess'));
+
+  const rules = $('#rules');
+  $('#helpBtn').onclick = e => { e.stopPropagation(); rules.hidden = !rules.hidden; };
+  rules.onclick = e => e.stopPropagation();
+  document.onclick = () => { rules.hidden = true; };
 
   $('#copyUrl').onclick = () => copy(boardUrl(board.id));
   $('#addExp').onclick = () => {
