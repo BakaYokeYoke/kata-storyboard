@@ -7,7 +7,7 @@
 <script>
   // Version de publication : mise à jour automatiquement à chaque commit (.githooks/pre-commit).
   // Sert à contourner le cache de GitHub Pages (10 minutes).
-  const APP_VERSION = '20260924-231908';
+  const APP_VERSION = '20260924-231924';
 
   // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
   // et on recharge une fois pour récupérer la dernière publication.
@@ -15,7 +15,7 @@
     fetch(`${location.pathname}?check=${Date.now()}`, { cache: 'no-store' })
       .then(r => r.text())
       .then(html => {
-        const live = html.match(/const APP_VERSION = '20260924-231908']+)'/)?.[1];
+        const live = html.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
         const flag = `kata-reloaded-${live}`;
         if (live && live !== APP_VERSION && !sessionStorage.getItem(flag)) {
           sessionStorage.setItem(flag, '1');
@@ -25,24 +25,24 @@
       .catch(() => {});
   }
 </script>
-<link rel="stylesheet" href="css/app.css?v=20260924-231908">
+<link rel="stylesheet" href="css/app.css?v=20260924-231924">
 </head>
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 
-<script src="js/store.js?v=20260924-231908"></script>
-<script src="js/utils.js?v=20260924-231908"></script>
-<script src="js/kanban.js?v=20260924-231908"></script>
-<script src="js/properties.js?v=20260924-231908"></script>
-<script src="js/view-settings.js?v=20260924-231908"></script>
-<script src="js/icons.js?v=20260924-231908"></script>
-<script src="js/templates.js?v=20260924-231908"></script>
-<script src="js/page.js?v=20260924-231908"></script>
-<script src="js/demo.js?v=20260924-231908"></script>
-<script src="js/storyboard.js?v=20260924-231908"></script>
-<script src="js/timeblock.js?v=20260924-231908"></script>
-<script src="js/diagrams.js?v=20260924-231908"></script>
-<script src="js/main.js?v=20260924-231908"></script>
+<script src="js/store.js?v=20260924-231924"></script>
+<script src="js/utils.js?v=20260924-231924"></script>
+<script src="js/kanban.js?v=20260924-231924"></script>
+<script src="js/properties.js?v=20260924-231924"></script>
+<script src="js/view-settings.js?v=20260924-231924"></script>
+<script src="js/icons.js?v=20260924-231924"></script>
+<script src="js/templates.js?v=20260924-231924"></script>
+<script src="js/page.js?v=20260924-231924"></script>
+<script src="js/demo.js?v=20260924-231924"></script>
+<script src="js/storyboard.js?v=20260924-231924"></script>
+<script src="js/timeblock.js?v=20260924-231924"></script>
+<script src="js/diagrams.js?v=20260924-231924"></script>
+<script src="js/main.js?v=20260924-231924"></script>
 </body>
 </html>
