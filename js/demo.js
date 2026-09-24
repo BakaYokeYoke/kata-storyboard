@@ -36,6 +36,10 @@ function seedDemo() {
   vision({
     id: 'demo-marathon', icon: '🏃', title: 'Vivre en athlète d\'endurance', status: 'wip', group: 'perso',
     recur: { every: 2, due: localISO() },
+    metrics: {
+      outcome: { target: 95, unit: 'min (semi)', better: 'down', points: [108, 104, 103, 100, 99, 97].map((v, i) => ({ id: uid(), date: addDaysISO(localISO(), (i - 5) * 7), value: v, note: i === 3 ? 'Nouveau plan de fractionné' : '' })) },
+      process: { target: 4, unit: 'sorties / sem.', better: 'up', points: [2, 2, 3, 2, 3, 4].map((v, i) => ({ id: uid(), date: addDaysISO(localISO(), (i - 5) * 7), value: v, note: '' })) },
+    },
     run: { mode: 'routine', items: [], routine: [
       { id: uid(), label: 'Échauffement 15 min', done: false },
       { id: uid(), label: '8 × 400 m à 4:20 / km, récup 1 min 30', done: false },

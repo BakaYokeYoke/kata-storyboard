@@ -15,7 +15,7 @@
 <script>
   // Version de publication : mise à jour automatiquement à chaque commit (.githooks/pre-commit).
   // Sert à contourner le cache de GitHub Pages (10 minutes).
-  const APP_VERSION = '20260924-234052';
+  const APP_VERSION = '20260924-234403';
 
   // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
   // et on recharge une fois pour récupérer la dernière publication.
@@ -38,24 +38,25 @@
     addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 </script>
-<link rel="stylesheet" href="css/app.css?v=20260924-234052">
+<link rel="stylesheet" href="css/app.css?v=20260924-234403">
 </head>
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 
-<script src="js/store.js?v=20260924-234052"></script>
-<script src="js/utils.js?v=20260924-234052"></script>
-<script src="js/kanban.js?v=20260924-234052"></script>
-<script src="js/properties.js?v=20260924-234052"></script>
-<script src="js/view-settings.js?v=20260924-234052"></script>
-<script src="js/icons.js?v=20260924-234052"></script>
-<script src="js/templates.js?v=20260924-234052"></script>
-<script src="js/page.js?v=20260924-234052"></script>
-<script src="js/demo.js?v=20260924-234052"></script>
-<script src="js/storyboard.js?v=20260924-234052"></script>
-<script src="js/timeblock.js?v=20260924-234052"></script>
-<script src="js/diagrams.js?v=20260924-234052"></script>
-<script src="js/main.js?v=20260924-234052"></script>
+<script src="js/store.js?v=20260924-234403"></script>
+<script src="js/utils.js?v=20260924-234403"></script>
+<script src="js/kanban.js?v=20260924-234403"></script>
+<script src="js/properties.js?v=20260924-234403"></script>
+<script src="js/view-settings.js?v=20260924-234403"></script>
+<script src="js/icons.js?v=20260924-234403"></script>
+<script src="js/templates.js?v=20260924-234403"></script>
+<script src="js/page.js?v=20260924-234403"></script>
+<script src="js/demo.js?v=20260924-234403"></script>
+<script src="js/storyboard.js?v=20260924-234403"></script>
+<script src="js/timeblock.js?v=20260924-234403"></script>
+<script src="js/metrics.js?v=20260924-234403"></script>
+<script src="js/diagrams.js?v=20260924-234403"></script>
+<script src="js/main.js?v=20260924-234403"></script>
 </body>
 </html>

@@ -57,6 +57,7 @@ function migrate(b) {
   b.run.routine ||= []; b.run.items ||= [];
   b.session ||= newSession(b.id);
   b.timeblocks ||= [];
+  b.metrics ||= {};
   b.current.asIs ||= [];
   const active = b.obstacles.find(o => o.focus && !o.done);
   b.experiments.forEach(x => {

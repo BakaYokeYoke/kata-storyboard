@@ -127,6 +127,8 @@ function renderBoard(id, root = $('#app')) {
   renderRecord();
   renderObstacles();
   renderTimeblock();
+  SB_ROOT.insertAdjacentHTML('beforeend', '<section class="metrics" id="metrics"></section>');
+  renderMetrics();
 
   // Premier affichage d'un nouvel id : on l'enregistre pour qu'il apparaisse dans la liste.
   if (!DocStore.get(id)) DocStore.save(board);

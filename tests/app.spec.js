@@ -158,3 +158,16 @@ test('automatisation du matin : déplace les cartes et « Annuler » revient en 
   await page.click('.toast-act');
   expect(await page.evaluate(() => Store.list().map(b => b.status).join())).toBe(before);
 });
+
+test('suivi des indicateurs : ajouter une mesure met à jour la courbe', async ({ page }) => {
+  await card(page, 'demo-marathon').click();
+  const outcome = page.locator('[data-metric="outcome"]');
+  await expect(outcome.locator('.mt-dot')).toHaveCount(6);
+  await outcome.locator('summary').click();
+  await outcome.locator('[data-new="value"]').fill('94');
+  await outcome.locator('.mt-add').click();
+  await expect(page.locator('[data-metric="outcome"] .mt-dot')).toHaveCount(7);
+  await expect(page.locator('[data-metric="outcome"] .mt-last')).toContainText('94 ✓');
+  await page.click('#drawerClose');
+  expect((await store(page, 'demo-marathon')).metrics.outcome.points).toHaveLength(7);
+});
