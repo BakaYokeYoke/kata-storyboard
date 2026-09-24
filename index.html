@@ -580,7 +580,23 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.4';
+const APP_VERSION = '2026-09-24.5';
+
+// Si le navigateur a servi une copie en cache, on compare avec la version en ligne
+// et on recharge une fois pour récupérer la dernière publication.
+if (window.top === window && location.protocol.startsWith('http')) {
+  fetch(`${location.pathname}?check=${Date.now()}`, { cache: 'no-store' })
+    .then(r => r.text())
+    .then(html => {
+      const live = html.match(/const APP_VERSION = '([^']+)'/)?.[1];
+      const flag = `kata-reloaded-${live}`;
+      if (live && live !== APP_VERSION && !sessionStorage.getItem(flag)) {
+        sessionStorage.setItem(flag, '1');
+        location.reload();
+      }
+    })
+    .catch(() => {});
+}
 
 const Store = makeStore('kata-sb:');        // Visions (cartes du Kanban)
 const Templates = makeStore('kata-tpl:');   // Templates de Vision
