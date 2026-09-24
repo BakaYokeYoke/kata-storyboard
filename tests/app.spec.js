@@ -70,9 +70,9 @@ test('propriétés : ajout Number + Formula, valeur calculée et affichée sur l
     await page.fill('#newPropName', name);
     await page.locator('#nPop .row').filter({ has: page.locator('.name', { hasText: new RegExp(`^${type}$`) }) }).click();
   };
-  await add('Points', 'Number');
+  await add('Points', 'Nombre');
   page.once('dialog', d => d.accept('prop("Points") * 2'));
-  await add('Double', 'Formula');
+  await add('Double', 'Formule');
   const row = name => page.locator('#peekProps [data-prop-menu]', { hasText: name }).locator('xpath=following-sibling::*[1]');
   await row('Points').locator('input').fill('8');
   await row('Points').locator('input').press('Tab');
@@ -130,9 +130,9 @@ test('storyboard seul (?board=…) : verrouillé à l\'étape Lire, saisie enreg
 test('templates : édition dans la fenêtre centrée et création depuis le template', async ({ page }) => {
   await page.click('#newCaret');
   await page.locator('[data-more="tpl-habitude"]').click();
-  await page.locator('#nPop .row', { hasText: 'Edit' }).click();
+  await page.locator('#nPop .row', { hasText: 'Modifier' }).click();
   await expect(page.locator('#drawer')).toHaveClass(/center/);
-  await expect(page.locator('#peekBanner')).toContainText('editing a template');
+  await expect(page.locator('#peekBanner')).toContainText('Vous modifiez un template');
   await page.fill('#focusProcess', 'Routine du matin');
   await page.click('#drawerClose');
   await page.click('#newCaret');
@@ -170,4 +170,16 @@ test('suivi des indicateurs : ajouter une mesure met à jour la courbe', async (
   await expect(page.locator('[data-metric="outcome"] .mt-last')).toContainText('94 ✓');
   await page.click('#drawerClose');
   expect((await store(page, 'demo-marathon')).metrics.outcome.points).toHaveLength(7);
+});
+
+test('langue : bascule en anglais depuis les réglages, contenu saisi inchangé', async ({ page }) => {
+  await expect(page.locator('.n-add').first()).toHaveText(/Nouvelle page/);
+  await page.click('#pageSettings');
+  await page.locator('#nPop .row', { hasText: 'English' }).click();
+  await expect(page.locator('.n-add').first()).toHaveText(/New page/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(card(page, 'demo-marathon').locator('.tt')).toHaveText("Vivre en athlète d'endurance");   // titre saisi : jamais traduit
+  await card(page, 'demo-marathon').click();
+  await expect(page.locator('[data-tb="start"]')).toHaveText('Start the run');
+  await expect(page.locator('[data-field="target.outcome"]')).toHaveAttribute('placeholder', 'Target result, quantified…');
 });

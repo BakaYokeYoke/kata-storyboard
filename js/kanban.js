@@ -66,6 +66,7 @@ const ICONS = {
   subgroup:'<rect x="2.5" y="2.5" width="3" height="3" rx=".5"/><rect x="6.5" y="2.5" width="3" height="3" rx=".5"/><rect x="10.5" y="2.5" width="3" height="3" rx=".5"/><rect x="2.5" y="10.5" width="3" height="3" rx=".5"/><rect x="6.5" y="10.5" width="3" height="3" rx=".5"/><rect x="10.5" y="10.5" width="3" height="3" rx=".5"/><path d="M2.5 8h11"/>',
   timer:  '<circle cx="8" cy="9" r="5"/><path d="M8 9V6.5M6.5 2h3"/>',
   bolt:   '<path d="M9 1.5L3.5 9H8l-1 5.5L12.5 7H8z"/>',
+  gear:   '<circle cx="8" cy="8" r="2.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/>',
   cursor: '<path d="M3.5 2.5l9 4-4 1.3-1.3 4z"/><path d="M8.5 7.8l3.5 3.5"/>',
   flag:   '<path d="M3.5 14V2.5M3.5 3h8l-1.5 3 1.5 3h-8"/>',
   edit:   '<path d="M13 9v3.5a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1H7"/><path d="M11 2l3 3-5.5 5.5H5.5v-3z"/>',
@@ -173,7 +174,7 @@ const ageDays = b => Math.floor((Date.now() - (b.statusSince || b.updatedAt || D
 
 function challengeText(b) {
   if (!b.challengeResult) return '';
-  return `D'ici ${b.challengeBy || '…'}, ${b.challengeResult}.`;
+  return `${LANG === 'en' ? 'By' : "D'ici"} ${b.challengeBy || '…'}, ${b.challengeResult}.`;
 }
 
 // Nom du Kanban : modifiable, repris dans le fil d'Ariane et l'onglet du navigateur.
@@ -256,6 +257,7 @@ function renderKanban() {
     <header class="n-topbar">
       <span class="n-crumb">${icon('doc')}<span id="crumbTitle">${esc(boardTitle() || 'Sans titre')}</span></span>
       <span class="spacer"></span>
+      <button class="n-icon-btn" id="pageSettings" title="Réglages" aria-label="Réglages">${icon('gear')}</button>
       <button class="n-icon-btn" id="pageMore" title="Plus d'actions">${icon('dots')}</button>
     </header>
     <div class="n-page">
@@ -497,6 +499,7 @@ function renderKanban() {
     app.querySelectorAll('.n-card').forEach(c => c.classList.toggle('hidden-by-search', !!q && !c.innerText.toLowerCase().includes(q)));
   };
   $('#searchInput').onblur = e => { if (!e.target.value) $('#search').classList.remove('open'); };
+  $('#pageSettings').onclick = e => { e.stopPropagation(); openSettingsMenu(e.currentTarget); };
   $('#pageMore').onclick = e => {
     e.stopPropagation();
     const anchor = e.currentTarget;

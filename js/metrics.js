@@ -106,9 +106,9 @@ function drawMetricChart(el, d, label) {
   const pad = (y1 - y0) * 0.15; y0 -= pad; y1 += pad;
   const X = t => L + (t - x0) / (x1 - x0) * (W - L - R);
   const Y = v => T + (1 - (v - y0) / (y1 - y0)) * (H - T - B);
-  const fmtV = v => `${Number(v).toLocaleString('fr-FR', { maximumFractionDigits: 2 })}${d.unit ? ' ' + d.unit : ''}`;
-  const fmtD = t => new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-  const fmtN = v => Number(v).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+  const fmtV = v => `${Number(v).toLocaleString(LOCALE(), { maximumFractionDigits: 2 })}${d.unit ? ' ' + d.unit : ''}`;
+  const fmtD = t => new Date(t).toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short' });
+  const fmtN = v => Number(v).toLocaleString(LOCALE(), { maximumFractionDigits: 2 });
   const ticks = niceTicks(y0, y1);
   const xTicks = pts.length > 2 ? [pts[0].t, pts[Math.floor(pts.length / 2)].t, pts.at(-1).t] : pts.map(p => p.t);
   const last = pts.at(-1);
@@ -119,7 +119,7 @@ function drawMetricChart(el, d, label) {
   el.innerHTML = `
     <svg width="${W}" height="${H}" role="img" aria-label="${esc(label)} : ${pts.length} mesures, dernière ${esc(fmtV(last.value))}${hasTarget ? `, cible ${esc(fmtV(d.target))}` : ''}">
       ${d.unit ? `<text x="${L - 6}" y="10" class="mt-axis" text-anchor="start">${esc(d.unit)}</text>` : ''}
-      ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="mt-grid-line"/><text x="${L - 6}" y="${Y(v) + 4}" class="mt-axis" text-anchor="end">${v.toLocaleString('fr-FR')}</text>`).join('')}
+      ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="mt-grid-line"/><text x="${L - 6}" y="${Y(v) + 4}" class="mt-axis" text-anchor="end">${v.toLocaleString(LOCALE())}</text>`).join('')}
       ${[...new Set(xTicks)].map(t => `<text x="${X(t)}" y="${H - 6}" class="mt-axis" text-anchor="middle">${fmtD(t)}</text>`).join('')}
       ${hasTarget ? `<line x1="${L}" x2="${W - R}" y1="${Y(d.target)}" y2="${Y(d.target)}" class="mt-target"/>
         <text x="${W - R + 6}" y="${yTarget}" class="mt-target-label">Cible ${esc(fmtN(d.target))}</text>` : ''}
@@ -136,7 +136,7 @@ function drawMetricChart(el, d, label) {
     const p = pts.reduce((a, z) => Math.abs(X(z.t) - x) < Math.abs(X(a.t) - x) ? z : a);
     cross.setAttribute('x1', X(p.t)); cross.setAttribute('x2', X(p.t)); cross.setAttribute('visibility', 'visible');
     tip.hidden = false;
-    tip.innerHTML = `<b>${esc(fmtV(p.value))}</b><span>${esc(new Date(p.t).toLocaleDateString('fr-FR', { dateStyle: 'medium' }))}</span>${p.note ? `<span>${esc(p.note)}</span>` : ''}${hasTarget ? `<span>Écart à la cible : ${esc(fmtV(Math.round((p.value - d.target) * 100) / 100))}</span>` : ''}`;
+    tip.innerHTML = `<b>${esc(fmtV(p.value))}</b><span>${esc(new Date(p.t).toLocaleDateString(LOCALE(), { dateStyle: 'medium' }))}</span>${p.note ? `<span>${esc(p.note)}</span>` : ''}${hasTarget ? `<span>Écart à la cible : ${esc(fmtV(Math.round((p.value - d.target) * 100) / 100))}</span>` : ''}`;
     tip.style.left = Math.min(X(p.t) + 10, W - 170) + 'px';
     tip.style.top = Math.max(0, Y(p.value) - 20) + 'px';
   };

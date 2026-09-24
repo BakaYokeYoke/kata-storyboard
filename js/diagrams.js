@@ -76,7 +76,7 @@ function renderDiagram(side) {
 
 const activeObstacle = () => board.obstacles.find(o => o.focus && !o.done);
 const obstacleLabel = o => o.text.trim() || 'Obstacle sans titre';
-const shortDate = d => d ? new Date(d + 'T00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : '';
+const shortDate = d => d ? new Date(d + 'T00:00').toLocaleDateString(LOCALE(), { day: '2-digit', month: '2-digit' }) : '';
 
 function setActiveObstacle(id) {
   board.obstacles.forEach(o => o.focus = o.id === id);   // un seul obstacle travaillé à la fois

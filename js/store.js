@@ -182,7 +182,7 @@ async function openBackupsMenu(anchor) {
   openPop(anchor, [
     { header: 'Sauvegardes internes (14 dernières)' },
     ...(all.length ? all.map(b => ({
-      icon: 'clockUI', label: new Date(b.id).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }),
+      icon: 'clockUI', label: new Date(b.id).toLocaleString(LOCALE(), { dateStyle: 'medium', timeStyle: 'short' }),
       value: `${Object.keys(b.data).filter(k => k.startsWith(Store.prefix)).length} pages · ${label(b)}`,
       onClick: async () => {
         if (!confirm('Restaurer cette sauvegarde ? L\'état actuel est d\'abord sauvegardé, et ⌘Z annule.')) return;

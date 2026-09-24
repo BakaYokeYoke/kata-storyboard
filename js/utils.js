@@ -10,7 +10,7 @@ const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
   .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 const baseUrl = () => location.href.split('?')[0].split('#')[0];
 const boardUrl = id => `${baseUrl()}?board=${encodeURIComponent(id)}`;
-const fmtDate = ts => ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+const fmtDate = ts => ts ? new Date(ts).toLocaleString(LOCALE(), { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
 function toast(msg, { action, onAction, ms } = {}) {
   const t = $('#toast');

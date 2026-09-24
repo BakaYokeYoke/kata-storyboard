@@ -115,7 +115,7 @@ function runRecurringTemplates() {
       : t.repeat === 'weekly' ? days >= 7
       : today.slice(0, 7) !== last.slice(0, 7);
     if (!due) { if (!t.lastRepeat) Templates.patch(t.id, { lastRepeat: today }); return; }
-    const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+    const date = new Date().toLocaleDateString(LOCALE(), { day: '2-digit', month: '2-digit' });
     cloneDoc(t, { title: `${t.name || 'Untitled'} – ${date}`, status: t.status || 'incoming', group: t.group || GROUPS[0].key });
     Templates.patch(t.id, { lastRepeat: today });
   });

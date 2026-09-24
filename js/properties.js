@@ -52,7 +52,7 @@ function relDay(iso) {
   if (diff === -1) return 'hier';
   if (diff > 1 && diff < 7) return `dans ${diff} j`;
   if (diff < -1) return `il y a ${-diff} j`;
-  return new Date(iso + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return new Date(iso + 'T00:00').toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short' });
 }
 
 /* ---------- Runs récurrents et bouton « Set as Done » ---------- */
@@ -101,7 +101,7 @@ function streakData(b, cp) {
   return { cells, every, n, hits: cells.filter(c => c.done).length, current };
 }
 const streakHTML = (data, clickable = false) => `<span class="streak">${data.cells.map(c =>
-  `<i class="${c.done ? 'on' : ''} ${c.current ? 'cur' : ''}" ${clickable ? `data-streak-cell="${c.key}"` : ''} title="${new Date(c.start).toLocaleDateString('fr-FR')}${c.done ? ' · réussi' : ''}"></i>`).join('')}</span>`;
+  `<i class="${c.done ? 'on' : ''} ${c.current ? 'cur' : ''}" ${clickable ? `data-streak-cell="${c.key}"` : ''} title="${new Date(c.start).toLocaleDateString(LOCALE())}${c.done ? ' · réussi' : ''}"></i>`).join('')}</span>`;
 const DEFAULT_OPTIONS = {
   status: () => [{ id: uid(), label: 'Not started', color: 'gray' }, { id: uid(), label: 'In progress', color: 'blue' }, { id: uid(), label: 'Done', color: 'green' }],
   person: () => [{ id: uid(), label: 'Moi', color: 'gray' }],
@@ -133,8 +133,8 @@ function setPageVis(key, vis) {
 }
 
 const isEmptyVal = v => v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length) || (typeof v === 'number' && isNaN(v));
-const fmtDay = d => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
-const fmtDateTime = d => d.toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const fmtDay = d => d.toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtDateTime = d => d.toLocaleString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const toDate = s => s ? new Date(s.length === 10 ? s + 'T00:00' : s) : null;
 const optOf = (cp, oid) => cp.options?.find(o => o.id === oid);
 const optPillHTML = o => o ? `<span class="n-pill small c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>` : '';
@@ -345,7 +345,7 @@ function valueHTML(b, key, ctx = 'card') {
   const chip = (t, cls = '') => ctx === 'card' ? `<span class="n-chip ${cls}">${t}</span>` : t;
   const fmt = v => v instanceof Error ? `<span class="err">Erreur : ${esc(v.message)}</span>`
     : v instanceof Date ? esc(fmtDay(v)) : typeof v === 'boolean' ? (v ? '☑' : '☐')
-    : Array.isArray(v) ? esc(v.join(', ')) : typeof v === 'number' ? esc(v.toLocaleString('fr-FR')) : esc(v ?? '');
+    : Array.isArray(v) ? esc(v.join(', ')) : typeof v === 'number' ? esc(v.toLocaleString(LOCALE())) : esc(v ?? '');
   switch (key) {
     case 'status': return pill(statusDef(statusOf(b))).replace('n-pill', ctx === 'card' ? 'n-pill small' : 'n-pill');
     case 'group': { const g = groupDef(groupOf(b)); return `<span class="n-pill ${ctx === 'card' ? 'small' : ''} c-${g.color}" style="border-radius:4px">${esc(g.label)}</span>`; }
@@ -423,8 +423,8 @@ function computeAgg(cards, agg) {
   const nums = filled.map(v => typeof v === 'number' ? v : Number(v)).filter(x => !isNaN(x));
   const dates = filled.filter(v => v instanceof Date).map(d => d.getTime());
   const pct = n => cards.length ? Math.round(n / cards.length * 100) + ' %' : '—';
-  const r2 = x => (Math.round(x * 100) / 100).toLocaleString('fr-FR');
-  const short = t => new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  const r2 = x => (Math.round(x * 100) / 100).toLocaleString(LOCALE());
+  const short = t => new Date(t).toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short' });
   switch (agg.fn) {
     case 'count_values': return String(filled.reduce((n, v) => n + (Array.isArray(v) ? v.length : 1), 0));
     case 'count_unique': return String(new Set(filled.flat().map(v => v instanceof Date ? v.getTime() : String(v))).size);
