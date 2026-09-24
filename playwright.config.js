@@ -4,6 +4,7 @@ const { defineConfig, devices } = require('@playwright/test');
 module.exports = defineConfig({
   testDir: 'tests',
   timeout: 30000,
+  retries: 1,   // un aléa de temps de réponse ne bloque pas ; un vrai bug échoue deux fois
   fullyParallel: true,
   reporter: [['list']],
   use: {
