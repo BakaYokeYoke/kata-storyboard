@@ -117,15 +117,19 @@ function loadView() {
 function saveView(v) { try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch (e) {} }
 
 /* Menu contextuel générique (popover Notion) */
+let popReturnFocus = null;   // élément qui retrouve le focus à la fermeture du menu
 function openPop(anchor, items) {
-  closePop();
+  const returnTo = $('#nPop')?.contains(document.activeElement) ? popReturnFocus : document.activeElement;
+  closePop(false);
+  popReturnFocus = returnTo;
   const pop = document.createElement('div');
   pop.className = 'n-pop';
   pop.id = 'nPop';
+  pop.setAttribute('role', 'menu');
   pop.innerHTML = items.map((it, i) => {
     if (it.sep) return '<hr>';
     if (it.header) return `<div class="label">${esc(it.header)}</div>`;
-    return `<div class="row ${it.danger ? 'danger' : ''}" data-i="${i}">
+    return `<div class="row ${it.danger ? 'danger' : ''}" data-i="${i}" role="${it.switch !== undefined ? 'menuitemcheckbox' : it.checked !== undefined ? 'menuitemradio' : 'menuitem'}" tabindex="-1"${it.switch !== undefined ? ` aria-checked="${!!it.switch}"` : it.checked !== undefined ? ` aria-checked="${!!it.checked}"` : ''}>
       ${it.icon ? `<span class="ic">${icon(it.icon)}</span>` : ''}
       ${it.html || `<span class="name">${esc(it.label)}</span>`}
       ${it.value ? `<span class="val">${esc(it.value)}</span>` : ''}
@@ -146,10 +150,15 @@ function openPop(anchor, items) {
     if (!it.keepOpen) closePop();
     it.onClick?.(row);
   };
+  // Clavier : le premier élément actif reçoit le focus (sauf si le menu contient un champ de saisie)
+  if (!pop.querySelector('input')) (pop.querySelector('.row[role^="menuitem"]'))?.focus({ preventScroll: true });
 }
-function closePop() {
-  $('#nPop')?.remove();
+function closePop(restore = true) {
+  const pop = $('#nPop');
+  const hadFocus = pop?.contains(document.activeElement);
+  pop?.remove();
   document.querySelectorAll('.n-card-tools.open').forEach(t => t.classList.remove('open'));
+  if (restore && hadFocus && popReturnFocus?.isConnected) popReturnFocus.focus({ preventScroll: true });
 }
 
 function migrateVisions() {
@@ -260,7 +269,7 @@ function renderKanban() {
       <button class="n-icon-btn" id="pageSettings" title="Réglages" aria-label="Réglages">${icon('gear')}</button>
       <button class="n-icon-btn" id="pageMore" title="Plus d'actions">${icon('dots')}</button>
     </header>
-    <div class="n-page">
+    <main class="n-page" aria-label="Tableau">
       <div class="backup-banner" id="backupBanner" hidden></div>
       <h1 class="n-title" id="boardTitle" contenteditable="true" spellcheck="false" data-placeholder="Sans titre">${esc(boardTitle())}</h1>
       <div class="n-bar">
@@ -295,9 +304,9 @@ function renderKanban() {
           ${view.subgroups ? `<div class="n-newgroup" id="newGroup" style="grid-row:${rowNo}">${icon('plus')} New group</div>` : ''}
         </div>
       </div>
-    </div>
+    </main>
     <div class="scrim" id="scrim"></div>
-    <aside class="drawer" id="drawer" aria-hidden="true">
+    <aside class="drawer" id="drawer" aria-hidden="true" inert role="dialog" aria-modal="true" aria-labelledby="peekTitle">
       <div class="peek-top">
         <button class="n-icon-btn" id="drawerClose" title="Fermer (Échap)">${icon('close')}</button>
         <button class="n-icon-btn" id="peekExpand" title="Agrandir" hidden>${icon('expand')}</button>
@@ -559,7 +568,7 @@ function visionCard(b, props = [], agingStd) {
   if (agingStd && ageDays(b) > agingStd) chips.push(`<span class="n-chip aging" title="Dans cette colonne depuis ${ageDays(b)} j (standard ${agingStd} j)">⏳ ${ageDays(b)} j</span>`);
   flush();
   return `
-    <div class="n-card" draggable="true" data-id="${esc(b.id)}">
+    <div class="n-card" draggable="true" data-id="${esc(b.id)}" tabindex="0" aria-label="${esc(b.title || 'Sans titre')}">
       <div class="n-card-tools">
         <button data-card="rename" title="Renommer">${icon('pencil')}</button>
         <button data-card="more" title="Plus d'actions">${icon('dots')}</button>

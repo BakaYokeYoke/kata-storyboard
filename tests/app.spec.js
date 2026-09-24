@@ -183,3 +183,34 @@ test('langue : bascule en anglais depuis les réglages, contenu saisi inchangé'
   await expect(page.locator('[data-tb="start"]')).toHaveText('Start the run');
   await expect(page.locator('[data-field="target.outcome"]')).toHaveAttribute('placeholder', 'Target result, quantified…');
 });
+
+test('clavier : ouvrir une carte, fermer avec Échap, déplacer avec Maj + flèches', async ({ page }) => {
+  const c = card(page, 'demo-conseil');
+  await c.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#drawer')).toHaveClass(/open/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#drawer')).not.toHaveClass(/open/);
+  await expect(card(page, 'demo-conseil')).toBeFocused();
+  await page.keyboard.press('Shift+ArrowRight');
+  expect((await store(page, 'demo-conseil')).status).toBe('tomorrow');
+  await expect(card(page, 'demo-conseil')).toBeFocused();
+  // Menu : flèches puis Entrée
+  await card(page, 'demo-conseil').locator('[data-card="more"]').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#nPop .row').first()).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#nPop')).toHaveCount(0);
+});
+
+test('accessibilité : aucune violation grave (axe) sur le Kanban et la page ouverte', async ({ page }) => {
+  const AxeBuilder = require('@axe-core/playwright').default;
+  const serious = r => r.violations.filter(v => ['serious', 'critical'].includes(v.impact)).map(v => `${v.id} (${v.nodes.length})`);
+  // Les couleurs de colonnes reprennent exactement celles de Notion : contraste hors périmètre de ce test
+  const kanban = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+  expect(serious(kanban)).toEqual([]);
+  await card(page, 'demo-marathon').click();
+  await expect(page.locator('#drawer')).toHaveClass(/open/);
+  const peekScan = await new AxeBuilder({ page }).include('#drawer').disableRules(['color-contrast']).analyze();
+  expect(serious(peekScan)).toEqual([]);
+});

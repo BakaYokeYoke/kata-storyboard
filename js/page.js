@@ -444,12 +444,17 @@ function openPeek(kind, id, { isNew = false } = {}) {
     drawer.classList.add('open');
   });
   drawer.setAttribute('aria-hidden', 'false');
+  drawer.inert = false;
+  peek.returnFocus = document.activeElement;
+  if (!isNew) setTimeout(() => $('#drawerClose')?.focus({ preventScroll: true }), 60);
 }
 
 function closePeek() {
   if (!peek) return;
   const { kind, id, isNew } = peek;
   peek = null;
+  const focusWasInside = $('#drawer').contains(document.activeElement);
+  $('#drawer').inert = true;   // fermé : plus aucun élément focusable à l'intérieur
   closeIconPicker();
   $('#scrim').classList.remove('open');
   $('#drawer').classList.remove('open');
@@ -464,5 +469,12 @@ function closePeek() {
   }
   board = null;
   // Après l'animation de fermeture : on vide le tiroir et on rafraîchit les cartes.
-  setTimeout(() => { if (!peek) { SB_ROOT = null; renderKanban(); } }, 300);
+  setTimeout(() => {
+    if (peek) return;
+    SB_ROOT = null;
+    renderKanban();
+    // Le focus revient sur la carte d'origine (recréée par le rendu)
+    const back = document.querySelector(`.n-card[data-id="${CSS.escape(id)}"]`);
+    if (back && (focusWasInside || document.activeElement === document.body)) back.focus({ preventScroll: true });
+  }, 300);
 }

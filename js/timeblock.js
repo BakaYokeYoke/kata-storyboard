@@ -54,7 +54,7 @@ function renderTimeblock() {
           const state = i < idx ? 'done' : i === idx ? 'active' : 'locked';
           const mark = state === 'done' ? '✓' : state === 'active' ? '●' : '🔒';
           return `${i ? `<span class="link ${i <= idx ? 'done' : ''}"></span>` : ''}
-            <span class="st ${state}" ${state === 'locked' ? 'aria-disabled="true" title="Verrouillé"' : ''}><span class="mark">${mark}</span>${i + 1}. ${st.label}</span>`;
+            <span class="st ${state}" ${state === 'locked' ? 'aria-disabled="true" title="Verrouillé"' : ''}${state === 'active' ? ' aria-current="step"' : ''}><span class="mark">${mark}</span>${i + 1}. ${st.label}</span>`;
         }).join('')}
       </div>
       <span class="tb-spacer"></span>
