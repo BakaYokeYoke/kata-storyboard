@@ -502,6 +502,20 @@
   .peek-props .val { justify-self: stretch; border: none; background: none; text-align: left; padding: 4px 6px; border-radius: 4px; margin-left: -6px; }
   .peek-props .val:hover { background: var(--n-hover); }
   .peek-props .v { color: var(--n-ink); padding: 5px 0; }
+  .peek-props .k.custom { cursor: pointer; border-radius: 4px; margin-left: -4px; padding-left: 4px; }
+  .peek-props .k.custom:hover { background: var(--n-hover); }
+  .peek-props .k .kname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .peek-props .pv { border: none; outline: none; font: inherit; font-size: 14px; color: var(--n-ink); background: transparent; padding: 4px 6px; margin-left: -6px; border-radius: 4px; width: 100%; min-width: 0; }
+  .peek-props .pv:hover, .peek-props .pv:focus { background: var(--n-hover); }
+  .peek-props .pv::placeholder, .peek-props .empty { color: rgba(55,53,47,.35); }
+  .peek-props .pv[type=date] { width: auto; justify-self: start; }
+  .peek-props .pv-check { padding: 4px 0; display: inline-flex; }
+  .peek-props .pv-check input { width: 16px; height: 16px; accent-color: #2383e2; }
+  .peek-props .val .pills { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .add-prop { grid-column: 1 / -1; justify-self: start; border: none; background: none; color: rgba(55,53,47,.45); font: inherit; font-size: 14px; padding: 5px 6px; margin-left: -6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: center; }
+  .add-prop:hover { background: var(--n-hover); color: rgba(55,53,47,.8); }
+  .n-pop input.pop-input { width: 100%; font: inherit; font-size: 14px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; background: rgba(242,241,238,.6); }
+  .n-pop input.pop-input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
   .drawer iframe { flex: 1; border: 0; width: 100%; border-top: 1px solid var(--n-line); }
 
   /* Sélecteur d'icône (Emoji / Icons / Upload) */
@@ -671,7 +685,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.8';
+const APP_VERSION = '2026-09-24.9';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -858,6 +872,9 @@ const ICONS = {
   expand: '<path d="M9.5 2.5h4v4M13.5 2.5L9 7M6.5 13.5h-4v-4M2.5 13.5L7 9"/>',
   shuffle:'<path d="M2 4.5h2.5c3 0 4 7 7 7H14M12 9.5l2 2-2 2M2 11.5h2.5c1 0 1.8-.8 2.4-1.8M9.1 6.3c.6-1 1.4-1.8 2.4-1.8H14M12 2.5l2 2-2 2"/>',
   smile:  '<circle cx="8" cy="8" r="6"/><path d="M5.5 9.5c.6 1 1.4 1.5 2.5 1.5s1.9-.5 2.5-1.5"/><circle cx="6" cy="6.5" r=".6" fill="currentColor"/><circle cx="10" cy="6.5" r=".6" fill="currentColor"/>',
+  checkbox:'<rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><path d="M5.3 8.2l1.9 1.9 3.5-4"/>',
+  link:   '<path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/>',
+  multi:  '<path d="M6 4.5h7.5M6 8h7.5M6 11.5h7.5"/><circle cx="3" cy="4.5" r=".9" fill="currentColor"/><circle cx="3" cy="8" r=".9" fill="currentColor"/><circle cx="3" cy="11.5" r=".9" fill="currentColor"/>',
   db:     '<ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>',
 };
 const icon = name => `<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
@@ -873,7 +890,10 @@ function loadView() {
     noCreate: [],                                             // colonnes où l'on ne crée pas de carte
     unsplit: ['wip'],                                         // colonnes non séparées par sous-groupe
   };
-  try { return { ...base, ...JSON.parse(localStorage.getItem(VIEW_KEY) || '{}') }; } catch (e) { return base; }
+  let v;
+  try { v = { ...base, ...JSON.parse(localStorage.getItem(VIEW_KEY) || '{}') }; } catch (e) { v = base; }
+  v.props = v.props.filter(k => allProps().some(p => p.key === k));
+  return v;
 }
 function saveView(v) { try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch (e) {} }
 
@@ -935,7 +955,36 @@ const PROPS = [
   { key: 'status',      label: 'Statut',              icon: 'status' },
   { key: 'group',       label: 'Pro/Perso',           icon: 'select' },
 ];
-const propDef = k => PROPS.find(p => p.key === k);
+// Propriétés ajoutées par l'utilisateur (communes à toutes les cartes, valeur propre à chaque carte)
+const PROP_TYPES = {
+  text:     { label: 'Text',         icon: 'text' },
+  number:   { label: 'Number',       icon: 'hash' },
+  select:   { label: 'Select',       icon: 'select' },
+  multi:    { label: 'Multi-select', icon: 'multi' },
+  date:     { label: 'Date',         icon: 'calendar' },
+  checkbox: { label: 'Checkbox',     icon: 'checkbox' },
+  url:      { label: 'URL',          icon: 'link' },
+};
+const CUSTOM_KEY = 'kata-props';
+function loadCustomProps() { try { return JSON.parse(localStorage.getItem(CUSTOM_KEY)) || []; } catch (e) { return []; } }
+let CUSTOM_PROPS = loadCustomProps();
+function saveCustomProps() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM_PROPS)); } catch (e) {} }
+const customDef = k => CUSTOM_PROPS.find(p => p.key === k);
+const allProps = () => [...PROPS, ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon }))];
+const propDef = k => allProps().find(p => p.key === k);
+
+// Pastille ou texte court d'une valeur de propriété personnalisée (vide → '')
+function customValueHTML(cp, v, forCard = false) {
+  if (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)) return '';
+  const chip = t => forCard ? `<span class="n-chip">${t}</span>` : t;
+  const opt = id => cp.options?.find(o => o.id === id);
+  const optPill = o => o ? `<span class="n-pill small c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>` : '';
+  if (cp.type === 'checkbox') return v ? chip(`☑ ${esc(cp.name)}`) : '';
+  if (cp.type === 'date') return chip(esc(new Date(v + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })));
+  if (cp.type === 'select') return optPill(opt(v));
+  if (cp.type === 'multi') return v.map(id => optPill(opt(id))).join('');
+  return chip(esc(v));
+}
 
 function orderedStatuses(view) {
   const known = view.order.map(statusDef).filter(Boolean);
@@ -1298,7 +1347,7 @@ function renderPanel() {
       ${row('subgroup', 'Sub-group', view.subgroups ? 'Pro/Perso' : 'None', 'subgroup')}`,
 
     props: () => {
-      const hidden = PROPS.filter(p => !view.props.includes(p.key));
+      const hidden = allProps().filter(p => !view.props.includes(p.key));
       return `
         ${head('Property visibility', true)}
         <input class="vp-search" id="vpSearch" placeholder="Search for a property…" autocomplete="off">
@@ -1388,7 +1437,7 @@ function renderPanel() {
     if (d.filterStatus) view.statuses = toggleIn(view.statuses, d.filterStatus);
     if (d.sort) view.sort = d.sort;
     if (d.act === 'hideAllProps') view.props = [];
-    if (d.act === 'showAllProps') view.props = [...view.props, ...PROPS.map(p => p.key).filter(k => !view.props.includes(k))];
+    if (d.act === 'showAllProps') view.props = [...view.props, ...allProps().map(p => p.key).filter(k => !view.props.includes(k))];
     if (d.act === 'clearFilters') { view.groups = []; view.statuses = []; }
     if (d.act === 'sortDir') view.sortDir = view.sortDir === 'asc' ? 'desc' : 'asc';
     if (d.act === 'hideAllCols') view.hidden = STATUSES.map(st => st.key);
@@ -1450,6 +1499,8 @@ function visionCard(b, props = []) {
     if (k === 'step' && stepLabel) chips.push(`<span class="n-chip">${stepLabel}</span>`);
     if (k === 'status') chips.push(pill(statusDef(statusOf(b))).replace('n-pill', 'n-pill small'));
     if (k === 'group') { const g = groupDef(groupOf(b)); chips.push(`<span class="n-pill small c-${g.color}" style="border-radius:4px">${g.label}</span>`); }
+    const cp = customDef(k);
+    if (cp) { const html = customValueHTML(cp, b.props?.[k], true); if (html) chips.push(html); }
   });
   flush();
   return `
@@ -1870,9 +1921,99 @@ function openPeek(kind, id, { isNew = false } = {}) {
   const renderProps = () => {
     const d = S.get(id);
     const g = groupDef(groupOf(d));
+    const vals = d.props || {};
+    const editor = cp => {
+      const v = vals[cp.key];
+      if (cp.type === 'checkbox') return `<label class="pv-check"><input type="checkbox" data-pv="${cp.key}" ${v ? 'checked' : ''}></label>`;
+      if (cp.type === 'select' || cp.type === 'multi') return `<button class="val" data-pv-select="${cp.key}"><span class="pills">${customValueHTML(cp, v) || '<span class="empty">Empty</span>'}</span></button>`;
+      const type = { number: 'number', date: 'date', url: 'url' }[cp.type] || 'text';
+      return `<input class="pv" type="${type}" data-pv="${cp.key}" value="${esc(v ?? '')}" placeholder="Empty">`;
+    };
     $('#peekProps').innerHTML = `
       <span class="k">${icon('status')} Status</span><button class="val" id="propStatus">${pill(statusDef(statusOf(d)))}</button>
-      <span class="k">${icon('select')} Pro/Perso</span><button class="val" id="propGroup"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>`;
+      <span class="k">${icon('select')} Pro/Perso</span><button class="val" id="propGroup"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>
+      ${CUSTOM_PROPS.map(cp => `
+        <span class="k custom" data-prop-menu="${cp.key}" title="Options de la propriété">${icon(PROP_TYPES[cp.type].icon)}<span class="kname">${esc(cp.name)}</span></span>
+        ${editor(cp)}`).join('')}
+      <button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
+
+    const setVal = (key, value) => { const cur = S.get(id); S.patch(id, { props: { ...(cur.props || {}), [key]: value } }); };
+    $('#peekProps').querySelectorAll('input[data-pv]').forEach(inp => {
+      if (inp.type === 'checkbox') inp.onchange = () => setVal(inp.dataset.pv, inp.checked);
+      else inp.oninput = () => setVal(inp.dataset.pv, inp.value);
+    });
+    // Select / Multi-select : liste des options + création
+    $('#peekProps').querySelectorAll('[data-pv-select]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      const cp = customDef(btn.dataset.pvSelect);
+      const openList = () => {
+        const cur = (S.get(id).props || {})[cp.key];
+        const has = oid => cp.type === 'multi' ? (cur || []).includes(oid) : cur === oid;
+        openPop(btn, [
+          { html: '<input class="pop-input" id="optInput" placeholder="Rechercher ou créer une option…" autocomplete="off">', keepOpen: true },
+          ...(cp.options.length ? [{ header: 'Options' }] : []),
+          ...cp.options.map(o => ({ html: `<span class="n-pill c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>`, checked: has(o.id), keepOpen: cp.type === 'multi', onClick: () => {
+            if (cp.type === 'multi') { const list = (S.get(id).props || {})[cp.key] || []; setVal(cp.key, has(o.id) ? list.filter(x => x !== o.id) : [...list, o.id]); renderProps(); openList(); }
+            else { setVal(cp.key, has(o.id) ? null : o.id); renderProps(); }
+          } })),
+        ]);
+        const inp = $('#optInput');
+        inp.focus();
+        inp.oninput = () => {
+          const q = inp.value.trim().toLowerCase();
+          document.querySelectorAll('#nPop .row').forEach((r, i) => { if (i > 0 && r.querySelector('.n-pill')) r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+        };
+        inp.onkeydown = ev => {
+          if (ev.key !== 'Enter' || !inp.value.trim()) return;
+          const label = inp.value.trim();
+          let o = cp.options.find(x => x.label.toLowerCase() === label.toLowerCase());
+          if (!o) {
+            o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] };
+            cp.options.push(o); saveCustomProps();
+          }
+          const list = (S.get(id).props || {})[cp.key] || [];
+          setVal(cp.key, cp.type === 'multi' ? [...new Set([...list, o.id])] : o.id);
+          renderProps();
+          if (cp.type === 'multi') openList(); else closePop();
+        };
+      };
+      openList();
+    });
+    // Menu d'une propriété : renommer / supprimer
+    $('#peekProps').querySelectorAll('[data-prop-menu]').forEach(k => k.onclick = e => {
+      e.stopPropagation();
+      const cp = customDef(k.dataset.propMenu);
+      openPop(k, [
+        { header: PROP_TYPES[cp.type].label },
+        { icon: 'pencil', label: 'Renommer', onClick: () => {
+          const name = prompt('Nom de la propriété', cp.name);
+          if (name && name.trim()) { cp.name = name.trim(); saveCustomProps(); renderProps(); }
+        } },
+        { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
+          if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les cartes ?`)) return;
+          CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); renderProps();
+        } },
+      ]);
+    });
+    // Ajouter une propriété : nom + type
+    $('#addProp').onclick = e => {
+      e.stopPropagation();
+      let typed = '';   // le menu se ferme avant l'appel : on garde la saisie au fil de la frappe
+      const create = type => {
+        const name = typed.trim() || PROP_TYPES[type].label;
+        CUSTOM_PROPS.push({ key: 'p-' + uid() + uid(), name, type, options: [] });
+        saveCustomProps(); renderProps();
+      };
+      openPop(e.currentTarget, [
+        { html: '<input class="pop-input" id="newPropName" placeholder="Nom de la propriété" autocomplete="off">', keepOpen: true },
+        { header: 'Type' },
+        ...Object.entries(PROP_TYPES).map(([k, t]) => ({ icon: t.icon, label: t.label, onClick: () => create(k) })),
+      ]);
+      const inp = $('#newPropName');
+      inp.focus();
+      inp.oninput = () => { typed = inp.value; };
+      inp.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); create('text'); } };
+    };
     $('#propStatus').onclick = e => {
       e.stopPropagation();
       openPop(e.currentTarget, STATUSES.map(st => ({ html: pill(st), checked: statusOf(S.get(id)) === st.key, onClick: () => { S.patch(id, { status: st.key }); renderProps(); } })));
@@ -2037,7 +2178,7 @@ function seedDemo() {
    ============================================================ */
 let board, saveTimer;
 // Champs édités par le Kanban / le tiroir, jamais par l'éditeur de storyboard.
-const SHELL_FIELDS = ['title', 'icon', 'status', 'group', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
+const SHELL_FIELDS = ['title', 'icon', 'status', 'group', 'props', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
 
 function scheduleSave() {
   if ($('#status')) $('#status').textContent = '…';
