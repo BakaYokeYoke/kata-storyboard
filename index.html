@@ -229,10 +229,7 @@
   .frame.readonly [data-act="init"], .frame.readonly .blk-tools, .frame.readonly .conn .side button { display: none !important; }
   .frame.readonly ::placeholder { color: transparent !important; }
   section.experiments.spot { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; scroll-margin-top: 130px; }
-  body.in-drawer { overflow: hidden; }
-  body.in-drawer .sheet { min-height: 0; }
-  body.in-drawer section.experiments.spot { scroll-margin-top: 170px; }
-  body.in-drawer .tb { will-change: transform; }
+
 
   /* Block diagrams As Is / To Be */
   .diagram { border-top: 1px dashed #d5d8de; padding: 8px 0 4px; min-width: 0; }
@@ -546,7 +543,12 @@
   .add-prop:hover { background: var(--n-hover); color: rgba(55,53,47,.8); }
   .n-pop input.pop-input { width: 100%; font: inherit; font-size: 14px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; background: rgba(242,241,238,.6); }
   .n-pop input.pop-input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
-  .drawer iframe { flex: none; border: 0; width: 100%; min-height: 400px; border-top: 1px solid var(--n-line); display: block; }
+  .drawer .sb-root { flex: none; border-top: 1px solid var(--n-line); padding-top: 4px; }
+  /* Le storyboard garde sa typographie propre (Helvetica), même dans la page Kanban */
+  .sb-root { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; color: var(--ink); }
+  .drawer .sb-root .tb { top: 42px; }
+  .drawer .sb-root .sheet { min-height: 0; }
+  .drawer .sb-root section.experiments.spot { scroll-margin-top: 170px; }
 
   /* Sélecteur d'icône (Emoji / Icons / Upload) */
   .ip { position: fixed; z-index: 45; width: 408px; max-width: calc(100vw - 16px); background: #fff; border-radius: 10px; box-shadow: var(--n-shadow-pop, rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px); font-size: 14px; color: rgb(55,53,47);
@@ -725,7 +727,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.13';
+const APP_VERSION = '2026-09-24.14';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -759,7 +761,6 @@ const boardUrl = id => `${baseUrl()}?board=${encodeURIComponent(id)}`;
 const fmtDate = ts => ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
 function toast(msg) {
-  if (inDrawer && window.parent !== window && window.parent.toast) return window.parent.toast(msg);
   const t = $('#toast');
   t.textContent = msg;
   t.classList.add('show');
@@ -832,7 +833,9 @@ function fitWidth(el) {
    Routage : ?board=<id> → storyboard, sinon → liste
    ============================================================ */
 const params = new URLSearchParams(location.search);
-const inDrawer = params.has('drawer');
+// Le storyboard peut être affiché seul (?board=…) ou dans le tiroir du Kanban (même page).
+let inDrawer = params.has('drawer');
+let SB_ROOT = null;   // conteneur où le storyboard est dessiné
 // L'éditeur de storyboard sert aux Visions comme aux templates : seul le stockage change.
 let DocStore = Store;
 
@@ -1509,7 +1512,7 @@ function renderKanban() {
         <input class="peek-title" id="peekTitle" placeholder="Sans titre" autocomplete="off">
         <div class="peek-props" id="peekProps"></div>
       </div>
-      <iframe id="drawerFrame" title="Storyboard"></iframe>
+      <div class="sb-root" id="sbRoot"></div>
     </aside>`;
 
   const app = $('#app');
@@ -2702,9 +2705,6 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
 }
 
 // Les modifications faites dans le storyboard (iframe) mettent à jour les propriétés affichées.
-addEventListener('storage', e => {
-  if (peek?.render && e.key && e.key.endsWith(':' + peek.id)) peek.render();
-});
 
 /* ---------- Tiroir (side peek) / fenêtre centrée pour les templates ---------- */
 let peek = null;   // { kind: 'vision' | 'template', id }
@@ -2773,7 +2773,7 @@ function openPeek(kind, id, { isNew = false } = {}) {
 
   const remove = () => {
     if (!confirm(`Supprimer ${isTpl ? 'ce template' : 'cette page'} ? Cette action est définitive.`)) return;
-    $('#drawerFrame').src = 'about:blank';   // coupe toute sauvegarde en attente dans l'iframe
+    cancelBoardSave();   // pas de sauvegarde en attente sur une page supprimée
     S.remove(id);
     closePeek();
   };
@@ -2788,21 +2788,13 @@ function openPeek(kind, id, { isNew = false } = {}) {
     ]);
   };
 
-  // Un seul défilement : l'iframe prend la hauteur de son contenu, le tiroir défile ;
-  // le bandeau Lire → Run → Kata reste collé sous la barre du haut.
-  const frame = $('#drawerFrame'), drawer = $('#drawer');
+  // Le storyboard est dessiné directement dans le tiroir (un seul défilement,
+  // bandeau Lire → Run → Kata collé sous la barre du haut).
+  const drawer = $('#drawer');
   drawer.scrollTop = 0;
-  frame.style.height = '';
-  frame.onload = () => {
-    const doc = frame.contentDocument, app = doc?.getElementById('app');
-    if (!app) return;
-    const fit = () => { frame.style.height = Math.ceil(app.getBoundingClientRect().height) + 'px'; stickTimeblock(); };
-    new ResizeObserver(fit).observe(app);
-    fit();
-  };
-  drawer.onscroll = stickTimeblock;
-
-  $('#drawerFrame').src = `${baseUrl()}?${isTpl ? 'template' : 'board'}=${encodeURIComponent(id)}&drawer=1&v=${APP_VERSION}`;
+  inDrawer = true;
+  DocStore = isTpl ? Templates : Store;
+  renderBoard(id, $('#sbRoot'));
   // Le tiroir peut venir d'être recréé (nouvelle carte) : on laisse le navigateur peindre
   // l'état fermé avant d'ouvrir, pour que l'animation se joue toujours.
   void drawer.offsetWidth;
@@ -2813,15 +2805,6 @@ function openPeek(kind, id, { isNew = false } = {}) {
   drawer.setAttribute('aria-hidden', 'false');
 }
 
-function stickTimeblock() {
-  const frame = $('#drawerFrame'), drawer = $('#drawer');
-  const tb = frame?.contentDocument?.getElementById('tb');
-  if (!tb) return;
-  const barH = drawer.querySelector('.peek-top').offsetHeight;
-  const offset = drawer.scrollTop + barH - frame.offsetTop;
-  tb.style.transform = offset > 0 ? `translateY(${Math.min(offset, frame.offsetHeight - tb.offsetHeight)}px)` : '';
-}
-
 function closePeek() {
   if (!peek) return;
   const { kind, id, isNew } = peek;
@@ -2830,15 +2813,17 @@ function closePeek() {
   $('#scrim').classList.remove('open');
   $('#drawer').classList.remove('open');
   $('#drawer').setAttribute('aria-hidden', 'true');
+  clearInterval(tbInterval);
   // Comme dans Notion : une nouvelle carte sans titre n'est pas créée.
   if (isNew && kind === 'vision' && !(Store.get(id)?.title || '').trim()) {
-    $('#drawerFrame').src = 'about:blank';   // coupe toute sauvegarde en attente dans l'iframe
+    cancelBoardSave();
     Store.remove(id);
-    setTimeout(renderKanban, 250);
-    return;
+  } else {
+    flushBoardSave();
   }
-  // Laisse l'iframe terminer sa sauvegarde, puis rafraîchit les cartes.
-  setTimeout(() => { $('#drawerFrame').src = 'about:blank'; renderKanban(); }, 350);
+  board = null;
+  // Après l'animation de fermeture : on vide le tiroir et on rafraîchit les cartes.
+  setTimeout(() => { if (!peek) { SB_ROOT = null; renderKanban(); } }, 300);
 }
 
 /* ============================================================
@@ -2948,26 +2933,34 @@ let board, saveTimer;
 // Champs édités par le Kanban / le tiroir, jamais par l'éditeur de storyboard.
 const SHELL_FIELDS = ['title', 'icon', 'status', 'group', 'props', 'name', 'isDefault', 'repeat', 'lastRepeat', 'order'];
 
+function saveBoardNow() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  if (!board) return;
+  const stored = DocStore.get(board.id);
+  if (stored) SHELL_FIELDS.forEach(k => { if (k in stored) board[k] = stored[k]; else delete board[k]; });
+  DocStore.save(board);
+  if ($('#status')) $('#status').textContent = 'Enregistré';
+  // Dans le tiroir, les propriétés calculées depuis le storyboard se mettent à jour
+  if (typeof peek !== 'undefined' && peek?.render && peek.id === board.id) peek.render();
+}
 function scheduleSave() {
   if ($('#status')) $('#status').textContent = '…';
   if ($('#tbReminder')) updateReminder();
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const stored = DocStore.get(board.id);
-    if (stored) SHELL_FIELDS.forEach(k => { if (k in stored) board[k] = stored[k]; else delete board[k]; });
-    DocStore.save(board);
-    if ($('#status')) $('#status').textContent = 'Enregistré';
-  }, 300);
+  saveTimer = setTimeout(saveBoardNow, 300);
 }
+const flushBoardSave = () => { if (saveTimer) saveBoardNow(); };
+const cancelBoardSave = () => { clearTimeout(saveTimer); saveTimer = null; };
 
-function renderBoard(id) {
+function renderBoard(id, root = $('#app')) {
   // Un id inconnu crée le storyboard : dupliquer un embed et changer l'id suffit.
+  SB_ROOT = root;
   board = migrate(DocStore.get(id) || newBoard(id));
-  document.title = board.title || 'Kata Storyboard';
-  document.body.classList.toggle('in-drawer', inDrawer);
+  if (!inDrawer) document.title = board.title || 'Kata Storyboard';
 
   const showToolbar = isTplDoc() || !inDrawer;
-  $('#app').innerHTML = `
+  SB_ROOT.innerHTML = `
     ${showToolbar ? `<div class="toolbar">
       ${inDrawer ? '' : `
         <a href="${esc(baseUrl())}">☰ Kanban</a>
@@ -3032,7 +3025,7 @@ function renderBoard(id) {
     </div>`;
 
   // Champs simples (data-field accepte un chemin : "target.outcome")
-  $('#app').querySelectorAll('[data-field]').forEach(el => {
+  SB_ROOT.querySelectorAll('[data-field]').forEach(el => {
     el.value = getPath(board, el.dataset.field) || '';
     el.oninput = () => {
       setPath(board, el.dataset.field, el.value);
@@ -3041,13 +3034,12 @@ function renderBoard(id) {
       scheduleSave();
     };
   });
-  $('#app').querySelectorAll('input.blank').forEach(fitWidth);
-  $('#app').querySelectorAll('.head textarea, .metric textarea').forEach(autoGrow);
+  SB_ROOT.querySelectorAll('input.blank').forEach(fitWidth);
+  SB_ROOT.querySelectorAll('.head textarea, .metric textarea').forEach(autoGrow);
 
   const rules = $('#rules');
   $('#helpBtn').onclick = e => { e.stopPropagation(); rules.hidden = !rules.hidden; };
   rules.onclick = e => e.stopPropagation();
-  document.onclick = () => { rules.hidden = true; };
 
   $('#addObs').onclick = () => {
     board.obstacles.push({ id: uid(), text: '', done: false, focus: false });
@@ -3065,6 +3057,9 @@ function renderBoard(id) {
   // Premier affichage d'un nouvel id : on l'enregistre pour qu'il apparaisse dans la liste.
   if (!DocStore.get(id)) DocStore.save(board);
 }
+
+// Ferme l'aide du Challenge au clic ailleurs (sans écraser les autres gestionnaires de la page)
+document.addEventListener('click', () => { const r = $('#rules'); if (r) r.hidden = true; });
 
 /* ============================================================
    Time block : Lire → Run → Kata
@@ -3192,10 +3187,10 @@ function tbAction(act) {
   scheduleSave();
   renderTimeblock();
   if (board.session.step === 'kata') setTimeout(() => $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  else if (inDrawer && window.frameElement) {
-    const drawer = window.frameElement.closest('.drawer');
+  else if (inDrawer && SB_ROOT?.closest('.drawer')) {
+    const drawer = SB_ROOT.closest('.drawer');
     const top = drawer.querySelector('.peek-top')?.offsetHeight || 0;
-    if (drawer.scrollTop > window.frameElement.offsetTop - top) drawer.scrollTo({ top: window.frameElement.offsetTop - top, behavior: 'smooth' });
+    if (drawer.scrollTop > SB_ROOT.offsetTop - top) drawer.scrollTo({ top: SB_ROOT.offsetTop - top, behavior: 'smooth' });
   }
   else scrollTo({ top: 0, behavior: 'smooth' });
 }
