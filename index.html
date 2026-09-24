@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kata Storyboard</title>
+<style>
+  :root {
+    --frame: #1f4fb5;
+    --frame-soft: #a3aedb;
+    --ink: #111;
+    --muted: #6b6f76;
+    --line: #111;
+    --paper: #fff;
+    --bg: #fff;
+    --hover: #f2f4fa;
+    --accent: #1f4fb5;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
+  button, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* ---------- Barre d'outils ---------- */
+  .toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 6px 10px; font-size: 12px; color: var(--muted);
+  }
+  .toolbar .spacer { flex: 1; }
+  .toolbar a, .toolbar button {
+    color: var(--muted); text-decoration: none; background: none; border: 1px solid transparent;
+    border-radius: 4px; padding: 3px 7px;
+  }
+  .toolbar a:hover, .toolbar button:hover { background: var(--hover); color: var(--ink); }
+  .status { min-width: 70px; text-align: right; }
+
+  /* ---------- Storyboard ---------- */
+  .frame {
+    margin: 0 10px 10px;
+    border: 3px solid var(--frame);
+    padding: 10px;
+    background: var(--frame-soft);
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  .sheet {
+    background: var(--paper);
+    border: 3px solid var(--frame);
+    padding: 0 14px 14px;
+    min-height: calc(100vh - 80px);
+    display: flex; flex-direction: column;
+  }
+  .head {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 3px solid var(--line);
+  }
+  .head > div { padding: 14px 16px 12px; display: flex; gap: 8px; align-items: baseline; }
+  .head > div + div { border-left: 3px solid var(--line); margin: 8px 0; padding-top: 6px; padding-bottom: 4px; }
+  .head > div:first-child { margin: 8px 0; padding-top: 6px; padding-bottom: 4px; }
+  .head label { font-weight: 700; font-size: 19px; white-space: nowrap; }
+  .head input { flex: 1; min-width: 0; border: none; outline: none; font-size: 16px; padding: 2px 0; background: transparent; }
+
+  .body {
+    flex: 1;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 14px;
+  }
+  .col { padding: 6px 16px; display: flex; flex-direction: column; min-width: 0; }
+  .col + .col { border-left: 3px solid var(--line); }
+  h2 { font-size: 19px; line-height: 1.2; margin: 4px 0 10px; font-weight: 700; }
+  .achieve { display: flex; align-items: center; gap: 6px; font-weight: 700; margin: -4px 0 12px; font-size: 15px; }
+  .achieve input { border: none; border-bottom: 2px solid var(--line); outline: none; padding: 2px 2px; font-weight: 400; background: transparent; }
+
+  textarea.free {
+    flex: 1; width: 100%; min-height: 220px; resize: none; border: none; outline: none;
+    line-height: 1.5; background: transparent; padding: 2px 0;
+  }
+  textarea.free::placeholder, .head input::placeholder, .obs input::placeholder, .exp textarea::placeholder { color: #b4b7bd; }
+
+  .right { padding: 0; }
+  .right > section { padding: 6px 16px; }
+  .right > section.experiments { flex: 1.3; }
+  .right > section.obstacles { flex: 1; border-top: 3px solid var(--line); margin-left: 8px; padding-left: 8px; padding-top: 14px; }
+
+  /* Experimenting record */
+  .exp { border: 1px solid #d5d8de; border-radius: 4px; margin-bottom: 8px; background: #fff; }
+  .exp-head { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-bottom: 1px solid #e6e8ec; background: #fafbfc; font-size: 12px; }
+  .exp-head .num { font-weight: 700; }
+  .exp-head input { border: none; outline: none; background: transparent; font-size: 12px; min-width: 0; }
+  .exp-head input.step { flex: 1; }
+  .exp-grid { display: grid; grid-template-columns: 1fr; }
+  .exp-field { display: grid; grid-template-columns: 70px 1fr; border-top: 1px solid #eef0f3; }
+  .exp-field:first-child { border-top: none; }
+  .exp-field span { font-size: 11px; color: var(--muted); padding: 5px 6px; text-transform: uppercase; letter-spacing: .02em; }
+  .exp textarea { border: none; outline: none; resize: none; padding: 4px 6px; min-height: 26px; line-height: 1.4; background: transparent; width: 100%; }
+
+  .icon { background: none; border: none; color: var(--muted); padding: 2px 5px; border-radius: 3px; line-height: 1; }
+  .icon:hover { background: var(--hover); color: var(--ink); }
+  .icon.del:hover { color: var(--danger); }
+  .add { background: none; border: 1px dashed #c3c7ce; border-radius: 4px; color: var(--muted); padding: 5px 8px; font-size: 12px; width: 100%; text-align: left; }
+  .add:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Obstacles */
+  .obs { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+  .obs input[type=text] { flex: 1; border: none; outline: none; padding: 3px 2px; background: transparent; min-width: 0; }
+  .obs.done input[type=text] { text-decoration: line-through; color: var(--muted); }
+  .obs .star { color: #c9ccd2; font-size: 15px; }
+  .obs.focus .star { color: #e0a100; }
+  .obs.focus input[type=text] { font-weight: 700; }
+  .list { margin-bottom: 8px; }
+
+  /* ---------- Index ---------- */
+  .index { max-width: 860px; margin: 0 auto; padding: 24px 16px 40px; }
+  .index h1 { font-size: 24px; margin: 0 0 4px; }
+  .index p.sub { color: var(--muted); margin: 0 0 20px; }
+  .create { display: flex; gap: 8px; margin-bottom: 22px; }
+  .create input { flex: 1; padding: 8px 10px; border: 1px solid #c3c7ce; border-radius: 6px; outline: none; }
+  .create input:focus { border-color: var(--accent); }
+  .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+  .btn.ghost { background: #fff; color: var(--ink); border-color: #c3c7ce; }
+  .btn.small { padding: 4px 9px; font-size: 12px; }
+  .cards { display: grid; gap: 10px; }
+  .card { border: 1px solid #d5d8de; border-left: 5px solid var(--frame); border-radius: 6px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .card .info { flex: 1; min-width: 200px; }
+  .card .title { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+  .card .title:hover { text-decoration: underline; }
+  .card .meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .card .meta code { background: #f2f3f5; padding: 1px 4px; border-radius: 3px; }
+  .card .actions { display: flex; gap: 6px; }
+  .empty { color: var(--muted); padding: 30px; text-align: center; border: 1px dashed #c3c7ce; border-radius: 6px; }
+  .footer { margin-top: 28px; display: flex; gap: 8px; }
+
+  .toast {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: #222; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 760px) {
+    .head { grid-template-columns: 1fr; }
+    .head > div + div { border-left: none; border-top: 3px solid var(--line); margin: 0; }
+    .body { grid-template-columns: 1fr; }
+    .col + .col { border-left: none; border-top: 3px solid var(--line); padding-top: 14px; }
+    .right > section.obstacles { margin-left: 0; }
+    textarea.free { min-height: 140px; }
+    .frame { margin: 0 4px 4px; padding: 5px; }
+    .sheet { padding: 0 6px 10px; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Stockage — tout passe par ces 4 fonctions.
+   Pour passer à un stockage partagé plus tard, seul ce bloc change.
+   ============================================================ */
+const PREFIX = 'kata-sb:';
+const Store = {
+  list() {
+    const out = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k.startsWith(PREFIX)) {
+        try { out.push(JSON.parse(localStorage.getItem(k))); } catch (e) {}
+      }
+    }
+    return out.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  },
+  get(id) {
+    try { return JSON.parse(localStorage.getItem(PREFIX + id)); } catch (e) { return null; }
+  },
+  save(board) {
+    board.updatedAt = Date.now();
+    localStorage.setItem(PREFIX + board.id, JSON.stringify(board));
+  },
+  remove(id) { localStorage.removeItem(PREFIX + id); },
+};
+
+/* ============================================================
+   Utilitaires
+   ============================================================ */
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 8);
+const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+const baseUrl = () => location.href.split('?')[0].split('#')[0];
+const boardUrl = id => `${baseUrl()}?board=${encodeURIComponent(id)}`;
+const fmtDate = ts => ts ? new Date(ts).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); toast('URL copiée'); }
+  catch (e) { prompt('Copiez cette URL :', text); }
+}
+
+function newBoard(id, title) {
+  return {
+    id, title: title || id,
+    focusProcess: '', challenge: '',
+    targetDate: '', target: '', current: '',
+    experiments: [], obstacles: [],
+    createdAt: Date.now(), updatedAt: Date.now(),
+  };
+}
+
+function autoGrow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+/* ============================================================
+   Routage : ?board=<id> → storyboard, sinon → liste
+   ============================================================ */
+function route() {
+  const id = new URLSearchParams(location.search).get('board');
+  if (id) renderBoard(id); else renderIndex();
+}
+
+/* ============================================================
+   Vue liste
+   ============================================================ */
+function renderIndex() {
+  document.title = 'Kata Storyboards';
+  const boards = Store.list();
+  $('#app').innerHTML = `
+    <div class="index">
+      <h1>Storyboards</h1>
+      <p class="sub">${boards.length} storyboard${boards.length > 1 ? 's' : ''} · stockés dans ce navigateur</p>
+
+      <form class="create" id="create">
+        <input id="newName" placeholder="Nom du nouveau storyboard (ex : Ligne 3 – changement de série)" autocomplete="off">
+        <button class="btn" type="submit">Créer</button>
+      </form>
+
+      <div class="cards">
+        ${boards.length ? boards.map(b => `
+          <div class="card">
+            <div class="info">
+              <a class="title" href="${esc(boardUrl(b.id))}">${esc(b.title || b.id)}</a>
+              <div class="meta">
+                ${b.focusProcess ? esc(b.focusProcess) + ' · ' : ''}
+                ${b.experiments.length} expérience${b.experiments.length > 1 ? 's' : ''} ·
+                modifié ${fmtDate(b.updatedAt)} · <code>${esc(b.id)}</code>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn ghost small" data-copy="${esc(b.id)}">Copier l'URL d'embed</button>
+              <button class="btn ghost small" data-del="${esc(b.id)}" title="Supprimer">Supprimer</button>
+            </div>
+          </div>`).join('') : `<div class="empty">Aucun storyboard pour l'instant. Créez-en un ci-dessus.</div>`}
+      </div>
+
+      <div class="footer">
+        <button class="btn ghost small" id="export">Exporter (JSON)</button>
+        <button class="btn ghost small" id="import">Importer</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>`;
+
+  $('#create').onsubmit = e => {
+    e.preventDefault();
+    const name = $('#newName').value.trim();
+    if (!name) return $('#newName').focus();
+    const id = `${slug(name) || 'board'}-${uid()}`;
+    Store.save(newBoard(id, name));
+    location.href = boardUrl(id);
+  };
+
+  $('#app').querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copy(boardUrl(b.dataset.copy)));
+  $('#app').querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    const board = Store.get(b.dataset.del);
+    if (confirm(`Supprimer « ${board?.title || b.dataset.del} » ? Cette action est définitive.`)) {
+      Store.remove(b.dataset.del);
+      renderIndex();
+    }
+  });
+
+  $('#export').onclick = () => {
+    const blob = new Blob([JSON.stringify(Store.list(), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `storyboards-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+  };
+  $('#import').onclick = () => $('#importFile').click();
+  $('#importFile').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      const list = Array.isArray(data) ? data : [data];
+      list.forEach(b => { if (b && b.id) localStorage.setItem(PREFIX + b.id, JSON.stringify(b)); });
+      toast(`${list.length} storyboard(s) importé(s)`);
+      renderIndex();
+    } catch (err) { alert('Fichier invalide'); }
+  };
+}
+
+/* ============================================================
+   Vue storyboard
+   ============================================================ */
+let board, saveTimer;
+
+function scheduleSave() {
+  $('#status').textContent = '…';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    Store.save(board);
+    $('#status').textContent = 'Enregistré';
+  }, 300);
+}
+
+function renderBoard(id) {
+  // Un id inconnu crée le storyboard : dupliquer un embed et changer l'id suffit.
+  board = Store.get(id) || newBoard(id);
+  document.title = board.title || 'Kata Storyboard';
+
+  $('#app').innerHTML = `
+    <div class="toolbar">
+      <a href="${esc(baseUrl())}">☰ Tous les storyboards</a>
+      <span>·</span>
+      <strong style="color:var(--ink)">${esc(board.title)}</strong>
+      <span class="spacer"></span>
+      <span class="status" id="status"></span>
+      <button id="copyUrl">Copier l'URL d'embed</button>
+    </div>
+    <div class="frame">
+      <div class="sheet">
+        <div class="head">
+          <div><label for="focusProcess">Focus Process:</label><input id="focusProcess" data-field="focusProcess"></div>
+          <div><label for="challenge">Challenge:</label><input id="challenge" data-field="challenge"></div>
+        </div>
+        <div class="body">
+          <div class="col">
+            <h2>Target Condition</h2>
+            <div class="achieve">Achieve by: <input type="date" data-field="targetDate"></div>
+            <textarea class="free" data-field="target" placeholder="Décrivez l'état visé : pattern de travail, indicateurs de résultat…"></textarea>
+          </div>
+          <div class="col">
+            <h2>Current<br>Condition</h2>
+            <textarea class="free" data-field="current" placeholder="Faits et données sur l'état actuel du processus…"></textarea>
+          </div>
+          <div class="col right">
+            <section class="experiments">
+              <h2>Experimenting<br>Record</h2>
+              <div id="expList"></div>
+              <button class="add" id="addExp">+ Nouvelle expérience</button>
+            </section>
+            <section class="obstacles">
+              <h2>Obstacles Parking Lot</h2>
+              <div class="list" id="obsList"></div>
+              <button class="add" id="addObs">+ Obstacle</button>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Champs simples
+  $('#app').querySelectorAll('[data-field]').forEach(el => {
+    el.value = board[el.dataset.field] || '';
+    el.oninput = () => { board[el.dataset.field] = el.value; scheduleSave(); };
+  });
+
+  $('#copyUrl').onclick = () => copy(boardUrl(board.id));
+  $('#addExp').onclick = () => {
+    board.experiments.push({ id: uid(), date: new Date().toISOString().slice(0, 10), step: '', expect: '', happened: '', learned: '' });
+    renderExperiments(); scheduleSave();
+    const inputs = $('#expList').querySelectorAll('.step');
+    inputs[inputs.length - 1]?.focus();
+  };
+  $('#addObs').onclick = () => {
+    board.obstacles.push({ id: uid(), text: '', done: false, focus: false });
+    renderObstacles(); scheduleSave();
+    const inputs = $('#obsList').querySelectorAll('input[type=text]');
+    inputs[inputs.length - 1]?.focus();
+  };
+
+  renderExperiments();
+  renderObstacles();
+
+  // Premier affichage d'un nouvel id : on l'enregistre pour qu'il apparaisse dans la liste.
+  if (!Store.get(id)) Store.save(board);
+}
+
+function renderExperiments() {
+  const list = $('#expList');
+  list.innerHTML = board.experiments.map((x, i) => `
+    <div class="exp" data-id="${x.id}">
+      <div class="exp-head">
+        <span class="num">#${i + 1}</span>
+        <input type="date" data-k="date" value="${esc(x.date)}">
+        <input class="step" data-k="step" placeholder="Étape / ce que je vais tester" value="${esc(x.step)}">
+        <button class="icon del" title="Supprimer">✕</button>
+      </div>
+      <div class="exp-grid">
+        <label class="exp-field"><span>Expect</span><textarea rows="1" data-k="expect" placeholder="Qu'est-ce que j'attends ?">${esc(x.expect)}</textarea></label>
+        <label class="exp-field"><span>Happened</span><textarea rows="1" data-k="happened" placeholder="Que s'est-il passé ?">${esc(x.happened)}</textarea></label>
+        <label class="exp-field"><span>Learned</span><textarea rows="1" data-k="learned" placeholder="Qu'avons-nous appris ?">${esc(x.learned)}</textarea></label>
+      </div>
+    </div>`).join('');
+
+  list.querySelectorAll('.exp').forEach(row => {
+    const x = board.experiments.find(e => e.id === row.dataset.id);
+    row.querySelectorAll('[data-k]').forEach(el => {
+      if (el.tagName === 'TEXTAREA') autoGrow(el);
+      el.oninput = () => { x[el.dataset.k] = el.value; if (el.tagName === 'TEXTAREA') autoGrow(el); scheduleSave(); };
+    });
+    row.querySelector('.del').onclick = () => {
+      if (!confirm(`Supprimer l'expérience #${board.experiments.indexOf(x) + 1} ?`)) return;
+      board.experiments = board.experiments.filter(e => e !== x);
+      renderExperiments(); scheduleSave();
+    };
+  });
+}
+
+function renderObstacles() {
+  const list = $('#obsList');
+  list.innerHTML = board.obstacles.map(o => `
+    <div class="obs ${o.done ? 'done' : ''} ${o.focus ? 'focus' : ''}" data-id="${o.id}">
+      <button class="icon star" title="Obstacle travaillé actuellement">★</button>
+      <input type="checkbox" ${o.done ? 'checked' : ''} title="Résolu">
+      <input type="text" value="${esc(o.text)}" placeholder="Obstacle…">
+      <button class="icon del" title="Supprimer">✕</button>
+    </div>`).join('');
+
+  list.querySelectorAll('.obs').forEach(row => {
+    const o = board.obstacles.find(x => x.id === row.dataset.id);
+    row.querySelector('input[type=text]').oninput = e => { o.text = e.target.value; scheduleSave(); };
+    row.querySelector('input[type=text]').onkeydown = e => { if (e.key === 'Enter') $('#addObs').click(); };
+    row.querySelector('input[type=checkbox]').onchange = e => { o.done = e.target.checked; renderObstacles(); scheduleSave(); };
+    row.querySelector('.star').onclick = () => {
+      const wasFocus = o.focus;
+      board.obstacles.forEach(x => x.focus = false);   // un seul obstacle travaillé à la fois
+      o.focus = !wasFocus;
+      renderObstacles(); scheduleSave();
+    };
+    row.querySelector('.del').onclick = () => {
+      board.obstacles = board.obstacles.filter(x => x !== o);
+      renderObstacles(); scheduleSave();
+    };
+  });
+}
+
+route();
+</script>
+</body>
+</html>
