@@ -432,6 +432,7 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .n-cell.empty { background: transparent; }
 
 .n-card {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;   /* appui long = glisser (tactile) */
   position: relative; background: #fff; border-radius: 10px; padding: 8px 10px; min-height: 40px; cursor: pointer; min-width: 0;
   box-shadow: rgba(15,15,15,.1) 0 0 0 1px, rgba(15,15,15,.1) 0 2px 4px;
 }
