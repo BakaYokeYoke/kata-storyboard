@@ -378,7 +378,8 @@
   .n-hidden-row:hover { background: var(--n-hover); }
   .n-hidden-label { color: var(--n-muted); font-size: 14px; padding: 2px 6px 4px; }
 
-  .n-group { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; padding: 14px 0 8px; font-size: 14px; }
+  .n-group { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; padding: 14px 0 8px; font-size: 14px; position: relative; z-index: 2; pointer-events: none; }
+  .n-group > * { pointer-events: auto; }
   .n-group .toggle { display: inline-flex; border: none; background: none; color: var(--n-ink); padding: 3px; border-radius: 4px; transition: transform .15s; }
   .n-group .toggle:hover { background: var(--n-hover); }
   .n-group.collapsed .toggle { transform: rotate(-90deg); }
@@ -670,7 +671,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.7';
+const APP_VERSION = '2026-09-24.8';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -870,6 +871,7 @@ function loadView() {
     order: STATUSES.map(st => st.key),                        // ordre des colonnes
     hideEmptyCols: false, colorCols: true, hideEmptySub: false, hiddenSub: [],
     noCreate: [],                                             // colonnes où l'on ne crée pas de carte
+    unsplit: ['wip'],                                         // colonnes non séparées par sous-groupe
   };
   try { return { ...base, ...JSON.parse(localStorage.getItem(VIEW_KEY) || '{}') }; } catch (e) { return base; }
 }
@@ -973,11 +975,44 @@ function renderKanban() {
   const nCols = Math.max(1, cols.length + (hiddenCols.length ? 1 : 0));
 
 
-  const cells = g => cols.map(st => `
-    <div class="n-cell c-${st.color}" data-status="${st.key}" data-group="${g ? g.key : ''}">
+  // Une case = une colonne × un sous-groupe (g = null : toute la colonne, sans séparation).
+  const cell = (st, g, style) => `
+    <div class="n-cell c-${st.color}" style="${style}" data-status="${st.key}" data-group="${g ? g.key : ''}">
       ${inCell(st.key, g?.key).map(b => visionCard(b, view.props)).join('')}
       ${view.noCreate.includes(st.key) ? '' : `<button class="n-add" data-new="${st.key}" data-group="${g ? g.key : GROUPS[0].key}">${icon('plus')} New page</button>`}
-    </div>`).join('') + (hiddenCols.length ? '<div class="n-cell empty"></div>' : '');
+    </div>`;
+  const unsplit = st => view.subgroups && view.unsplit.includes(st.key);
+
+  // Placement explicite : ligne 1 = en-têtes, puis (titre de sous-groupe + cases) par groupe.
+  // Les colonnes non séparées forment une seule case qui traverse tous les sous-groupes.
+  let rowNo = 2, groupsHTML = '';
+  rows.forEach(g => {
+    if (!g) {
+      groupsHTML += cols.map((st, i) => cell(st, null, `grid-row:${rowNo};grid-column:${i + 1}`)).join('');
+      rowNo++;
+      return;
+    }
+    const collapsed = view.collapsed.includes(g.key);
+    const n = visions.filter(b => groupOf(b) === g.key).length;
+    groupsHTML += `
+      <div class="n-group ${collapsed ? 'collapsed' : ''}" style="grid-row:${rowNo}">
+        <button class="toggle" data-toggle="${g.key}" title="${collapsed ? 'Déplier' : 'Replier'}">${icon('tri')}</button>
+        <span class="n-pill c-${g.color}">${esc(g.label)}</span><span class="n-count">${n}</span>
+        <span class="n-group-tools">
+          <button class="n-icon-btn" data-group-more="${g.key}" title="Options du groupe">${icon('dots')}</button>
+          <button class="n-icon-btn" data-group-add="${g.key}" title="Nouvelle page">${icon('plus')}</button>
+        </span>
+      </div>`;
+    rowNo++;
+    if (!collapsed) {
+      groupsHTML += cols.map((st, i) => unsplit(st) ? '' : cell(st, g, `grid-row:${rowNo};grid-column:${i + 1}`)).join('');
+      rowNo++;
+    }
+  });
+  if (view.subgroups && rows.length) {
+    const from = 3, to = Math.max(rowNo, from + 1);   // de la 1re ligne de cases jusqu'à la dernière
+    groupsHTML += cols.map((st, i) => unsplit(st) ? cell(st, null, `grid-row:${from} / ${to};grid-column:${i + 1}`) : '').join('');
+  }
 
   const nFilters = view.groups.length + view.statuses.length;
   $('#app').innerHTML = `
@@ -1015,22 +1050,8 @@ function renderKanban() {
               <div class="n-hidden-label">Groupes masqués</div>
               ${hiddenCols.map(st => `<div class="n-hidden-row c-${st.color}" data-unhide="${st.key}" title="Afficher">${pill(st)}<span class="n-count">${inCell(st.key).length}</span></div>`).join('')}
             </div>` : ''}
-          ${rows.map(g => {
-            if (!g) return cells(null);
-            const collapsed = view.collapsed.includes(g.key);
-            const n = visions.filter(b => groupOf(b) === g.key).length;
-            return `
-              <div class="n-group ${collapsed ? 'collapsed' : ''}">
-                <button class="toggle" data-toggle="${g.key}" title="${collapsed ? 'Déplier' : 'Replier'}">${icon('tri')}</button>
-                <span class="n-pill c-${g.color}">${esc(g.label)}</span><span class="n-count">${n}</span>
-                <span class="n-group-tools">
-                  <button class="n-icon-btn" data-group-more="${g.key}" title="Options du groupe">${icon('dots')}</button>
-                  <button class="n-icon-btn" data-group-add="${g.key}" title="Nouvelle page">${icon('plus')}</button>
-                </span>
-              </div>
-              ${collapsed ? '' : cells(g)}`;
-          }).join('')}
-          ${view.subgroups ? `<div class="n-newgroup" id="newGroup">${icon('plus')} New group</div>` : ''}
+          ${groupsHTML}
+          ${view.subgroups ? `<div class="n-newgroup" id="newGroup" style="grid-row:${rowNo}">${icon('plus')} New group</div>` : ''}
         </div>
       </div>
     </div>
@@ -1118,6 +1139,13 @@ function renderKanban() {
         saveView(v); renderKanban();
         row.querySelector('.n-switch').classList.toggle('on', on);
       } },
+      ...(view.subgroups ? [{ icon: 'subgroup', label: 'Séparer par sous-groupe', switch: !view.unsplit.includes(key), keepOpen: true, onClick: row => {
+        const v = loadView();
+        const merged = v.unsplit.includes(key);
+        v.unsplit = merged ? v.unsplit.filter(k => k !== key) : [...v.unsplit, key];
+        saveView(v); renderKanban();
+        row.querySelector('.n-switch').classList.toggle('on', merged);
+      } }] : []),
       { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hidden.push(key); saveView(view); renderKanban(); } },
     ]);
   });
