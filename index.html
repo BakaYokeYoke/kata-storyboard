@@ -140,6 +140,96 @@
   .add { background: none; border: 1px dashed #c3c7ce; border-radius: 4px; color: var(--muted); padding: 5px 8px; font-size: 12px; width: 100%; text-align: left; }
   .add:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* ---------- Time block : Lire → Run → Kata ---------- */
+  .tb {
+    position: sticky; top: 0; z-index: 15; background: #fff;
+    border-bottom: 1px solid #e3e5e8; box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    padding: 8px 12px 7px; margin-bottom: 10px;
+  }
+  .tb-row { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; }
+  .stepper { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .stepper .st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; color: var(--muted); }
+  .stepper .st .mark { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; border: 1.5px solid #c9ccd2; background: #fff; }
+  .stepper .st.done { color: #8a9099; }
+  .stepper .st.done .mark { border-color: #1d7a3a; background: #1d7a3a; color: #fff; }
+  .stepper .st.active { color: var(--accent); font-weight: 700; }
+  .stepper .st.active .mark { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .stepper .st.locked { color: #b4b7bd; cursor: not-allowed; }
+  .stepper .st.locked .mark { background: #f2f3f5; font-size: 10px; }
+  .stepper .link { width: 22px; height: 2px; background: #d5d8de; border-radius: 1px; }
+  .stepper .link.done { background: #1d7a3a; }
+  .tb-spacer { flex: 1; }
+  .timer { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+  .timer input { width: 48px; font: inherit; padding: 2px 4px; border: 1px solid #c3c7ce; border-radius: 4px; text-align: right; }
+  .timer.running strong { font-size: 15px; }
+  .timer.over { color: var(--danger); }
+  .tb-actions { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .tb-btn { font-size: 13px; padding: 6px 12px; border-radius: 6px; border: 1px solid #c3c7ce; background: #fff; color: var(--ink); white-space: nowrap; }
+  .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tb-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .tb-btn.primary:hover { background: #173f96; color: #fff; }
+  .tb-btn.danger { color: var(--danger); border-color: #e3b3af; }
+  .tb-btn:disabled { opacity: .5; cursor: default; }
+  .tb-reminder {
+    margin-top: 7px; font-size: 13px; line-height: 1.45; background: var(--active-bg); border: 1px solid var(--active-line);
+    border-radius: 6px; padding: 5px 9px; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .tb-reminder.empty { background: #f6f7f9; border-color: #d5d8de; color: var(--muted); }
+  .tb-reminder .sep { color: #c3a64a; margin: 0 4px; }
+  .tb-impossible { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .tb-impossible[hidden] { display: none; }
+  .tb-impossible textarea { width: 100%; min-height: 54px; resize: vertical; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid #c3c7ce; border-radius: 6px; outline: none; }
+  .tb-impossible textarea:focus { border-color: var(--accent); }
+  .tb-impossible .row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Zone de premier plan selon l'étape */
+  #stage { margin: 0 10px 10px; }
+  .stage-card { border: 2px solid var(--accent); border-radius: 8px; padding: 12px 14px; background: #f7f9ff; margin-bottom: 10px; }
+  .stage-card h3 { margin: 0 0 8px; font-size: 15px; }
+  .stage-card .muted { color: var(--muted); font-size: 13px; }
+  .focus-exp { display: grid; grid-template-columns: 110px 1fr; gap: 4px 10px; font-size: 14px; margin: 6px 0 8px; }
+  .focus-exp dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .02em; padding-top: 2px; }
+  .focus-exp dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .stage-card ol { margin: 6px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.6; }
+
+  /* Section Run */
+  .run { border: 1px solid #d5d8de; border-radius: 8px; padding: 10px 12px; background: #fff; margin-bottom: 10px; }
+  .run-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .run-head h3 { margin: 0; font-size: 15px; }
+  .run-head .hint-inline { color: var(--muted); font-size: 12px; flex: 1; min-width: 160px; }
+  .seg { display: inline-flex; border: 1px solid #c3c7ce; border-radius: 6px; overflow: hidden; }
+  .seg button { border: none; background: #fff; font-size: 12px; padding: 4px 10px; color: var(--muted); }
+  .seg button + button { border-left: 1px solid #c3c7ce; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .routine { list-style: none; margin: 0 0 8px; padding: 0; }
+  .routine li { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px solid #f0f1f3; }
+  .routine li input[type=checkbox] { width: 17px; height: 17px; flex: none; }
+  .routine li input.lbl { flex: 1; min-width: 0; border: none; outline: none; font: inherit; padding: 3px 2px; background: transparent; }
+  .routine li.done input.lbl { text-decoration: line-through; color: var(--muted); }
+  .routine-progress { font-size: 12px; color: var(--muted); }
+  .flow { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .fcol { background: #f4f5f7; border-radius: 6px; padding: 6px; min-height: 70px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .fcol.drop { outline: 2px dashed var(--accent); outline-offset: -2px; }
+  .fcol.edge { background: #eef1f8; }
+  .fcol-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); display: flex; gap: 4px; overflow: hidden; }
+  .fcol-h span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fitem { background: #fff; border: 1px solid #d5d8de; border-radius: 4px; padding: 4px 6px; font-size: 13px; display: flex; gap: 4px; align-items: flex-start; overflow-wrap: anywhere; }
+  .fitem[draggable=true] { cursor: grab; }
+  .fitem span { flex: 1; min-width: 0; }
+  .fcol input.new-item { border: 1px dashed #c3c7ce; border-radius: 4px; padding: 4px 6px; font: inherit; font-size: 12px; background: transparent; outline: none; min-width: 0; width: 100%; }
+
+  /* Storyboard verrouillé hors étape Kata */
+  .frame.readonly { position: relative; }
+  .frame.readonly::before {
+    content: '🔒 Storyboard en lecture seule — éditable à l\2019 étape Kata';
+    display: block; font-size: 12px; color: #1f2a5a; margin: -4px 0 6px;
+  }
+  .frame.readonly .add, .frame.readonly .icon.del, .frame.readonly #liftObs, .frame.readonly .add-wait,
+  .frame.readonly [data-act="init"], .frame.readonly .blk-tools, .frame.readonly .conn .side button { display: none !important; }
+  .frame.readonly ::placeholder { color: transparent !important; }
+  section.experiments.spot { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; scroll-margin-top: 130px; }
+
   /* Block diagrams As Is / To Be */
   .diagram { border-top: 1px dashed #d5d8de; padding: 8px 0 4px; min-width: 0; }
   .diagram-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; min-height: 22px; }
@@ -488,6 +578,10 @@ function migrate(b) {
     if (typeof b[side] !== 'object' || !b[side]) b[side] = { ...emptyCondition(), pattern: b[side] || '' };
   }
   b.target.toBe ||= [];
+  b.run ||= { mode: 'routine', routine: [], items: [] };
+  b.run.routine ||= []; b.run.items ||= [];
+  b.session ||= newSession(b.id);
+  b.timeblocks ||= [];
   b.current.asIs ||= [];
   const active = b.obstacles.find(o => o.focus && !o.done);
   b.experiments.forEach(x => {
@@ -966,6 +1060,9 @@ function cloneDoc(src, fields) {
   Object.assign(b, { id: 'v-' + uid() + uid(), createdAt: Date.now() }, fields);
   b.obstacles = (b.obstacles || []).map(o => { const id = uid(); idMap[o.id] = id; return { ...o, id }; });
   b.experiments = (b.experiments || []).map(x => ({ ...x, id: uid(), obstacleId: idMap[x.obstacleId] ?? null }));
+  // Nouvelle carte = nouveau cycle : pas de session en cours, checklist décochée.
+  delete b.session; b.timeblocks = [];
+  if (b.run) b.run = { ...b.run, items: [], routine: (b.run.routine || []).map(r => ({ ...r, id: uid(), done: false })) };
   ['target', 'current'].forEach(side => {
     const key = side === 'target' ? 'toBe' : 'asIs';
     if (b[side]?.[key]) b[side][key] = b[side][key].map(k => ({ ...k, id: uid() }));
@@ -1099,6 +1196,12 @@ function seedDemo() {
 
   vision({
     id: 'demo-marathon', icon: '🏃', title: 'Vivre en athlète d\'endurance', status: 'wip', group: 'perso',
+    run: { mode: 'routine', items: [], routine: [
+      { id: uid(), label: 'Échauffement 15 min', done: false },
+      { id: uid(), label: '8 × 400 m à 4:20 / km, récup 1 min 30', done: false },
+      { id: uid(), label: 'Retour au calme 10 min', done: false },
+      { id: uid(), label: 'Noter les temps de chaque répétition', done: false },
+    ] },
     focusProcess: 'Plan d\'entraînement hebdomadaire',
     challengeBy: 'avril 2027', challengeResult: 'finir un marathon en moins de 3h00', challengeVision: 'vivre en athlète d\'endurance',
     targetDate: d(28),
@@ -1119,6 +1222,11 @@ function seedDemo() {
   });
   vision({
     id: 'demo-piano', icon: '🎹', title: 'Jouer du piano pour le plaisir, sans partition', status: 'goal', group: 'perso',
+    run: { mode: 'routine', items: [], routine: [
+      { id: uid(), label: 'Gammes 5 min', done: false },
+      { id: uid(), label: 'Mesures 7–8 en boucle × 10 à 40 bpm', done: false },
+      { id: uid(), label: 'Enchaîner les 16 mesures une fois', done: false },
+    ] },
     focusProcess: 'Séance de pratique quotidienne',
     challengeBy: 'juin 2027', challengeResult: 'jouer la Gymnopédie n°1 en entier sans arrêt à 66 bpm', challengeVision: 'jouer pour le plaisir, sans partition',
     targetDate: d(21),
@@ -1133,6 +1241,11 @@ function seedDemo() {
   });
   vision({
     id: 'demo-usine', icon: '🏭', title: 'Une usine qui produit au rythme du client', status: 'tomorrow', group: 'pro',
+    run: { mode: 'flow', routine: [], items: [
+      { id: uid(), title: 'Série A-120 → B-340', column: 'todo' },
+      { id: uid(), title: 'Série B-340 → C-015', column: 'todo' },
+      { id: uid(), title: 'Série C-015 → A-120', column: 'todo' },
+    ] },
     focusProcess: 'Changement de série presse P12',
     challengeBy: 'juin 2027', challengeResult: 'changer de série en moins de 10 min', challengeVision: 'produire en petits lots au rythme du client',
     targetDate: d(35),
@@ -1161,13 +1274,14 @@ let board, saveTimer;
 const SHELL_FIELDS = ['title', 'icon', 'status', 'name', 'isDefault'];
 
 function scheduleSave() {
-  $('#status').textContent = '…';
+  if ($('#status')) $('#status').textContent = '…';
+  if ($('#tbReminder')) updateReminder();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     const stored = DocStore.get(board.id);
     if (stored) SHELL_FIELDS.forEach(k => { if (k in stored) board[k] = stored[k]; else delete board[k]; });
     DocStore.save(board);
-    $('#status').textContent = 'Enregistré';
+    if ($('#status')) $('#status').textContent = 'Enregistré';
   }, 300);
 }
 
@@ -1176,16 +1290,19 @@ function renderBoard(id) {
   board = migrate(DocStore.get(id) || newBoard(id));
   document.title = board.title || 'Kata Storyboard';
 
+  const showToolbar = isTplDoc() || !inDrawer;
   $('#app').innerHTML = `
-    <div class="toolbar">
+    ${showToolbar ? `<div class="toolbar">
       ${inDrawer ? '' : `
         <a href="${esc(baseUrl())}">☰ Kanban</a>
         <span>·</span>
         <strong style="color:var(--ink)">${esc(board.title)}</strong>`}
       <span class="spacer"></span>
       <span class="status" id="status"></span>
-    </div>
-    <div class="frame">
+    </div>` : ''}
+    ${isTplDoc() ? '' : '<div class="tb" id="tb"></div>'}
+    <div id="stage"></div>
+    <div class="frame" id="sbFrame">
       <div class="sheet">
         <div class="head">
           <div><label for="focusProcess">Focus Process:</label><textarea class="focus-input" id="focusProcess" data-field="focusProcess" rows="1"></textarea></div>
@@ -1267,9 +1384,299 @@ function renderBoard(id) {
   renderDiagram('current');
   renderRecord();
   renderObstacles();
+  renderTimeblock();
 
   // Premier affichage d'un nouvel id : on l'enregistre pour qu'il apparaisse dans la liste.
   if (!DocStore.get(id)) DocStore.save(board);
+}
+
+/* ============================================================
+   Time block : Lire → Run → Kata
+   Le Kata (cycle de coaching) n'est accessible qu'après le Run.
+   ============================================================ */
+const STEPS = [
+  { key: 'read', label: 'Lire' },
+  { key: 'run',  label: 'Run' },
+  { key: 'kata', label: 'Kata' },
+];
+let tbInterval = null;
+const isTplDoc = () => DocStore === Templates;
+
+function newSession(cardId, durationMin = 60) {
+  return { id: uid(), cardId, step: 'read', startedAt: null, durationMin, runStatus: null };
+}
+
+// Expérience en cours = dernière entrée du record de l'obstacle actif (sinon du record global).
+function currentExperiment() {
+  const active = board.obstacles.find(o => o.focus && !o.done);
+  const list = active ? board.experiments.filter(x => x.obstacleId === active.id) : board.experiments;
+  return list.length ? { x: list[list.length - 1], n: list.length, obstacle: active } : null;
+}
+
+function reminderHTML() {
+  const cur = currentExperiment();
+  if (!cur) return 'Aucune expérience en cours : définissez-la à l\'étape Kata.';
+  return `<b>Expérience #${cur.n}</b> ${esc(cur.x.step || '(étape non renseignée)')}<span class="sep">·</span><b>Prédiction</b> ${esc(cur.x.expect || '—')}`;
+}
+function updateReminder() {
+  const el = $('#tbReminder');
+  el.innerHTML = reminderHTML();
+  el.classList.toggle('empty', !currentExperiment());
+}
+
+function renderTimeblock() {
+  clearInterval(tbInterval);
+  if (isTplDoc()) { renderStage(); return; }
+  const s = board.session;
+  const idx = STEPS.findIndex(st => st.key === s.step);
+
+  const actions = {
+    read: `<button class="tb-btn primary" data-tb="start">Commencer le run</button>`,
+    run:  `<button class="tb-btn primary" data-tb="validate">✔ Valider le run</button>
+           <button class="tb-btn danger" data-tb="impossible">Run impossible</button>`,
+    kata: `<button class="tb-btn primary" data-tb="save">Enregistrer le cycle</button>`,
+  }[s.step];
+
+  $('#tb').innerHTML = `
+    <div class="tb-row">
+      <div class="stepper" aria-label="Étapes du time block">
+        ${STEPS.map((st, i) => {
+          const state = i < idx ? 'done' : i === idx ? 'active' : 'locked';
+          const mark = state === 'done' ? '✓' : state === 'active' ? '●' : '🔒';
+          return `${i ? `<span class="link ${i <= idx ? 'done' : ''}"></span>` : ''}
+            <span class="st ${state}" ${state === 'locked' ? 'aria-disabled="true" title="Verrouillé"' : ''}><span class="mark">${mark}</span>${i + 1}. ${st.label}</span>`;
+        }).join('')}
+      </div>
+      <span class="tb-spacer"></span>
+      <span class="timer" id="timer"></span>
+      <span class="tb-actions">${actions}</span>
+    </div>
+    <div class="tb-reminder ${currentExperiment() ? '' : 'empty'}" id="tbReminder">${reminderHTML()}</div>
+    <div class="tb-impossible" id="tbImpossible" hidden>
+      <textarea id="impossibleText" placeholder="Qu'est-ce qui a empêché le run ? Ce texte devient un obstacle dans le Parking Lot."></textarea>
+      <div class="row">
+        <button class="tb-btn primary" data-tb="impossibleConfirm">Créer l'obstacle et passer au Kata</button>
+        <button class="tb-btn" data-tb="impossibleCancel">Annuler</button>
+      </div>
+    </div>`;
+
+  $('#tb').querySelectorAll('[data-tb]').forEach(btn => btn.onclick = () => tbAction(btn.dataset.tb));
+  renderTimer();
+  if (s.startedAt) tbInterval = setInterval(renderTimer, 1000);
+  renderStage();
+}
+
+function renderTimer() {
+  const s = board.session;
+  const el = $('#timer');
+  if (!el) return;
+  if (!s.startedAt) {
+    el.className = 'timer';
+    el.innerHTML = `⏱ <input type="number" id="tbDuration" min="5" max="480" step="5" value="${s.durationMin}" title="Durée du time block"> min`;
+    $('#tbDuration').onchange = e => {
+      s.durationMin = Math.max(5, Math.min(480, parseInt(e.target.value, 10) || 60));
+      e.target.value = s.durationMin;
+      scheduleSave();
+    };
+    return;
+  }
+  const left = Math.round((s.startedAt + s.durationMin * 60000 - Date.now()) / 1000);
+  const abs = Math.abs(left);
+  const mmss = `${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
+  el.className = `timer running ${left < 0 ? 'over' : ''}`;
+  el.innerHTML = `⏱ <strong>${left < 0 ? '+' : ''}${mmss}</strong> <span style="color:var(--muted)">/ ${s.durationMin} min</span>`;
+}
+
+function tbAction(act) {
+  const s = board.session;
+  if (act === 'start') {
+    board.session = { ...newSession(board.id, s.durationMin), step: 'run', startedAt: Date.now() };
+    board.run.routine.forEach(r => r.done = false);   // nouveau time block : checklist décochée
+  }
+  if (act === 'validate') Object.assign(s, { step: 'kata', runStatus: 'done' });
+  if (act === 'impossible') {
+    $('#tbImpossible').hidden = false;
+    $('#impossibleText').focus();
+    return;
+  }
+  if (act === 'impossibleCancel') { $('#tbImpossible').hidden = true; return; }
+  if (act === 'impossibleConfirm') {
+    const text = $('#impossibleText').value.trim();
+    if (!text) { $('#impossibleText').focus(); return toast('Décrivez ce qui a bloqué le run'); }
+    board.obstacles.push({ id: uid(), text, done: false, focus: false });
+    Object.assign(s, { step: 'kata', runStatus: 'impossible' });
+    renderObstacles(); renderRecord();
+    toast('Obstacle ajouté au Parking Lot');
+  }
+  if (act === 'save') {
+    board.timeblocks.push({ ...s, endedAt: Date.now() });
+    board.session = newSession(board.id, s.durationMin);
+    toast('Cycle enregistré');
+  }
+  scheduleSave();
+  renderTimeblock();
+  if (board.session.step === 'kata') setTimeout(() => $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  else scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* Premier plan selon l'étape + verrouillage du storyboard */
+function renderStage() {
+  const step = isTplDoc() ? 'template' : board.session.step;
+  const readonly = step === 'read' || step === 'run';
+  $('#sbFrame').inert = readonly;
+  $('#sbFrame').classList.toggle('readonly', readonly);
+  $('section.experiments').classList.toggle('spot', step === 'kata');
+
+  const cur = currentExperiment();
+  let html = '';
+  if (step === 'read') {
+    html = `
+      <div class="stage-card">
+        <h3>1. Lire — l'expérience du jour</h3>
+        ${cur ? `<dl class="focus-exp">
+          ${cur.obstacle ? `<dt>Obstacle</dt><dd>${esc(cur.obstacle.text)}</dd>` : ''}
+          <dt>Expérience #${cur.n}</dt><dd>${esc(cur.x.step || '(étape non renseignée)')}</dd>
+          <dt>Prédiction</dt><dd>${esc(cur.x.expect || '—')}</dd>
+        </dl>` : `<p class="muted">Aucune expérience définie. Lancez quand même le run, ou passez par le Kata pour en définir une.</p>`}
+        <div class="muted">Relisez le storyboard ci-dessous (Challenge, Target / Current Condition), préparez le run, puis cliquez sur « Commencer le run ».</div>
+      </div>
+      ${runSectionHTML('prep')}`;
+  } else if (step === 'run') {
+    html = runSectionHTML('run');
+  } else if (step === 'kata') {
+    html = `
+      <div class="stage-card">
+        <h3>3. Kata — cycle de coaching</h3>
+        <div class="muted">Run ${board.session.runStatus === 'impossible' ? 'impossible : l\'obstacle a été ajouté au Parking Lot' : 'validé'}. Le storyboard est éditable : complétez l'Experimenting Record (Happened / Learned), puis définissez la prochaine expérience.</div>
+        <ol>
+          <li>Quelle est la Target Condition ?</li>
+          <li>Quelle est la condition actuelle ?</li>
+          <li>Qu'aviez-vous prévu ? Que s'est-il passé ? Qu'avez-vous appris ?</li>
+          <li>Quels obstacles vous empêchent d'atteindre la Target Condition ? Lequel traitez-vous maintenant ?</li>
+          <li>Quelle est votre prochaine étape ? Qu'en attendez-vous ?</li>
+          <li>Quand pourrons-nous voir ce que vous avez appris ?</li>
+        </ol>
+      </div>`;
+  } else {
+    html = runSectionHTML('template');
+  }
+  $('#stage').innerHTML = html;
+  bindRunSection(step === 'run' ? 'run' : step === 'read' ? 'prep' : 'template');
+}
+
+/* ---------- Section Run ---------- */
+// ctx : 'prep' (préparation, étape Lire), 'run' (exécution), 'template' (configuration)
+function flowColumns() {
+  return [
+    { id: 'todo', label: 'À faire', edge: true },
+    ...board.current.asIs.map(b => ({ id: b.id, label: b.name || 'Étape sans nom' })),
+    { id: 'done', label: 'Fait', edge: true },
+  ];
+}
+
+function runSectionHTML(ctx) {
+  const run = board.run;
+  const canCheck = ctx === 'run';
+  const hint = {
+    prep: 'Préparation : ajustez le standard avant de commencer.',
+    run: run.mode === 'routine' ? 'Cochez chaque étape réalisée.' : 'Faites avancer les items d\'une colonne à l\'autre.',
+    template: 'Configuration reprise par chaque nouvelle Vision.',
+  }[ctx];
+
+  let body;
+  if (run.mode === 'routine') {
+    const done = run.routine.filter(r => r.done).length;
+    body = `
+      <ul class="routine">
+        ${run.routine.map(r => `
+          <li class="${r.done ? 'done' : ''}" data-id="${r.id}">
+            <input type="checkbox" ${r.done ? 'checked' : ''} ${canCheck ? '' : 'disabled'} title="${canCheck ? 'Fait' : 'Se coche pendant le run'}">
+            <input class="lbl" value="${esc(r.label)}" placeholder="Étape du standard de travail">
+            <button class="icon del" title="Supprimer">✕</button>
+          </li>`).join('')}
+      </ul>
+      <button class="add" id="addRoutine">+ Étape du standard</button>
+      ${run.routine.length && ctx === 'run' ? `<div class="routine-progress" style="margin-top:6px">${done} / ${run.routine.length} étapes faites</div>` : ''}`;
+  } else if (ctx === 'template') {
+    body = `<p class="hint">Mode Flux : les colonnes reprendront les blocs du diagramme As Is de chaque Vision.</p>`;
+  } else {
+    const cols = flowColumns();
+    const known = new Set(cols.map(c => c.id));
+    body = `<div class="flow">
+      ${cols.map(c => {
+        const items = run.items.filter(it => (known.has(it.column) ? it.column : 'todo') === c.id);
+        return `<div class="fcol ${c.edge ? 'edge' : ''}" data-col="${c.id}">
+          <div class="fcol-h"><span title="${esc(c.label)}">${esc(c.label)}</span><span>${items.length}</span></div>
+          ${items.map(it => `<div class="fitem" draggable="${canCheck}" data-id="${it.id}"><span>${esc(it.title)}</span><button class="icon del" title="Supprimer">✕</button></div>`).join('')}
+          ${c.id === 'todo' ? `<input class="new-item" id="newItem" placeholder="+ Item (Entrée)">` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+    ${!board.current.asIs.length ? '<p class="hint">Ajoutez des blocs au diagramme As Is (Current Condition) pour créer les colonnes intermédiaires.</p>' : ''}`;
+  }
+
+  return `
+    <section class="run" id="runSec">
+      <div class="run-head">
+        <h3>${ctx === 'run' ? '2. Run' : 'Run'}</h3>
+        <div class="seg" role="group" aria-label="Mode du run">
+          <button data-mode="routine" class="${run.mode === 'routine' ? 'on' : ''}">Routine</button>
+          <button data-mode="flow" class="${run.mode === 'flow' ? 'on' : ''}">Flux</button>
+        </div>
+        <span class="hint-inline">${hint}</span>
+      </div>
+      ${body}
+    </section>`;
+}
+
+function bindRunSection(ctx) {
+  const sec = $('#runSec');
+  if (!sec) return;
+  const run = board.run;
+  const rerender = () => { $('#stage').querySelector('#runSec').outerHTML = runSectionHTML(ctx); bindRunSection(ctx); };
+
+  sec.querySelectorAll('[data-mode]').forEach(btn => btn.onclick = () => { run.mode = btn.dataset.mode; scheduleSave(); rerender(); });
+
+  // Routine
+  sec.querySelectorAll('.routine li').forEach(li => {
+    const r = run.routine.find(x => x.id === li.dataset.id);
+    li.querySelector('input[type=checkbox]').onchange = e => { r.done = e.target.checked; scheduleSave(); rerender(); };
+    const lbl = li.querySelector('input.lbl');
+    lbl.oninput = () => { r.label = lbl.value; scheduleSave(); };
+    lbl.onkeydown = e => { if (e.key === 'Enter') $('#addRoutine').click(); };
+    li.querySelector('.del').onclick = () => { run.routine = run.routine.filter(x => x !== r); scheduleSave(); rerender(); };
+  });
+  const addR = $('#addRoutine');
+  if (addR) addR.onclick = () => {
+    run.routine.push({ id: uid(), label: '', done: false });
+    scheduleSave(); rerender();
+    const lbls = $('#runSec').querySelectorAll('input.lbl');
+    lbls[lbls.length - 1]?.focus();
+  };
+
+  // Flux
+  const newItem = $('#newItem');
+  if (newItem) newItem.onkeydown = e => {
+    if (e.key !== 'Enter' || !newItem.value.trim()) return;
+    run.items.push({ id: uid(), title: newItem.value.trim(), column: 'todo' });
+    scheduleSave(); rerender();
+    $('#newItem')?.focus();
+  };
+  sec.querySelectorAll('.fitem').forEach(el => {
+    const it = run.items.find(x => x.id === el.dataset.id);
+    el.querySelector('.del').onclick = () => { run.items = run.items.filter(x => x !== it); scheduleSave(); rerender(); };
+    el.ondragstart = e => e.dataTransfer.setData('text/plain', it.id);
+  });
+  if (ctx === 'run') sec.querySelectorAll('.fcol').forEach(col => {
+    col.ondragover = e => { e.preventDefault(); col.classList.add('drop'); };
+    col.ondragleave = () => col.classList.remove('drop');
+    col.ondrop = e => {
+      e.preventDefault();
+      const it = run.items.find(x => x.id === e.dataTransfer.getData('text/plain'));
+      if (it) { it.column = col.dataset.col; scheduleSave(); }
+      rerender();
+    };
+  });
 }
 
 function conditionFields(side) {
