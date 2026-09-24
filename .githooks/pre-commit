@@ -1,0 +1,13 @@
+#!/bin/sh
+# Met à jour le numéro de version avant chaque commit.
+# Il sert à contourner le cache de GitHub Pages : la page, les styles et les scripts
+# sont rechargés dès qu'une nouvelle version est publiée.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+V=$(date +%Y%m%d-%H%M%S)
+sed -i.bak -E "s/const APP_VERSION = '[^']+'/const APP_VERSION = '$V'/; s/\?v=[0-9A-Za-z._-]+\"/?v=$V\"/g" index.html && rm -f index.html.bak
+git add index.html
+if [ -f sw.js ]; then
+  sed -i.bak -E "s/const CACHE = 'kata-[^']+'/const CACHE = 'kata-$V'/" sw.js && rm -f sw.js.bak
+  git add sw.js
+fi
