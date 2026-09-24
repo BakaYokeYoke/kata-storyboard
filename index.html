@@ -512,6 +512,28 @@
   .peek-props .pv-check { padding: 4px 0; display: inline-flex; }
   .peek-props .pv-check input { width: 16px; height: 16px; accent-color: #2383e2; }
   .peek-props .val .pills { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .peek-props .v.ro { color: var(--n-ink); padding: 4px 0; min-height: 28px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; cursor: default; }
+  .peek-props .v.ro[title] { color: rgba(55,53,47,.85); }
+  .peek-props .err { color: rgb(212, 76, 71); font-size: 13px; }
+  .peek-props .pv-wrap { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .peek-props .pv-open { display: inline-flex; color: rgba(55,53,47,.5); padding: 3px; border-radius: 4px; text-decoration: none; }
+  .peek-props .pv-open:hover { background: var(--n-hover); color: var(--n-ink); }
+  .peek-props a { color: inherit; }
+  .peek-props .val .pills a, .n-chip a { color: inherit; text-decoration: underline; text-decoration-color: rgba(55,53,47,.3); }
+  .more-props { grid-column: 1 / -1; justify-self: start; border: none; background: none; color: rgba(55,53,47,.45); font: inherit; font-size: 14px; padding: 5px 6px; margin-left: -6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: center; }
+  .more-props:hover { background: var(--n-hover); }
+  .streak { display: inline-flex; gap: 3px; align-items: center; vertical-align: middle; }
+  .streak i { width: 10px; height: 10px; border-radius: 2px; background: rgba(55,53,47,.13); display: inline-block; }
+  .streak i.on { background: rgb(55,53,47); }
+  .streak i.cur { box-shadow: 0 0 0 1.5px rgba(55,53,47,.35); }
+  .streak i[data-streak-cell] { cursor: pointer; }
+  .streak i[data-streak-cell]:hover { transform: scale(1.15); }
+  .streak-chip { background: transparent !important; padding-left: 0 !important; }
+  .streak-edit { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 4px 0; }
+  .streak-edit .every { color: rgba(55,53,47,.6); font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+  .streak-edit .every input { width: 44px; font: inherit; font-size: 13px; padding: 1px 4px; border: 1px solid rgba(55,53,47,.16); border-radius: 4px; }
+  .vp-flabel { display: flex; align-items: center; gap: 6px; }
+  .n-pop { max-height: 70vh; overflow-y: auto; }
   .add-prop { grid-column: 1 / -1; justify-self: start; border: none; background: none; color: rgba(55,53,47,.45); font: inherit; font-size: 14px; padding: 5px 6px; margin-left: -6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: center; }
   .add-prop:hover { background: var(--n-hover); color: rgba(55,53,47,.8); }
   .n-pop input.pop-input { width: 100%; font: inherit; font-size: 14px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; background: rgba(242,241,238,.6); }
@@ -599,6 +621,16 @@
   .n-newgroup { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; color: rgba(55,53,47,.45); font-size: 14px; padding: 14px 6px 8px; cursor: pointer; border-radius: 6px; width: max-content; }
   .n-newgroup:hover { color: rgba(55,53,47,.8); }
   .n-newgroup input { font: inherit; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 3px 6px; outline: none; width: 200px; }
+  .c-default { --col-bg: rgb(249, 249, 248); --col-pill: rgba(227, 226, 224, .5); --col-text: rgb(50, 48, 44); --col-dot: rgb(145, 145, 142); --col-count: rgba(55, 53, 47, .5); }
+  .sw { width: 18px; height: 18px; border-radius: 4px; background: var(--col-pill); box-shadow: inset 0 0 0 1px rgba(55,53,47,.12); flex: none; }
+  button.n-agg { border: none; background: none; font: inherit; padding: 1px 5px; margin-left: -3px; border-radius: 4px; cursor: pointer; }
+  button.n-agg:hover { background: rgba(55,53,47,.08); }
+  /* Contrôle WIP / Aging : trait fin avec le texte au centre, rouge si dépassement */
+  .n-check { display: flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(55,53,47,.45); letter-spacing: .02em; margin: 0 2px; }
+  .n-check::before, .n-check::after { content: ''; flex: 1; border-top: 1px solid rgba(55,53,47,.16); }
+  .n-check.over::before, .n-check.over::after { border-top-color: rgba(212,76,71,.45); }
+  .n-check .bad { color: rgb(212, 76, 71); font-weight: 600; }
+  .n-chip.aging { background: rgba(212,76,71,.1); color: rgb(212, 76, 71); }
   .c-orange { --col-bg: rgb(252, 247, 242); --col-pill: rgb(250, 222, 201); --col-text: rgb(217, 115, 13); --col-dot: rgb(217, 115, 13); --col-count: rgb(217, 115, 13); }
   .c-pink   { --col-bg: rgb(252, 246, 249); --col-pill: rgb(245, 224, 233); --col-text: rgb(193, 76, 138); --col-dot: rgb(193, 76, 138); --col-count: rgb(193, 76, 138); }
   .c-red    { --col-bg: rgb(253, 246, 245); --col-pill: rgb(255, 226, 221); --col-text: rgb(212, 76, 71);  --col-dot: rgb(212, 76, 71);  --col-count: rgb(212, 76, 71); }
@@ -685,7 +717,7 @@ function makeStore(prefix) {
 }
 // À incrémenter à chaque publication : force le tiroir à recharger la dernière version
 // (GitHub Pages met les pages en cache 10 minutes).
-const APP_VERSION = '2026-09-24.9';
+const APP_VERSION = '2026-09-24.11';
 
 // Si le navigateur a servi une copie en cache, on compare avec la version en ligne
 // et on recharge une fois pour récupérer la dernière publication.
@@ -875,6 +907,16 @@ const ICONS = {
   checkbox:'<rect x="2.5" y="2.5" width="11" height="11" rx="2.5"/><path d="M5.3 8.2l1.9 1.9 3.5-4"/>',
   link:   '<path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/>',
   multi:  '<path d="M6 4.5h7.5M6 8h7.5M6 11.5h7.5"/><circle cx="3" cy="4.5" r=".9" fill="currentColor"/><circle cx="3" cy="8" r=".9" fill="currentColor"/><circle cx="3" cy="11.5" r=".9" fill="currentColor"/>',
+  people: '<circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13c0-2.4 1.9-4 4.2-4s4.2 1.6 4.2 4"/><circle cx="11.5" cy="6" r="1.8"/><path d="M11 9.2c2 0 3.5 1.3 3.5 3.3"/>',
+  clip:   '<path d="M13 7.5l-5.3 5.3a3 3 0 0 1-4.3-4.3l5.6-5.6a2 2 0 0 1 2.9 2.9L6.4 11.3a1 1 0 0 1-1.4-1.4L10 4.9"/>',
+  at:     '<circle cx="8" cy="8" r="2.6"/><path d="M10.6 8v1a1.9 1.9 0 0 0 3.8 0V8A6.4 6.4 0 1 0 12 13"/>',
+  phone:  '<path d="M4.5 2h2l1 3-1.5 1a8 8 0 0 0 4 4l1-1.5 3 1v2a1.5 1.5 0 0 1-1.6 1.5A11.5 11.5 0 0 1 3 3.6 1.5 1.5 0 0 1 4.5 2z"/>',
+  sigma:  '<path d="M12.5 3h-9l5 5-5 5h9"/>',
+  arrowUR:'<path d="M4.5 11.5l7-7M5.5 4.5h6v6"/>',
+  clockUI:'<circle cx="8" cy="8" r="5.8"/><path d="M8 4.8V8l2.2 1.4"/>',
+  userUI: '<circle cx="8" cy="8" r="5.8"/><circle cx="8" cy="6.8" r="2"/><path d="M4.3 12.3c.8-1.4 2.1-2.1 3.7-2.1s2.9.7 3.7 2.1"/>',
+  idUI:   '<rect x="2" y="3.5" width="12" height="9" rx="1.5"/><path d="M5 6.5v3M7.5 6.5h1.3a1.5 1.5 0 0 1 0 3H7.5z"/>',
+  streakUI:'<rect x="1.5" y="6" width="3" height="3" rx=".6" fill="currentColor"/><rect x="6.5" y="6" width="3" height="3" rx=".6" fill="currentColor"/><rect x="11.5" y="6" width="3" height="3" rx=".6"/>',
   db:     '<ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>',
 };
 const icon = name => `<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
@@ -888,11 +930,17 @@ function loadView() {
     order: STATUSES.map(st => st.key),                        // ordre des colonnes
     hideEmptyCols: false, colorCols: true, hideEmptySub: false, hiddenSub: [],
     noCreate: [],                                             // colonnes où l'on ne crée pas de carte
+    cf: {},                                                   // filtres sur les autres propriétés { clé: [valeurs] }
+    agg: {},                                                  // calcul affiché par colonne { colonne: { fn, prop } }
+    subAgg: true,                                             // nombre affiché à côté des sous-groupes
+    std: { goal: { wip: 1 }, wip: { wip: 1 } },               // standards par colonne : { wip, aging (jours) }
     unsplit: ['wip'],                                         // colonnes non séparées par sous-groupe
   };
   let v;
   try { v = { ...base, ...JSON.parse(localStorage.getItem(VIEW_KEY) || '{}') }; } catch (e) { v = base; }
   v.props = v.props.filter(k => allProps().some(p => p.key === k));
+  v.cf = Object.fromEntries(Object.entries(v.cf || {}).filter(([k, a]) => propDef(k) && a?.length));
+  if (v.sort !== 'manual' && v.sort !== 'title' && !propDef(v.sort)) v.sort = 'manual';
   return v;
 }
 function saveView(v) { try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch (e) {} }
@@ -934,57 +982,369 @@ function closePop() {
 }
 
 function migrateVisions() {
+  let seq = Math.max(0, ...Store.list().map(b => b.seq || 0));
   Store.list().forEach(b => {
-    if (statusOf(b) !== b.status || groupOf(b) !== b.group) Store.patch(b.id, { status: statusOf(b), group: groupOf(b) });
+    const fix = {};
+    if (statusOf(b) !== b.status || groupOf(b) !== b.group) Object.assign(fix, { status: statusOf(b), group: groupOf(b) });
+    if (b.seq == null) fix.seq = ++seq;
+    if (!b.createdAt || b.createdAt < 1e11) fix.createdAt = (b.updatedAt || Date.now()) - (1000 - (b.createdAt || 0)) * 60000;   // anciennes démos : numéro d'ordre
+    if (!b.statusSince) fix.statusSince = b.updatedAt || Date.now();
+    if (Object.keys(fix).length) { const d = Store.get(b.id); Object.assign(d, fix); localStorage.setItem(Store.prefix + d.id, JSON.stringify(d)); }
   });
 }
+const nextSeq = () => Math.max(0, ...Store.list().map(b => b.seq || 0)) + 1;
+// Changement de colonne : on note la date d'entrée (sert à l'Aging)
+function setStatus(St, id, status, extra = {}) {
+  const d = St.get(id);
+  if (!d) return;
+  St.patch(id, statusOf(d) === status ? extra : { ...extra, status, statusSince: Date.now() });
+}
+const ageDays = b => Math.floor((Date.now() - (b.statusSince || b.updatedAt || Date.now())) / DAY);
 
 function challengeText(b) {
   if (!b.challengeResult) return '';
   return `D'ici ${b.challengeBy || '…'}, ${b.challengeResult}.`;
 }
 
-/* Propriétés affichables sur les cartes (Property visibility) */
-const PROPS = [
-  { key: 'challenge',   label: 'Challenge',           icon: 'text' },
-  { key: 'obstacle',    label: 'Obstacle en cours',   icon: 'text' },
-  { key: 'due',         label: 'Échéance (Target)',   icon: 'calendar' },
-  { key: 'experiments', label: 'Expériences',         icon: 'hash' },
-  { key: 'step',        label: 'Étape du time block', icon: 'timer' },
-  { key: 'focus',       label: 'Focus Process',       icon: 'text' },
-  { key: 'status',      label: 'Statut',              icon: 'status' },
-  { key: 'group',       label: 'Pro/Perso',           icon: 'select' },
+/* ============================================================
+   Propriétés (comme une base Notion)
+   Une seule liste, partagée par la page ouverte, les cartes, Property visibility, Filter et Sort.
+   ============================================================ */
+// Intégrées : Status et Pro/Perso sont éditables ; les autres viennent du storyboard (lecture seule).
+const BUILTIN_PROPS = [
+  { key: 'status',      label: 'Status',              icon: 'status',   kind: 'status' },
+  { key: 'group',       label: 'Pro/Perso',           icon: 'select',   kind: 'group' },
+  { key: 'challenge',   label: 'Challenge',           icon: 'text',     kind: 'story' },
+  { key: 'focus',       label: 'Focus Process',       icon: 'text',     kind: 'story' },
+  { key: 'due',         label: 'Échéance (Target)',   icon: 'calendar', kind: 'story' },
+  { key: 'obstacle',    label: 'Obstacle en cours',   icon: 'text',     kind: 'story' },
+  { key: 'experiments', label: 'Expériences',         icon: 'hash',     kind: 'story' },
+  { key: 'step',        label: 'Étape du time block', icon: 'timer',    kind: 'story' },
 ];
-// Propriétés ajoutées par l'utilisateur (communes à toutes les cartes, valeur propre à chaque carte)
 const PROP_TYPES = {
-  text:     { label: 'Text',         icon: 'text' },
-  number:   { label: 'Number',       icon: 'hash' },
-  select:   { label: 'Select',       icon: 'select' },
-  multi:    { label: 'Multi-select', icon: 'multi' },
-  date:     { label: 'Date',         icon: 'calendar' },
-  checkbox: { label: 'Checkbox',     icon: 'checkbox' },
-  url:      { label: 'URL',          icon: 'link' },
+  text:         { label: 'Text',             icon: 'text' },
+  number:       { label: 'Number',           icon: 'hash' },
+  select:       { label: 'Select',           icon: 'select',   options: true },
+  multi:        { label: 'Multi-select',     icon: 'multi',    options: true, many: true },
+  status:       { label: 'Status',           icon: 'status',   options: true },
+  date:         { label: 'Date',             icon: 'calendar' },
+  person:       { label: 'Person',           icon: 'people',   options: true, many: true },
+  files:        { label: 'Files & media',    icon: 'clip' },
+  checkbox:     { label: 'Checkbox',         icon: 'checkbox' },
+  url:          { label: 'URL',              icon: 'link' },
+  email:        { label: 'Email',            icon: 'at' },
+  phone:        { label: 'Phone',            icon: 'phone' },
+  formula:      { label: 'Formula',          icon: 'sigma',    readOnly: true },
+  relation:     { label: 'Relation',         icon: 'arrowUR' },
+  rollup:       { label: 'Rollup',           icon: 'search',   readOnly: true },
+  created_time: { label: 'Created time',     icon: 'clockUI',  readOnly: true },
+  created_by:   { label: 'Created by',       icon: 'userUI',   readOnly: true },
+  edited_time:  { label: 'Last edited time', icon: 'clockUI',  readOnly: true },
+  edited_by:    { label: 'Last edited by',   icon: 'userUI',   readOnly: true },
+  id:           { label: 'ID',               icon: 'idUI',     readOnly: true },
+  streak:       { label: 'Streak',           icon: 'streakUI' },
 };
+
+// Streak : réussite (run validé, ou correction manuelle) sur chacune des N dernières occurrences.
+// Chaque carte définit sa fréquence : une occurrence tous les « every » jours.
+const DAY = 86400000;
+const dayStart = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+function streakData(b, cp) {
+  const v = b.props?.[cp.key] || {};
+  const every = Math.max(1, parseInt(v.every, 10) || 1);
+  const n = Math.max(1, cp.streakLength || 7);
+  const done = (b.timeblocks || []).filter(t => t.runStatus === 'done' && t.endedAt).map(t => t.endedAt);
+  const end0 = dayStart(Date.now()) + DAY;
+  const cells = [];
+  for (let k = n - 1; k >= 0; k--) {
+    const end = end0 - k * every * DAY, start = end - every * DAY;
+    const key = new Date(start).toISOString().slice(0, 10);
+    const auto = done.some(t => t >= start && t < end);
+    const manual = v.manual?.[key];
+    cells.push({ key, start, end, done: manual ?? auto, current: k === 0 });
+  }
+  let current = 0;
+  for (let i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].done) current++;
+    else if (cells[i].current) continue;   // l'occurrence en cours peut encore être réussie
+    else break;
+  }
+  return { cells, every, n, hits: cells.filter(c => c.done).length, current };
+}
+const streakHTML = (data, clickable = false) => `<span class="streak">${data.cells.map(c =>
+  `<i class="${c.done ? 'on' : ''} ${c.current ? 'cur' : ''}" ${clickable ? `data-streak-cell="${c.key}"` : ''} title="${new Date(c.start).toLocaleDateString('fr-FR')}${c.done ? ' · réussi' : ''}"></i>`).join('')}</span>`;
+const DEFAULT_OPTIONS = {
+  status: () => [{ id: uid(), label: 'Not started', color: 'gray' }, { id: uid(), label: 'In progress', color: 'blue' }, { id: uid(), label: 'Done', color: 'green' }],
+  person: () => [{ id: uid(), label: 'Moi', color: 'gray' }],
+};
+const ME = 'Moi';
+
 const CUSTOM_KEY = 'kata-props';
 function loadCustomProps() { try { return JSON.parse(localStorage.getItem(CUSTOM_KEY)) || []; } catch (e) { return []; } }
 let CUSTOM_PROPS = loadCustomProps();
 function saveCustomProps() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM_PROPS)); } catch (e) {} }
 const customDef = k => CUSTOM_PROPS.find(p => p.key === k);
-const allProps = () => [...PROPS, ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon }))];
+const allProps = () => [...BUILTIN_PROPS, ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon, kind: 'custom' }))];
 const propDef = k => allProps().find(p => p.key === k);
+const PROPS = BUILTIN_PROPS;   // compatibilité
 
-// Pastille ou texte court d'une valeur de propriété personnalisée (vide → '')
-function customValueHTML(cp, v, forCard = false) {
-  if (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)) return '';
-  const chip = t => forCard ? `<span class="n-chip">${t}</span>` : t;
-  const opt = id => cp.options?.find(o => o.id === id);
-  const optPill = o => o ? `<span class="n-pill small c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>` : '';
-  if (cp.type === 'checkbox') return v ? chip(`☑ ${esc(cp.name)}`) : '';
-  if (cp.type === 'date') return chip(esc(new Date(v + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })));
-  if (cp.type === 'select') return optPill(opt(v));
-  if (cp.type === 'multi') return v.map(id => optPill(opt(id))).join('');
-  return chip(esc(v));
+// Affichage dans la page ouverte : 'show' (toujours), 'empty' (masquée si vide), 'hide' (toujours masquée)
+const PAGE_VIS_KEY = 'kata-page-vis';
+function pageVisOf(key) {
+  const cp = customDef(key);
+  if (cp) return cp.pageVis || 'show';
+  let m = {}; try { m = JSON.parse(localStorage.getItem(PAGE_VIS_KEY) || '{}'); } catch (e) {}
+  return m[key] || (key === 'status' || key === 'group' ? 'show' : 'empty');
 }
+function setPageVis(key, vis) {
+  const cp = customDef(key);
+  if (cp) { cp.pageVis = vis; return saveCustomProps(); }
+  let m = {}; try { m = JSON.parse(localStorage.getItem(PAGE_VIS_KEY) || '{}'); } catch (e) {}
+  m[key] = vis; try { localStorage.setItem(PAGE_VIS_KEY, JSON.stringify(m)); } catch (e) {}
+}
+
+const isEmptyVal = v => v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length) || (typeof v === 'number' && isNaN(v));
+const fmtDay = d => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtDateTime = d => d.toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const toDate = s => s ? new Date(s.length === 10 ? s + 'T00:00' : s) : null;
+const optOf = (cp, oid) => cp.options?.find(o => o.id === oid);
+const optPillHTML = o => o ? `<span class="n-pill small c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>` : '';
+
+// Valeur « brute » d'une propriété pour une carte (utilisée par l'affichage, les formules, le tri et les filtres)
+function rawValue(b, key, depth = 0) {
+  switch (key) {
+    case 'status': return statusDef(statusOf(b)).label;
+    case 'group': return groupDef(groupOf(b)).label;
+    case 'challenge': return challengeText(b);
+    case 'focus': return b.focusProcess || '';
+    case 'due': return toDate(b.targetDate);
+    case 'obstacle': return (b.obstacles || []).find(o => o.focus && !o.done)?.text || '';
+    case 'experiments': return (b.experiments || []).length;
+    case 'step': return { run: 'Run en cours', kata: 'Kata' }[b.session?.step] || '';
+  }
+  const cp = customDef(key);
+  if (!cp) return null;
+  const v = b.props?.[key];
+  switch (cp.type) {
+    case 'number': return v === '' || v === undefined || v === null ? null : Number(v);
+    case 'select': case 'status': return optOf(cp, v)?.label || '';
+    case 'multi': case 'person': return (v || []).map(id => optOf(cp, id)?.label).filter(Boolean);
+    case 'date': return toDate(v);
+    case 'checkbox': return !!v;
+    case 'files': return (v || []).map(f => f.name);
+    case 'relation': return (v || []).map(id => Store.get(id)).filter(Boolean).map(c => c.title || 'Sans titre');
+    case 'formula': try { return evalFormula(b, cp.formula, depth); } catch (e) { return new Error(e.message); }
+    case 'rollup': return computeRollup(b, cp, depth);
+    case 'created_time': return b.createdAt ? new Date(b.createdAt) : null;
+    case 'edited_time': return b.updatedAt ? new Date(b.updatedAt) : null;
+    case 'created_by': case 'edited_by': return ME;
+    case 'id': return b.seq ?? null;
+    case 'streak': return streakData(b, cp).hits;
+    default: return v ?? '';
+  }
+}
+
+// Formules : prop("Nom"), if(), and/or, maths, dates, textes
+function evalFormula(b, expr, depth = 0) {
+  if (!expr || !expr.trim()) return null;
+  if (depth > 6) throw new Error('Référence circulaire');
+  const unit = u => ({ days: 86400000, day: 86400000, jours: 86400000, hours: 3600000, heures: 3600000, minutes: 60000, weeks: 604800000, semaines: 604800000 })[u || 'days'] || 86400000;
+  const H = {
+    prop: name => {
+      const d = allProps().find(p => p.label.toLowerCase() === String(name).toLowerCase());
+      if (String(name).toLowerCase() === 'name' || String(name).toLowerCase() === 'titre') return b.title || '';
+      if (!d) throw new Error(`Propriété inconnue : ${name}`);
+      const v = rawValue(b, d.key, depth + 1);
+      if (v instanceof Error) throw v;
+      return v;
+    },
+    now: () => new Date(),
+    today: () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; },
+    if_: (c, a, z) => c ? a : z,
+    concat: (...a) => a.flat().map(x => x instanceof Date ? fmtDay(x) : x ?? '').join(''),
+    join: (arr, sep = ', ') => (arr || []).join(sep),
+    length: x => x == null ? 0 : Array.isArray(x) ? x.length : String(x).length,
+    round: (x, d = 0) => Math.round(x * 10 ** d) / 10 ** d,
+    floor: Math.floor, ceil: Math.ceil, abs: Math.abs, sqrt: Math.sqrt, pow: Math.pow,
+    min: (...a) => Math.min(...a.flat()), max: (...a) => Math.max(...a.flat()),
+    sum: (...a) => a.flat().reduce((t, x) => t + (+x || 0), 0),
+    mean: (...a) => { const l = a.flat(); return l.length ? l.reduce((t, x) => t + (+x || 0), 0) / l.length : 0; },
+    empty: x => isEmptyVal(x), not: x => !x,
+    contains: (a, x) => Array.isArray(a) ? a.includes(x) : String(a ?? '').includes(x),
+    lower: x => String(x ?? '').toLowerCase(), upper: x => String(x ?? '').toUpperCase(),
+    toNumber: x => Number(x), format: x => x instanceof Date ? fmtDay(x) : String(x ?? ''),
+    dateBetween: (a, z, u) => a && z ? Math.floor((new Date(a) - new Date(z)) / unit(u)) : null,
+    dateAdd: (d, n, u) => d ? new Date(new Date(d).getTime() + n * unit(u)) : null,
+    formatDate: d => d ? fmtDay(new Date(d)) : '',
+  };
+  const src = expr.replace(/\bif\s*\(/g, 'if_(').replace(/\band\b/g, '&&').replace(/\bor\b/g, '||');
+  const fn = new Function(...Object.keys(H), `"use strict"; return (${src});`);
+  return fn(...Object.values(H));
+}
+
+const ROLLUP_CALCS = {
+  show: 'Afficher les valeurs', count: 'Nombre de pages', count_values: 'Nombre de valeurs', sum: 'Somme', avg: 'Moyenne',
+  min: 'Minimum', max: 'Maximum', checked: 'Nombre cochées', percent_checked: '% cochées',
+};
+function computeRollup(b, cp, depth = 0) {
+  const r = cp.rollup || {};
+  if (!r.relation) return null;
+  const pages = (b.props?.[r.relation] || []).map(id => Store.get(id)).filter(Boolean);
+  const vals = r.target ? pages.map(p => r.target === '__title' ? p.title : rawValue(p, r.target, depth + 1)) : [];
+  const nums = vals.flat().map(Number).filter(x => !isNaN(x));
+  switch (r.calc || 'count') {
+    case 'count': return pages.length;
+    case 'count_values': return vals.flat().filter(v => !isEmptyVal(v)).length;
+    case 'sum': return nums.reduce((t, x) => t + x, 0);
+    case 'avg': return nums.length ? Math.round(nums.reduce((t, x) => t + x, 0) / nums.length * 100) / 100 : null;
+    case 'min': return nums.length ? Math.min(...nums) : null;
+    case 'max': return nums.length ? Math.max(...nums) : null;
+    case 'checked': return vals.filter(Boolean).length;
+    case 'percent_checked': return pages.length ? Math.round(vals.filter(Boolean).length / pages.length * 100) + ' %' : null;
+    default: return vals.flat().filter(v => !isEmptyVal(v)).map(v => v instanceof Date ? fmtDay(v) : v).join(', ');
+  }
+}
+
+// HTML d'une valeur ('' si vide). ctx : 'card' (pastilles du Kanban) ou 'page' (page ouverte)
+function valueHTML(b, key, ctx = 'card') {
+  const chip = (t, cls = '') => ctx === 'card' ? `<span class="n-chip ${cls}">${t}</span>` : t;
+  const fmt = v => v instanceof Error ? `<span class="err">Erreur : ${esc(v.message)}</span>`
+    : v instanceof Date ? esc(fmtDay(v)) : typeof v === 'boolean' ? (v ? '☑' : '☐')
+    : Array.isArray(v) ? esc(v.join(', ')) : typeof v === 'number' ? esc(v.toLocaleString('fr-FR')) : esc(v ?? '');
+  switch (key) {
+    case 'status': return pill(statusDef(statusOf(b))).replace('n-pill', ctx === 'card' ? 'n-pill small' : 'n-pill');
+    case 'group': { const g = groupDef(groupOf(b)); return `<span class="n-pill ${ctx === 'card' ? 'small' : ''} c-${g.color}" style="border-radius:4px">${esc(g.label)}</span>`; }
+    case 'challenge': case 'focus': { const v = rawValue(b, key); return v ? esc(v) : ''; }
+    case 'due': { const d = rawValue(b, key); return d ? chip(`🎯 ${esc(fmtDay(d))}`) : ''; }
+    case 'obstacle': { const v = rawValue(b, key); return v ? chip(`➜ ${esc(v)}`, 'obs') : ''; }
+    case 'experiments': { const n = rawValue(b, key); return n ? chip(`${n} exp.`) : ''; }
+    case 'step': { const v = rawValue(b, key); return v ? chip(v === 'Kata' ? '● Kata' : '▶ Run en cours') : ''; }
+  }
+  const cp = customDef(key);
+  if (!cp) return '';
+  const v = b.props?.[key];
+  switch (cp.type) {
+    case 'select': case 'status': return optPillHTML(optOf(cp, v));
+    case 'multi': case 'person': return (v || []).map(id => optPillHTML(optOf(cp, id))).join('');
+    case 'checkbox': return v ? (ctx === 'card' ? chip(`☑ ${esc(cp.name)}`) : '☑') : '';
+    case 'date': return v ? chip(esc(fmtDay(toDate(v)))) : '';
+    case 'url': return v ? chip(`<a href="${esc(/^https?:/.test(v) ? v : 'https://' + v)}" target="_blank" rel="noopener">${esc(v.replace(/^https?:\/\//, ''))}</a>`) : '';
+    case 'email': return v ? chip(`<a href="mailto:${esc(v)}">${esc(v)}</a>`) : '';
+    case 'phone': return v ? chip(`<a href="tel:${esc(v)}">${esc(v)}</a>`) : '';
+    case 'files': return (v || []).map(f => chip(`📎 <a href="${esc(f.url)}" target="_blank" rel="noopener" download="${esc(f.name)}">${esc(f.name)}</a>`)).join(ctx === 'card' ? '' : ' ');
+    case 'relation': return (v || []).map(id => Store.get(id)).filter(Boolean).map(c => chip(`↗ ${esc(c.title || 'Sans titre')}`)).join(ctx === 'card' ? '' : ' ');
+    case 'created_time': case 'edited_time': { const d = rawValue(b, key); return d ? chip(esc(fmtDateTime(d))) : ''; }
+    case 'created_by': case 'edited_by': return chip(ME);
+    case 'id': return b.seq != null ? chip(`${esc(cp.prefix || '')}${b.seq}`) : '';
+    case 'streak': { const sd = streakData(b, cp); return ctx === 'card' ? `<span class="n-chip streak-chip" title="${esc(cp.name)} : ${sd.hits}/${sd.n} · série en cours ${sd.current}">${streakHTML(sd)}</span>` : streakHTML(sd); }
+    case 'formula': case 'rollup': case 'number': { const r = rawValue(b, key); return isEmptyVal(r) && !(r instanceof Error) ? '' : chip(fmt(r)); }
+    default: return v ? (ctx === 'card' ? esc(v) : esc(v)) : '';
+  }
+}
+// Sur une carte, les textes longs forment une ligne, le reste des pastilles
+const isBlockProp = key => ['challenge', 'focus'].includes(key) || customDef(key)?.type === 'text';
+
+// ---------- Calculs de colonne (comme le pied de colonne Notion) ----------
+const AGG_FNS = {
+  count_all:       { group: 'Count',        label: 'Count all' },
+  count_values:    { group: 'Count',        label: 'Count values',        prop: true },
+  count_unique:    { group: 'Count',        label: 'Count unique values', prop: true },
+  count_empty:     { group: 'Count',        label: 'Count empty',         prop: true },
+  count_not_empty: { group: 'Count',        label: 'Count not empty',     prop: true },
+  percent_empty:   { group: 'Percent',      label: 'Percent empty',       prop: true },
+  percent_not_empty: { group: 'Percent',    label: 'Percent not empty',   prop: true },
+  sum:             { group: 'More options', label: 'Sum',     prop: 'number' },
+  avg:             { group: 'More options', label: 'Average', prop: 'number' },
+  median:          { group: 'More options', label: 'Median',  prop: 'number' },
+  min:             { group: 'More options', label: 'Min',     prop: 'number' },
+  max:             { group: 'More options', label: 'Max',     prop: 'number' },
+  range:           { group: 'More options', label: 'Range',   prop: 'number' },
+  earliest:        { group: 'Date',         label: 'Earliest date', prop: 'date' },
+  latest:          { group: 'Date',         label: 'Latest date',   prop: 'date' },
+  date_range:      { group: 'Date',         label: 'Date range',    prop: 'date' },
+};
+const NUMERIC_TYPES = ['number', 'formula', 'rollup', 'id', 'streak'];
+const DATE_TYPES = ['date', 'created_time', 'edited_time', 'formula'];
+const propKind = key => {
+  if (key === 'experiments') return 'number';
+  if (key === 'due') return 'date';
+  const cp = customDef(key);
+  if (!cp) return 'other';
+  if (['number', 'id', 'streak', 'rollup'].includes(cp.type)) return 'number';
+  if (['date', 'created_time', 'edited_time'].includes(cp.type)) return 'date';
+  if (cp.type === 'formula') return 'any';
+  return 'other';
+};
+function computeAgg(cards, agg) {
+  const def = AGG_FNS[agg?.fn] || AGG_FNS.count_all;
+  if (!agg || agg.fn === 'count_all' || !agg.prop) return String(cards.length);
+  const vals = cards.map(b => agg.prop === '__title' ? b.title : rawValue(b, agg.prop));
+  const filled = vals.filter(v => !isEmptyVal(v) && !(v instanceof Error));
+  const nums = filled.map(v => typeof v === 'number' ? v : Number(v)).filter(x => !isNaN(x));
+  const dates = filled.filter(v => v instanceof Date).map(d => d.getTime());
+  const pct = n => cards.length ? Math.round(n / cards.length * 100) + ' %' : '—';
+  const r2 = x => (Math.round(x * 100) / 100).toLocaleString('fr-FR');
+  const short = t => new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  switch (agg.fn) {
+    case 'count_values': return String(filled.reduce((n, v) => n + (Array.isArray(v) ? v.length : 1), 0));
+    case 'count_unique': return String(new Set(filled.flat().map(v => v instanceof Date ? v.getTime() : String(v))).size);
+    case 'count_empty': return String(cards.length - filled.length);
+    case 'count_not_empty': return String(filled.length);
+    case 'percent_empty': return pct(cards.length - filled.length);
+    case 'percent_not_empty': return pct(filled.length);
+    case 'sum': return r2(nums.reduce((t, x) => t + x, 0));
+    case 'avg': return nums.length ? r2(nums.reduce((t, x) => t + x, 0) / nums.length) : '—';
+    case 'median': { if (!nums.length) return '—'; const o = [...nums].sort((a, z) => a - z), m = o.length >> 1; return r2(o.length % 2 ? o[m] : (o[m - 1] + o[m]) / 2); }
+    case 'min': return nums.length ? r2(Math.min(...nums)) : '—';
+    case 'max': return nums.length ? r2(Math.max(...nums)) : '—';
+    case 'range': return nums.length ? r2(Math.max(...nums) - Math.min(...nums)) : '—';
+    case 'earliest': return dates.length ? short(Math.min(...dates)) : '—';
+    case 'latest': return dates.length ? short(Math.max(...dates)) : '—';
+    case 'date_range': return dates.length ? `${Math.round((Math.max(...dates) - Math.min(...dates)) / DAY)} j` : '—';
+  }
+  return String(cards.length);
+}
+const aggLabel = agg => {
+  if (!agg || agg.fn === 'count_all') return 'Count all';
+  const p = agg.prop === '__title' ? 'Name' : propDef(agg.prop)?.label || '?';
+  return `${AGG_FNS[agg.fn].label} · ${p}`;
+};
+
+// ---------- Tri et filtres sur n'importe quelle propriété ----------
+function sortValue(b, key) {
+  if (key === 'title') return (b.title || '').toLowerCase();
+  if (key === 'status') return STATUSES.findIndex(st => st.key === statusOf(b));
+  if (key === 'group') return GROUPS.findIndex(g => g.key === groupOf(b));
+  const cp = customDef(key);
+  if (cp && ['select', 'status'].includes(cp.type)) { const i = cp.options.findIndex(o => o.id === b.props?.[key]); return i < 0 ? Infinity : i; }
+  const v = rawValue(b, key);
+  if (v instanceof Date) return v.getTime();
+  if (Array.isArray(v)) return v.join(', ').toLowerCase();
+  if (typeof v === 'boolean') return v ? 0 : 1;
+  if (typeof v === 'number') return v;
+  if (v === null || v === undefined || v === '' || v instanceof Error) return Infinity;
+  return String(v).toLowerCase();
+}
+const filterChoices = key => {
+  if (key === 'group') return GROUPS.map(g => ({ id: g.key, html: `<span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span>` }));
+  if (key === 'status') return STATUSES.map(st => ({ id: st.key, html: pill(st) }));
+  const cp = customDef(key);
+  if (cp && PROP_TYPES[cp.type].options) return cp.options.map(o => ({ id: o.id, html: optPillHTML(o) }));
+  if (cp && cp.type === 'checkbox') return [{ id: 'checked', html: 'Coché' }, { id: 'unchecked', html: 'Non coché' }];
+  return [{ id: 'notempty', html: 'Non vide' }, { id: 'empty', html: 'Vide' }];
+};
+function matchFilter(b, key, sel) {
+  if (!sel?.length) return true;
+  if (key === 'group') return sel.includes(groupOf(b));
+  if (key === 'status') return sel.includes(statusOf(b));
+  const cp = customDef(key);
+  if (cp && PROP_TYPES[cp.type].options) { const v = b.props?.[key]; const ids = Array.isArray(v) ? v : [v]; return sel.some(x => ids.includes(x)); }
+  if (cp && cp.type === 'checkbox') return sel.includes(b.props?.[key] ? 'checked' : 'unchecked');
+  const v = rawValue(b, key);
+  return sel.includes(isEmptyVal(v) || v instanceof Error ? 'empty' : 'notempty');
+}
+const activeFilters = view => ({ ...view.cf, ...(view.groups.length ? { group: view.groups } : {}), ...(view.statuses.length ? { status: view.statuses } : {}) });
+const countFilters = view => Object.values(activeFilters(view)).reduce((n, a) => n + (a?.length || 0), 0);
 
 function orderedStatuses(view) {
   const known = view.order.map(statusDef).filter(Boolean);
@@ -992,12 +1352,18 @@ function orderedStatuses(view) {
 }
 
 function sortedVisions(view) {
-  let list = Store.list();
-  if (view.groups.length) list = list.filter(b => view.groups.includes(groupOf(b)));
-  if (view.statuses.length) list = list.filter(b => view.statuses.includes(statusOf(b)));
-  if (view.sort === 'title') list.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'fr'));
-  if (view.sort === 'due') list.sort((a, b) => (a.targetDate || '9999').localeCompare(b.targetDate || '9999'));
-  if (view.sort !== 'manual' && view.sortDir === 'desc') list.reverse();
+  const filters = activeFilters(view);
+  let list = Store.list().filter(b => Object.entries(filters).every(([k, sel]) => matchFilter(b, k, sel)));
+  if (view.sort !== 'manual' && (view.sort === 'title' || propDef(view.sort))) {
+    list.sort((a, z) => {
+      const x = sortValue(a, view.sort), y = sortValue(z, view.sort);
+      if (x === y) return 0;
+      if (x === Infinity) return 1;
+      if (y === Infinity) return -1;
+      return typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), 'fr');
+    });
+    if (view.sortDir === 'desc') list.reverse();
+  }
   return list;
 }
 
@@ -1025,9 +1391,21 @@ function renderKanban() {
 
 
   // Une case = une colonne × un sous-groupe (g = null : toute la colonne, sans séparation).
+  // Contrôle discret « réel / standard » : WIP (nombre de cartes) et Aging (jours dans la colonne)
+  const checker = (st, cards) => {
+    const std = view.std[st.key] || {};
+    if (!std.wip && !std.aging) return '';
+    const age = cards.length ? Math.max(...cards.map(ageDays)) : 0;
+    const wipOver = std.wip && cards.length > std.wip, ageOver = std.aging && age > std.aging;
+    return `<div class="n-check ${wipOver || ageOver ? 'over' : ''}" title="Réel / standard">
+      ${std.wip ? `<span class="${wipOver ? 'bad' : ''}">WIP ${cards.length}/${std.wip}</span>` : ''}
+      ${std.aging ? `<span class="${ageOver ? 'bad' : ''}">Aging ${age} j/${std.aging} j</span>` : ''}
+    </div>`;
+  };
   const cell = (st, g, style) => `
     <div class="n-cell c-${st.color}" style="${style}" data-status="${st.key}" data-group="${g ? g.key : ''}">
-      ${inCell(st.key, g?.key).map(b => visionCard(b, view.props)).join('')}
+      ${checker(st, inCell(st.key, g?.key))}
+      ${inCell(st.key, g?.key).map(b => visionCard(b, view.props, view.std[st.key]?.aging)).join('')}
       ${view.noCreate.includes(st.key) ? '' : `<button class="n-add" data-new="${st.key}" data-group="${g ? g.key : GROUPS[0].key}">${icon('plus')} New page</button>`}
     </div>`;
   const unsplit = st => view.subgroups && view.unsplit.includes(st.key);
@@ -1046,7 +1424,7 @@ function renderKanban() {
     groupsHTML += `
       <div class="n-group ${collapsed ? 'collapsed' : ''}" style="grid-row:${rowNo}">
         <button class="toggle" data-toggle="${g.key}" title="${collapsed ? 'Déplier' : 'Replier'}">${icon('tri')}</button>
-        <span class="n-pill c-${g.color}">${esc(g.label)}</span><span class="n-count">${n}</span>
+        <span class="n-pill c-${g.color}" data-group-rename="${g.key}" title="Double-clic pour renommer">${esc(g.label)}</span>${view.subAgg ? `<span class="n-count">${n}</span>` : ''}
         <span class="n-group-tools">
           <button class="n-icon-btn" data-group-more="${g.key}" title="Options du groupe">${icon('dots')}</button>
           <button class="n-icon-btn" data-group-add="${g.key}" title="Nouvelle page">${icon('plus')}</button>
@@ -1063,7 +1441,7 @@ function renderKanban() {
     groupsHTML += cols.map((st, i) => unsplit(st) ? cell(st, null, `grid-row:${from} / ${to};grid-column:${i + 1}`) : '').join('');
   }
 
-  const nFilters = view.groups.length + view.statuses.length;
+  const nFilters = countFilters(view);
   $('#app').innerHTML = `
     <header class="n-topbar">
       <span class="n-crumb">${icon('doc')}<span id="crumbTitle">${esc(boardTitle() || 'Sans titre')}</span></span>
@@ -1088,7 +1466,7 @@ function renderKanban() {
         <div class="n-board ${view.colorCols ? '' : 'nocolor'}" style="grid-template-columns: repeat(${nCols}, 276px)">
           ${cols.map(st => `
             <div class="n-head c-${st.color}">
-              ${pill(st)}<span class="n-count">${inCell(st.key).length}</span>
+              ${pill(st)}<button class="n-count n-agg" data-agg="${st.key}" title="${esc(aggLabel(view.agg[st.key]))}">${esc(computeAgg(inCell(st.key), view.agg[st.key]))}</button>
               <span class="n-head-tools">
                 <button class="n-icon-btn" data-col-more="${st.key}" title="Options du groupe">${icon('dots')}</button>
                 ${view.noCreate.includes(st.key) ? '' : `<button class="n-icon-btn" data-col-add="${st.key}" title="Nouvelle page">${icon('plus')}</button>`}
@@ -1154,7 +1532,7 @@ function renderKanban() {
         { icon: 'pencil', label: 'Renommer', onClick: () => renameInline(card) },
         { icon: 'copy', label: 'Dupliquer', onClick: () => { duplicateVision(id); renderKanban(); } },
         { sep: true }, { header: 'Déplacer vers' },
-        ...STATUSES.map(st => ({ html: pill(st), checked: statusOf(b) === st.key, onClick: () => { Store.patch(id, { status: st.key }); renderKanban(); } })),
+        ...STATUSES.map(st => ({ html: pill(st), checked: statusOf(b) === st.key, onClick: () => { setStatus(Store, id, st.key); renderKanban(); } })),
         { sep: true },
         { icon: 'trash', label: 'Supprimer', danger: true, onClick: () => { if (confirm('Supprimer cette Vision ?')) { Store.remove(id); renderKanban(); } } },
       ]);
@@ -1166,9 +1544,7 @@ function renderKanban() {
     cell.ondragleave = () => cell.classList.remove('drop');
     cell.ondrop = e => {
       e.preventDefault();
-      const fields = { status: cell.dataset.status };
-      if (cell.dataset.group) fields.group = cell.dataset.group;
-      Store.patch(e.dataTransfer.getData('text/plain'), fields);
+      setStatus(Store, e.dataTransfer.getData('text/plain'), cell.dataset.status, cell.dataset.group ? { group: cell.dataset.group } : {});
       renderKanban();
     };
   });
@@ -1195,6 +1571,18 @@ function renderKanban() {
         saveView(v); renderKanban();
         row.querySelector('.n-switch').classList.toggle('on', merged);
       } }] : []),
+      { header: 'Standards (réel / standard)' },
+      { icon: 'stack', label: 'WIP maximum', value: String(view.std[key]?.wip || '—'), onClick: () => {
+        const n = prompt('Nombre maximum de cartes dans la colonne (vide = aucun)', view.std[key]?.wip || '');
+        if (n === null) return;
+        const v = loadView(); v.std[key] = { ...(v.std[key] || {}), wip: parseInt(n, 10) > 0 ? parseInt(n, 10) : undefined }; saveView(v); renderKanban();
+      } },
+      { icon: 'clockUI', label: 'Aging maximum (jours)', value: String(view.std[key]?.aging || '—'), onClick: () => {
+        const n = prompt('Nombre maximum de jours dans la colonne (vide = aucun)', view.std[key]?.aging || '');
+        if (n === null) return;
+        const v = loadView(); v.std[key] = { ...(v.std[key] || {}), aging: parseInt(n, 10) > 0 ? parseInt(n, 10) : undefined }; saveView(v); renderKanban();
+      } },
+      { sep: true },
       { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hidden.push(key); saveView(view); renderKanban(); } },
     ]);
   });
@@ -1207,21 +1595,40 @@ function renderKanban() {
     saveView(view); renderKanban();
   });
 
+  // Calcul de colonne : Count / Percent / More options / Date
+  app.querySelectorAll('[data-agg]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const col = btn.dataset.agg;
+    const setAgg = agg => { const v = loadView(); v.agg[col] = agg; saveView(v); renderKanban(); };
+    const cur = view.agg[col] || { fn: 'count_all' };
+    const propsFor = kind => [
+      ...(kind === true ? [{ key: '__title', label: 'Name', icon: 'text' }] : []),
+      ...allProps().filter(p => kind === true || propKind(p.key) === kind || propKind(p.key) === 'any'),
+    ];
+    const fnMenu = (row, fn) => {
+      const def = AGG_FNS[fn];
+      if (!def.prop) return setAgg({ fn });
+      const list = propsFor(def.prop);
+      if (!list.length) return toast(def.prop === 'number' ? 'Aucune propriété numérique' : 'Aucune propriété de date');
+      openPop(row, [{ header: def.label + ' — propriété' }, ...list.map(p => ({ icon: p.icon, label: p.label, checked: cur.fn === fn && cur.prop === p.key, onClick: () => setAgg({ fn, prop: p.key }) }))]);
+    };
+    const groupMenu = (row, group) => openPop(row, Object.entries(AGG_FNS).filter(([, d]) => d.group === group).map(([fn, d]) => ({
+      label: d.label, checked: cur.fn === fn, value: d.prop ? '▸' : '', keepOpen: !!d.prop, onClick: r => fnMenu(r || row, fn),
+    })));
+    openPop(btn, ['Count', 'Percent', 'More options', 'Date'].map(g => ({ label: g, value: '▸', keepOpen: true, onClick: row => groupMenu(row, g) })));
+  });
+
   // Sous-groupes : ⋯, + et « New group »
   app.querySelectorAll('[data-group-add]').forEach(btn => btn.onclick = () => createVision(defaultTemplate(), cols.find(c => !view.noCreate.includes(c.key))?.key || 'incoming', btn.dataset.groupAdd));
   app.querySelectorAll('[data-group-more]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
     const g = groupDef(btn.dataset.groupMore);
+    const COLOR_NAMES = { default: 'Default', gray: 'Gray', brown: 'Brown', orange: 'Orange', yellow: 'Yellow', green: 'Green', blue: 'Blue', purple: 'Purple', pink: 'Pink', red: 'Red' };
     openPop(btn, [
-      { icon: 'pencil', label: 'Renommer', onClick: () => {
-        const name = prompt('Nom du groupe', g.label);
-        if (name && name.trim()) { g.label = name.trim(); saveGroups(); renderKanban(); }
-      } },
-      { header: 'Couleur' },
-      ...GROUP_COLORS.map(c => ({ html: `<span class="n-pill c-${c}" style="border-radius:4px">${esc(g.label)}</span>`, checked: g.color === c, onClick: () => { g.color = c; saveGroups(); renderKanban(); } })),
-      { sep: true },
-      { icon: 'hide', label: 'Masquer le groupe', onClick: () => { view.hiddenSub.push(g.key); saveView(view); renderKanban(); } },
-      { icon: 'trash', label: 'Supprimer le groupe', danger: true, onClick: () => {
+      { icon: 'subgroup', label: 'Edit groups', onClick: () => openPanel('subgroup') },
+      { icon: 'eye', label: view.subAgg ? 'Hide aggregation' : 'Show aggregation', onClick: () => { view.subAgg = !view.subAgg; saveView(view); renderKanban(); } },
+      { icon: 'eyeOff', label: 'Hide group', onClick: () => { view.hiddenSub.push(g.key); saveView(view); renderKanban(); } },
+      { icon: 'trash', label: 'Move to Trash', onClick: () => {
         if (GROUPS.length === 1) return toast('Il faut garder au moins un groupe');
         const n = Store.list().filter(b => groupOf(b) === g.key).length;
         if (!confirm(`Supprimer le groupe « ${g.label} » ?${n ? ` Ses ${n} carte(s) passeront dans « ${GROUPS.find(x => x !== g).label} ».` : ''}`)) return;
@@ -1229,7 +1636,15 @@ function renderKanban() {
         Store.list().filter(b => b.group === g.key).forEach(b => Store.patch(b.id, { group: GROUPS[0].key }));
         renderKanban();
       } },
+      { sep: true },
+      { header: 'Colors' },
+      ...Object.entries(COLOR_NAMES).map(([c, l]) => ({ html: `<span class="sw c-${c}"></span><span class="name">${l}</span>`, checked: (g.color || 'default') === c, onClick: () => { g.color = c; saveGroups(); renderKanban(); } })),
     ]);
+  });
+  app.querySelectorAll('[data-group-rename]').forEach(pl => pl.ondblclick = () => {
+    const g = groupDef(pl.dataset.groupRename);
+    const name = prompt('Nom du groupe', g.label);
+    if (name && name.trim()) { g.label = name.trim(); saveGroups(); renderKanban(); }
   });
   const newGroup = $('#newGroup');
   if (newGroup) newGroup.onclick = e => {
@@ -1334,7 +1749,7 @@ function renderPanel() {
     <div class="vp-row" data-switch="${key}"><span class="lbl">${label}</span><span class="n-switch ${view[key] ? 'on' : ''}"></span></div>`;
   const check = on => on ? `<span class="check">${icon('check')}</span>` : '';
   const eyeBtn = (on, attr) => `<button class="eye" ${attr} title="${on ? 'Masquer' : 'Afficher'}">${icon(on ? 'eye' : 'eyeOff')}</button>`;
-  const nFilters = view.groups.length + view.statuses.length;
+  const nFilters = countFilters(view);
 
   const pages = {
     root: () => `
@@ -1365,18 +1780,20 @@ function renderPanel() {
             </div>`).join('')}` : ''}`;
     },
 
-    filter: () => `
-      ${head('Filter', true)}
-      <div class="vp-label">Pro/Perso</div>
-      ${GROUPS.map(g => `<div class="vp-row" data-filter-group="${g.key}"><span class="n-pill c-${g.color}" style="border-radius:4px">${g.label}</span>${check(view.groups.includes(g.key))}</div>`).join('')}
-      <div class="vp-label">Status</div>
-      ${STATUSES.map(st => `<div class="vp-row" data-filter-status="${st.key}">${pill(st)}${check(view.statuses.includes(st.key))}</div>`).join('')}
-      ${nFilters ? `<div class="vp-sep"></div><div class="vp-row danger" data-act="clearFilters"><span class="ic">${icon('trash')}</span><span class="lbl">Retirer les filtres</span></div>` : ''}`,
+    filter: () => {
+      const f = activeFilters(view);
+      return `
+        ${head('Filter', true)}
+        ${nFilters ? `<div class="vp-row danger" data-act="clearFilters"><span class="ic">${icon('trash')}</span><span class="lbl">Retirer les filtres (${nFilters})</span></div><div class="vp-sep"></div>` : ''}
+        ${allProps().map(p => `
+          <div class="vp-label vp-flabel">${icon(p.icon)} ${esc(p.label)}</div>
+          ${filterChoices(p.key).map(c => `<div class="vp-row" data-cf="${p.key}" data-cv="${esc(c.id)}"><span class="lbl">${c.html}</span>${check((f[p.key] || []).includes(c.id))}</div>`).join('')}`).join('')}`;
+    },
 
     sort: () => `
       ${head('Sort', true)}
-      ${[['manual', 'Manuel'], ['title', 'Name'], ['due', 'Échéance (Target)']].map(([k, l]) => `
-        <div class="vp-row" data-sort="${k}"><span class="lbl">${l}</span>${check(view.sort === k)}</div>`).join('')}
+      ${[['manual', 'Manuel', null], ['title', 'Name', 'text'], ...allProps().map(p => [p.key, p.label, p.icon])].map(([k, l, ic]) => `
+        <div class="vp-row" data-sort="${k}">${ic ? `<span class="ic">${icon(ic)}</span>` : ''}<span class="lbl">${esc(l)}</span>${check(view.sort === k)}</div>`).join('')}
       ${view.sort !== 'manual' ? `<div class="vp-sep"></div>${row(null, 'Ordre', view.sortDir === 'asc' ? 'Ascending' : 'Descending', null, 'data-act="sortDir" style="cursor:pointer"')}` : ''}`,
 
     group: () => {
@@ -1424,7 +1841,7 @@ function renderPanel() {
   el.onclick = e => {
     e.stopPropagation();
     closePop();
-    const t = e.target.closest('[data-vp-go],[data-vp-close],[data-act],[data-prop],[data-col],[data-sub],[data-switch],[data-filter-group],[data-filter-status],[data-sort]');
+    const t = e.target.closest('[data-vp-go],[data-vp-close],[data-act],[data-prop],[data-col],[data-sub],[data-switch],[data-cf],[data-sort]');
     if (!t || t.disabled) return;
     const d = t.dataset;
     if ('vpClose' in d) return closePanel();
@@ -1433,12 +1850,15 @@ function renderPanel() {
     if (d.col) view.hidden = toggleIn(view.hidden, d.col);
     if (d.sub) view.hiddenSub = toggleIn(view.hiddenSub, d.sub);
     if (d.switch) view[d.switch] = !view[d.switch];
-    if (d.filterGroup) view.groups = toggleIn(view.groups, d.filterGroup);
-    if (d.filterStatus) view.statuses = toggleIn(view.statuses, d.filterStatus);
+    if (d.cf) {
+      if (d.cf === 'group') view.groups = toggleIn(view.groups, d.cv);
+      else if (d.cf === 'status') view.statuses = toggleIn(view.statuses, d.cv);
+      else { view.cf[d.cf] = toggleIn(view.cf[d.cf] || [], d.cv); if (!view.cf[d.cf].length) delete view.cf[d.cf]; }
+    }
     if (d.sort) view.sort = d.sort;
     if (d.act === 'hideAllProps') view.props = [];
     if (d.act === 'showAllProps') view.props = [...view.props, ...allProps().map(p => p.key).filter(k => !view.props.includes(k))];
-    if (d.act === 'clearFilters') { view.groups = []; view.statuses = []; }
+    if (d.act === 'clearFilters') { view.groups = []; view.statuses = []; view.cf = {}; }
     if (d.act === 'sortDir') view.sortDir = view.sortDir === 'asc' ? 'desc' : 'asc';
     if (d.act === 'hideAllCols') view.hidden = STATUSES.map(st => st.key);
     if (d.act === 'showAllCols') view.hidden = [];
@@ -1482,26 +1902,17 @@ function renderPanel() {
 }
 
 /* Carte : titre + propriétés visibles, dans l'ordre choisi */
-function visionCard(b, props = []) {
-  const active = (b.obstacles || []).find(o => o.focus && !o.done);
-  const due = b.targetDate ? new Date(b.targetDate + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
-  const nExp = (b.experiments || []).length;
-  const stepLabel = { run: '▶ Run en cours', kata: '● Kata' }[b.session?.step];
+function visionCard(b, props = [], agingStd) {
   const parts = [];
   let chips = [];
   const flush = () => { if (chips.length) { parts.push(`<div class="chips">${chips.join('')}</div>`); chips = []; } };
   props.forEach(k => {
-    if (k === 'challenge' && challengeText(b)) { flush(); parts.push(`<div class="prop">${esc(challengeText(b))}</div>`); }
-    if (k === 'focus' && b.focusProcess) { flush(); parts.push(`<div class="prop">${esc(b.focusProcess)}</div>`); }
-    if (k === 'obstacle' && active) chips.push(`<span class="n-chip obs" title="Obstacle en cours">➜ ${esc(active.text)}</span>`);
-    if (k === 'due' && due) chips.push(`<span class="n-chip" title="Target Condition">🎯 ${esc(due)}</span>`);
-    if (k === 'experiments' && nExp) chips.push(`<span class="n-chip">${nExp} exp.</span>`);
-    if (k === 'step' && stepLabel) chips.push(`<span class="n-chip">${stepLabel}</span>`);
-    if (k === 'status') chips.push(pill(statusDef(statusOf(b))).replace('n-pill', 'n-pill small'));
-    if (k === 'group') { const g = groupDef(groupOf(b)); chips.push(`<span class="n-pill small c-${g.color}" style="border-radius:4px">${g.label}</span>`); }
-    const cp = customDef(k);
-    if (cp) { const html = customValueHTML(cp, b.props?.[k], true); if (html) chips.push(html); }
+    const html = valueHTML(b, k, 'card');
+    if (!html) return;
+    if (isBlockProp(k)) { flush(); parts.push(`<div class="prop">${html}</div>`); }
+    else chips.push(html);
   });
+  if (agingStd && ageDays(b) > agingStd) chips.push(`<span class="n-chip aging" title="Dans cette colonne depuis ${ageDays(b)} j (standard ${agingStd} j)">⏳ ${ageDays(b)} j</span>`);
   flush();
   return `
     <div class="n-card" draggable="true" data-id="${esc(b.id)}">
@@ -1600,6 +2011,96 @@ const ICONSET = {
   loop: '<path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/>',
   graduation: '<path d="M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5M22 9v6"/>',
   money: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 9v.01M18 15v.01"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+  bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+  box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',
+  bug: '<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M12 8V5M9 5l1.5 2M15 5l-1.5 2M3 12h4M17 12h4M3 17h4M17 17h4"/>',
+  building: '<rect x="4" y="3" width="10" height="18"/><path d="M14 9h6v12h-6M7 7h1M10 7h1M7 11h1M10 11h1M7 15h1M10 15h1"/>',
+  cake: '<path d="M4 21V13h16v8zM4 17c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5M12 13V9M12 6a1 1 0 0 1 0-2"/>',
+  car: '<path d="M3 16v-4l2-5h14l2 5v4zM3 16v2M21 16v2"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/>',
+  cart: '<path d="M3 4h2l2.5 11h11L21 7H7"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  cloud: '<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/>',
+  crown: '<path d="M3 18l2-10 5 5 2-7 2 7 5-5 2 10z"/>',
+  diamond: '<path d="M6 4h12l3 5-9 11L3 9zM3 9h18M9 4l3 5 3-5M12 9v11"/>',
+  download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+  envelope: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  feather: '<path d="M20 4c-9 0-14 5-14 14l-2 2M6 18l8-8M9 15h6c3-2 5-6 5-11"/>',
+  film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+  folder: '<path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
+  gift: '<rect x="3" y="8" width="18" height="5"/><path d="M5 13v8h14v-8M12 8v13M12 8c-2 0-5-1-5-3s3-2 5 3c2-5 5-5 5-3s-3 3-5 3"/>',
+  hammer: '<path d="M14 4l6 6-3 3-6-6zM11 7L3 15l3 3 8-8"/>',
+  headphones: '<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+  hourglass: '<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9"/>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
+  inbox: '<path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  laptop: '<rect x="5" y="5" width="14" height="10" rx="1"/><path d="M2 19h20l-2-4H4z"/>',
+  layers: '<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  magnet: '<path d="M5 3v9a7 7 0 0 0 14 0V3h-4v9a3 3 0 0 1-6 0V3zM5 7h4M15 7h4"/>',
+  map: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/>',
+  medal: '<circle cx="12" cy="15" r="5"/><path d="M8.5 11L6 3h4l2 5 2-5h4l-2.5 8"/>',
+  megaphone: '<path d="M3 10v4h3l8 5V5L6 10zM18 9a4 4 0 0 1 0 6M6 14l1 6h3l-1-5"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/>',
+  paper: '<path d="M22 2L2 10l8 3 3 8zM10 13l12-11"/>',
+  paw: '<circle cx="7" cy="9" r="1.8"/><circle cx="11" cy="6" r="1.8"/><circle cx="15" cy="7" r="1.8"/><circle cx="18" cy="11" r="1.8"/><path d="M8 18c0-3 2-5 4-5s5 2 5 5-3 3-4.5 2-2-1-4.5 0-.5-2 0-2z"/>',
+  plane: '<path d="M2 13l8-2 5-8h2l-2 8 6 1 2-2h1l-1 4 1 4h-1l-2-2-6 1 2 8h-2l-5-8-8-2z"/>',
+  plant: '<path d="M12 21v-9M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 15c0-3-2-5-5-5 0 3 2 5 5 5M7 21h10"/>',
+  printer: '<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="14" width="12" height="7"/>',
+  question: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.01"/>',
+  receipt: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6"/>',
+  recycle: '<path d="M7 19H4l3-5M17 19h3l-3-5M9 5l3-3 3 3M12 2v6M7 14l-3 5M17 14l3 5"/>',
+  scissors: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5l12 9M8 16.5l12-9"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  ship: '<path d="M3 16l2 4h14l2-4zM5 16V10h14v6M12 10V3M8 10V6h8v4"/>',
+  shirt: '<path d="M8 3l-5 3 2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0z"/>',
+  smile: '<circle cx="12" cy="12" r="9"/><path d="M8 14c1 1.5 2.3 2 4 2s3-.5 4-2"/><circle cx="9" cy="10" r=".8" fill="currentColor"/><circle cx="15" cy="10" r=".8" fill="currentColor"/>',
+  snow: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  stack: '<rect x="4" y="4" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8zM7.5 8.5v.01"/>',
+  terminal: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M12 15h5"/>',
+  thumb: '<path d="M7 21H4V10h3zM7 10l4-7c1.5 0 2.5 1 2.5 2.5L13 9h6a2 2 0 0 1 2 2.3l-1.3 7.2A2 2 0 0 1 17.7 21H7"/>',
+  timer2: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6M19 5l1.5 1.5"/>',
+  tools: '<path d="M14 7l3-3 3 3-3 3M14 7L4 17l3 3 10-10M17 10l-3-3"/>',
+  train: '<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/><circle cx="9" cy="14" r=".8" fill="currentColor"/><circle cx="15" cy="14" r=".8" fill="currentColor"/>',
+  tree: '<path d="M12 22v-5M12 2l6 8h-3l4 6H5l4-6H6z"/>',
+  umbrella: '<path d="M3 12a9 9 0 0 1 18 0zM12 12v7a2 2 0 0 1-4 0"/>',
+  video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+  wallet: '<path d="M4 6h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 6l11-3v3M16 13h4"/>',
+  water: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  wifi: '<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5v.01"/>',
+  wrench: '<path d="M15 4a5 5 0 0 0-5 6.5L3 17.5 6.5 21l7-7A5 5 0 0 0 20 9l-3 3-3-1-1-3z"/>',
+  yoga: '<circle cx="12" cy="4.5" r="1.8"/><path d="M12 7v6M6 10l6 3 6-3M8 21l4-8 4 8M5 21h14"/>',
+  zap: '<circle cx="12" cy="12" r="9"/><path d="M13 6l-4 7h4l-1 5 4-7h-4z"/>',
+  anchor: '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M5 13a7 7 0 0 0 14 0M8 11h8"/>',
+  atom: '<circle cx="12" cy="12" r="1.5" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/>',
+  battery: '<rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2M5 10v4M8 10v4M11 10v4"/>',
+  bike: '<circle cx="6" cy="16" r="4"/><circle cx="18" cy="16" r="4"/><path d="M6 16l4-8h5l3 8M10 8l2 8h-6M14 5h3"/>',
+  brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h1V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-1V4z"/>',
+  brush: '<path d="M20 3L10 13M7 14c-2 0-3 1.5-3 3.5S3 21 3 21s5 0 6-2 0-5-2-5z"/>',
+  chess: '<path d="M8 21h8M9 18h6l-1-6h-4zM10 12V9h4v3M12 3v4M10 5h4"/>',
+  dice: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="16" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/>',
+  flask: '<path d="M9 3h6M10 3v6L4 19a1.5 1.5 0 0 0 1.3 2h13.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7 14h10"/>',
+  guitar: '<path d="M19 3l2 2-6 6M14 10a3 3 0 0 0-4 0c-1 1-1 2-2.5 2.5S4 13 4 16s3 5 5 5 3-1.5 3.5-3.5S13 15 14 14a3 3 0 0 0 0-4z"/><circle cx="10" cy="15" r="1.3"/>',
+  handshake: '<path d="M2 11l4-4 4 2 3-2 4 1 5 3M2 11l6 6 2-1 2 2 2-1 2 1 4-5M9 14l2 2M12 13l2 2"/>',
+  infinity: '<path d="M7 16a4 4 0 1 1 0-8c3 0 7 8 10 8a4 4 0 1 0 0-8c-3 0-7 8-10 8z"/>',
+  moneybag: '<path d="M9 4h6l-2 3h-2zM8 8h8c3 3 4 6 4 9a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4c0-3 1-6 4-9zM12 11v7M10 12.5c0-1 4-1 4 .5s-4 1.5-4 3 4 1.5 4 .5"/>',
+  percent: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  pizza: '<path d="M12 21L3 5a15 15 0 0 1 18 0z"/><circle cx="10" cy="9" r="1" fill="currentColor"/><circle cx="14" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/>',
+  robot: '<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13v.01M15 13v.01M9 16h6M2 12v3M22 12v3"/><circle cx="12" cy="3.5" r="1"/>',
+  sailboat: '<path d="M3 18h18l-2 3H5zM12 3v13M12 4l7 11h-7M12 7l-5 8h5"/>',
+  seedling: '<path d="M12 21v-8M12 13c0-4-3-6-7-6 0 4 3 6 7 6zM12 11c0-4 3-7 7-7 0 4-3 7-7 7"/>',
+  soccer: '<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10zM12 7V3M16 10l4-1M14.5 15l2 4M9.5 15l-2 4M8 10l-4-1"/>',
+  swim: '<circle cx="17" cy="6" r="2"/><path d="M2 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1M6 14l5-5 3 2 3-2"/>',
+  telescope: '<path d="M3 10l14-6 2 5L5 15zM10 13l-3 8M11 13l4 8M17 4l2-1 2 5-2 1"/>',
+  ticket: '<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4zM14 7v10" stroke-dasharray="0"/>',
+  translate: '<path d="M3 5h10M8 3v2c0 4-2 7-5 9M5 9c1 2 3 4 6 5M13 21l4-10 4 10M14.5 18h5"/>',
+  trophy2: '<path d="M7 3h10v6a5 5 0 0 1-10 0zM12 14v4M8 21h8"/>',
+  users2: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
+  weight: '<path d="M6 8h12l2 13H4zM12 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>',
+  wind: '<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/>',
 };
 const EMOJI_LIST = [
   ['🎯','cible objectif target'],['🏃','course running sport'],['🎹','piano musique'],['💼','travail pro job'],['🏭','usine factory'],
@@ -1849,7 +2350,7 @@ function cloneDoc(src, fields) {
   const b = JSON.parse(JSON.stringify(src || newBoard('')));
   const idMap = {};
   ['name', 'isDefault', 'repeat', 'lastRepeat', 'order'].forEach(k => delete b[k]);
-  Object.assign(b, { id: 'v-' + uid() + uid(), createdAt: Date.now() }, fields);
+  Object.assign(b, { id: 'v-' + uid() + uid(), createdAt: Date.now(), seq: nextSeq() }, fields);
   b.obstacles = (b.obstacles || []).map(o => { const id = uid(); idMap[o.id] = id; return { ...o, id }; });
   b.experiments = (b.experiments || []).map(x => ({ ...x, id: uid(), obstacleId: idMap[x.obstacleId] ?? null }));
   // Nouvelle carte = nouveau cycle : pas de session en cours, checklist décochée.
@@ -1880,6 +2381,291 @@ function createVision(tpl, status, group) {
   openPeek('vision', b.id, { isNew: true });
   setTimeout(() => $('#peekTitle').focus(), 280);
 }
+
+/* ---------- Propriétés dans la page ouverte ---------- */
+function propEditorHTML(d, p) {
+  const empty = '<span class="empty">Empty</span>';
+  if (p.key === 'status') return `<button class="val" data-edit="status">${pill(statusDef(statusOf(d)))}</button>`;
+  if (p.key === 'group') { const g = groupDef(groupOf(d)); return `<button class="val" data-edit="group"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>`; }
+  if (p.kind === 'story') return `<span class="v ro" title="Vient du storyboard (lecture seule)">${valueHTML(d, p.key, 'page') || empty}</span>`;
+  const cp = customDef(p.key), v = d.props?.[p.key], t = cp.type;
+  if (t === 'checkbox') return `<label class="pv-check"><input type="checkbox" data-pv="${cp.key}" ${v ? 'checked' : ''}></label>`;
+  if (PROP_TYPES[t].options) return `<button class="val" data-pv-select="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
+  if (t === 'files') return `<button class="val" data-pv-files="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
+  if (t === 'relation') return `<button class="val" data-pv-rel="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
+  if (t === 'streak') {
+    const sd = streakData(d, cp);
+    return `<span class="streak-edit">${streakHTML(sd, true)}
+      <span class="every">tous les <input type="number" min="1" data-streak-every="${cp.key}" value="${sd.every}"> j · ${sd.hits}/${sd.n} · série ${sd.current}</span></span>`;
+  }
+  if (PROP_TYPES[t].readOnly) return `<span class="v ro">${valueHTML(d, cp.key, 'page') || empty}</span>`;
+  const type = { number: 'number', date: 'date', url: 'url', email: 'email', phone: 'tel' }[t] || 'text';
+  const href = t === 'url' && v ? (/^https?:/.test(v) ? v : 'https://' + v) : t === 'email' && v ? 'mailto:' + v : t === 'phone' && v ? 'tel:' + v : '';
+  return `<span class="pv-wrap"><input class="pv" type="${type}" data-pv="${cp.key}" value="${esc(v ?? '')}" placeholder="Empty">${href ? `<a class="pv-open" href="${esc(href)}" target="_blank" rel="noopener" title="Ouvrir">${icon('arrowUR')}</a>` : ''}</span>`;
+}
+
+// Change le type d'une propriété et convertit les valeurs de toutes les pages et templates
+function changePropType(cp, to) {
+  const from = cp.type;
+  if (from === to) return;
+  const optsFrom = PROP_TYPES[from].options, optsTo = PROP_TYPES[to].options;
+  cp.options ||= [];
+  const labelFor = v => Array.isArray(v) ? v : (v === undefined || v === null || v === '' ? [] : [v]);
+  const convert = v => {
+    if (v === undefined || v === null) return v;
+    if (optsFrom && optsTo) return PROP_TYPES[to].many ? labelFor(v) : labelFor(v)[0] ?? null;
+    if (!optsFrom && optsTo && ['text', 'number', 'url', 'email', 'phone'].includes(from) && String(v).trim()) {
+      let o = cp.options.find(x => x.label === String(v).trim());
+      if (!o) { o = { id: uid(), label: String(v).trim(), color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] }; cp.options.push(o); }
+      return PROP_TYPES[to].many ? [o.id] : o.id;
+    }
+    if (optsFrom && ['text', 'url', 'email', 'phone'].includes(to)) return labelFor(v).map(id => optOf(cp, id)?.label).filter(Boolean).join(', ');
+    if (to === 'checkbox') return !!v && v !== 'false';
+    if (to === 'number') { const n = parseFloat(v); return isNaN(n) ? null : n; }
+    if (to === 'date') return /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? String(v).slice(0, 10) : null;
+    if (['text', 'url', 'email', 'phone'].includes(to) && ['text', 'number', 'url', 'email', 'phone', 'date'].includes(from)) return String(v);
+    return null;
+  };
+  [Store, Templates].forEach(St => St.list().forEach(doc => {
+    if (doc.props && cp.key in doc.props) { const nv = convert(doc.props[cp.key]); St.patch(doc.id, { props: { ...doc.props, [cp.key]: nv } }); }
+  }));
+  cp.type = to;
+  if (optsTo && !cp.options.length && DEFAULT_OPTIONS[to]) cp.options = DEFAULT_OPTIONS[to]();
+  if (to === 'streak') cp.streakLength ||= 7;
+  saveCustomProps();
+}
+
+function editFormula(cp, doc) {
+  const f = prompt('Formule — ex. : prop("Points") * 2 · if(prop("Engagé"), "Oui", "Non") · dateBetween(prop("Échéance (Target)"), now(), "days") · concat(prop("Status"), " – ", prop("Pro/Perso"))', cp.formula || '');
+  if (f === null) return;
+  cp.formula = f; saveCustomProps();
+  if (doc) { const r = rawValue(doc, cp.key); if (r instanceof Error) toast('Formule invalide : ' + r.message); }
+}
+
+function configureRollup(cp, after) {
+  const rels = CUSTOM_PROPS.filter(x => x.type === 'relation');
+  if (!rels.length) return toast('Ajoutez d\'abord une propriété de type Relation');
+  const anchor = document.querySelector(`[data-prop-menu="${cp.key}"]`) || $('#peekProps');
+  const step3 = () => openPop(anchor, [{ header: 'Calcul' }, ...Object.entries(ROLLUP_CALCS).map(([k, l]) => ({ label: l, checked: (cp.rollup.calc || 'count') === k, onClick: () => { cp.rollup.calc = k; saveCustomProps(); after?.(); } }))]);
+  const step2 = () => openPop(anchor, [{ header: 'Propriété à agréger' },
+    { label: 'Name', checked: cp.rollup.target === '__title', keepOpen: true, onClick: () => { cp.rollup.target = '__title'; step3(); } },
+    ...allProps().filter(x => x.key !== cp.key).map(x => ({ icon: x.icon, label: x.label, checked: cp.rollup.target === x.key, keepOpen: true, onClick: () => { cp.rollup.target = x.key; step3(); } }))]);
+  cp.rollup ||= {};
+  openPop(anchor, [{ header: 'Relation' }, ...rels.map(r => ({ icon: 'arrowUR', label: r.name, checked: cp.rollup.relation === r.key, keepOpen: true, onClick: () => { cp.rollup.relation = r.key; step2(); } }))]);
+}
+
+function bindPropEditors(S, id, d, rerender, { toggleMore }) {
+  const root = $('#peekProps');
+  const setVal = (key, value) => { const cur = S.get(id); S.patch(id, { props: { ...(cur.props || {}), [key]: value } }); };
+  const getVal = key => (S.get(id).props || {})[key];
+
+  root.querySelectorAll('input[data-pv]').forEach(inp => {
+    if (inp.type === 'checkbox') inp.onchange = () => { setVal(inp.dataset.pv, inp.checked); };
+    else {
+      inp.oninput = () => setVal(inp.dataset.pv, customDef(inp.dataset.pv).type === 'number' ? (inp.value === '' ? null : Number(inp.value)) : inp.value);
+      inp.onchange = rerender;   // met à jour le lien ↗ et les propriétés calculées
+    }
+  });
+
+  // Status / Pro/Perso
+  root.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    if (btn.dataset.edit === 'status') openPop(btn, STATUSES.map(st => ({ html: pill(st), checked: statusOf(S.get(id)) === st.key, onClick: () => { setStatus(S, id, st.key); rerender(); } })));
+    else openPop(btn, GROUPS.map(gr => ({ html: `<span class="n-pill c-${gr.color}" style="border-radius:4px">${esc(gr.label)}</span>`, checked: groupOf(S.get(id)) === gr.key, onClick: () => { S.patch(id, { group: gr.key }); rerender(); } })));
+  });
+
+  // Select / Multi-select / Status / Person
+  root.querySelectorAll('[data-pv-select]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const cp = customDef(btn.dataset.pvSelect), many = PROP_TYPES[cp.type].many;
+    const openList = () => {
+      const cur = getVal(cp.key);
+      const has = oid => many ? (cur || []).includes(oid) : cur === oid;
+      openPop(btn, [
+        { html: '<input class="pop-input" id="optInput" placeholder="Rechercher ou créer une option…" autocomplete="off">', keepOpen: true },
+        ...(cp.options.length ? [{ header: many ? 'Sélectionnez une ou plusieurs options' : 'Sélectionnez une option' }] : []),
+        ...cp.options.map(o => ({ html: optPillHTML(o), checked: has(o.id), keepOpen: many, onClick: () => {
+          if (many) { const list = getVal(cp.key) || []; setVal(cp.key, has(o.id) ? list.filter(x => x !== o.id) : [...list, o.id]); rerender(); openList(); }
+          else { setVal(cp.key, has(o.id) ? null : o.id); rerender(); }
+        } })),
+      ]);
+      const inp = $('#optInput');
+      inp.focus();
+      inp.oninput = () => {
+        const q = inp.value.trim().toLowerCase();
+        document.querySelectorAll('#nPop .row').forEach(r => { if (r.querySelector('.n-pill')) r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+      };
+      inp.onkeydown = ev => {
+        if (ev.key !== 'Enter' || !inp.value.trim()) return;
+        const label = inp.value.trim();
+        let o = cp.options.find(x => x.label.toLowerCase() === label.toLowerCase());
+        if (!o) { o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] }; cp.options.push(o); saveCustomProps(); }
+        const list = getVal(cp.key) || [];
+        setVal(cp.key, many ? [...new Set([...list, o.id])] : o.id);
+        rerender();
+        if (many) openList(); else closePop();
+      };
+    };
+    openList();
+  });
+
+  // Files & media
+  root.querySelectorAll('[data-pv-files]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const key = btn.dataset.pvFiles;
+    const files = getVal(key) || [];
+    openPop(btn, [
+      ...files.map((f, i) => ({ icon: 'clip', label: f.name, onClick: () => window.open(f.url, '_blank') })),
+      ...files.map((f, i) => ({ icon: 'trash', label: `Retirer « ${f.name} »`, danger: true, onClick: () => { setVal(key, files.filter((_, j) => j !== i)); rerender(); } })),
+      ...(files.length ? [{ sep: true }] : []),
+      { icon: 'download', label: 'Téléverser un fichier…', onClick: () => {
+        const inp = document.createElement('input');
+        inp.type = 'file';
+        inp.onchange = () => {
+          const f = inp.files[0];
+          if (!f) return;
+          if (f.size > 1.5 * 1024 * 1024) return toast('Fichier trop lourd (1,5 Mo max) : ajoutez plutôt un lien');
+          const rd = new FileReader();
+          rd.onload = () => { setVal(key, [...(getVal(key) || []), { name: f.name, url: rd.result }]); rerender(); };
+          rd.readAsDataURL(f);
+        };
+        inp.click();
+      } },
+      { icon: 'link', label: 'Ajouter un lien…', onClick: () => {
+        const url = prompt('Adresse du fichier ou du média');
+        if (!url) return;
+        const name = decodeURIComponent(url.split('/').pop().split('?')[0]) || url;
+        setVal(key, [...(getVal(key) || []), { name, url: /^https?:|^data:/.test(url) ? url : 'https://' + url }]); rerender();
+      } },
+    ]);
+  });
+
+  // Relation (vers d'autres cartes)
+  root.querySelectorAll('[data-pv-rel]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const key = btn.dataset.pvRel;
+    const openList = () => {
+      const cur = getVal(key) || [];
+      const pages = Store.list().filter(x => x.id !== id);
+      openPop(btn, [
+        { html: '<input class="pop-input" id="relInput" placeholder="Rechercher une page…" autocomplete="off">', keepOpen: true },
+        { header: 'Pages liées' },
+        ...pages.map(x => ({ html: `<span class="tm-ico">${iconHTML(x.icon) || DEFAULT_PAGE_ICON}</span><span class="name">${esc(x.title || 'Sans titre')}</span>`, checked: cur.includes(x.id), keepOpen: true, onClick: () => {
+          const list = getVal(key) || [];
+          setVal(key, list.includes(x.id) ? list.filter(z => z !== x.id) : [...list, x.id]); rerender(); openList();
+        } })),
+      ]);
+      const inp = $('#relInput');
+      inp.focus();
+      inp.oninput = () => {
+        const q = inp.value.trim().toLowerCase();
+        document.querySelectorAll('#nPop .row').forEach((r, i) => { if (i > 0) r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+      };
+    };
+    openList();
+  });
+
+  // Streak : clic sur une case = corriger la réussite ; fréquence par carte
+  root.querySelectorAll('[data-streak-cell]').forEach(cell => cell.onclick = e => {
+    e.stopPropagation();
+    const key = cell.closest('.streak-edit').querySelector('[data-streak-every]').dataset.streakEvery;
+    const cp = customDef(key);
+    const sd = streakData(S.get(id), cp);
+    const c = sd.cells.find(x => x.key === cell.dataset.streakCell);
+    const v = { ...(getVal(key) || {}) };
+    v.manual = { ...(v.manual || {}), [c.key]: !c.done };
+    setVal(key, v); rerender();
+  });
+  root.querySelectorAll('[data-streak-every]').forEach(inp => inp.onchange = () => {
+    const key = inp.dataset.streakEvery;
+    setVal(key, { ...(getVal(key) || {}), every: Math.max(1, parseInt(inp.value, 10) || 1) }); rerender();
+  });
+
+  // Menu d'une propriété
+  root.querySelectorAll('[data-prop-menu]').forEach(k => k.onclick = e => {
+    e.stopPropagation();
+    const key = k.dataset.propMenu, p = propDef(key), cp = customDef(key);
+    const vis = pageVisOf(key);
+    const visItems = [{ header: 'Dans la page' },
+      ...[['show', 'Toujours afficher'], ['empty', 'Masquer si vide'], ['hide', 'Toujours masquer']].map(([v, l]) => ({ icon: v === 'hide' ? 'eyeOff' : 'eye', label: l, checked: vis === v, onClick: () => { setPageVis(key, v); rerender(); } }))];
+    if (!cp) {
+      return openPop(k, [{ header: p.label + (p.kind === 'story' ? ' · depuis le storyboard' : '') }, ...visItems]);
+    }
+    openPop(k, [
+      { html: `<input class="pop-input" id="propNameInput" value="${esc(cp.name)}" autocomplete="off">`, keepOpen: true },
+      { icon: PROP_TYPES[cp.type].icon, label: 'Type', value: `${PROP_TYPES[cp.type].label} ▸`, keepOpen: true, onClick: row => openPop(row, [
+        { header: 'Changer le type' },
+        ...Object.entries(PROP_TYPES).map(([t, def]) => ({ icon: def.icon, label: def.label, checked: cp.type === t, onClick: () => {
+          if (t !== cp.type && !confirm(`Passer « ${cp.name} » en ${def.label} ? Les valeurs incompatibles seront effacées.`)) return;
+          changePropType(cp, t); rerender();
+          if (t === 'formula' && !cp.formula) editFormula(cp, S.get(id)), rerender();
+          if (t === 'rollup') configureRollup(cp, rerender);
+        } })),
+      ]) },
+      ...(cp.type === 'formula' ? [{ icon: 'sigma', label: 'Modifier la formule', onClick: () => { editFormula(cp, S.get(id)); rerender(); } }] : []),
+      ...(cp.type === 'rollup' ? [{ icon: 'search', label: 'Configurer le rollup', keepOpen: true, onClick: () => configureRollup(cp, rerender) }] : []),
+      ...(cp.type === 'streak' ? [{ icon: 'streakUI', label: 'Occurrences affichées', value: String(cp.streakLength || 7), onClick: () => {
+        const n = parseInt(prompt('Nombre d\'occurrences affichées', cp.streakLength || 7), 10);
+        if (n > 0) { cp.streakLength = Math.min(60, n); saveCustomProps(); rerender(); }
+      } }] : []),
+      ...(cp.type === 'id' ? [{ icon: 'idUI', label: 'Préfixe', value: cp.prefix || '—', onClick: () => {
+        const pr = prompt('Préfixe de l\'ID (ex. : VIS-)', cp.prefix || '');
+        if (pr !== null) { cp.prefix = pr; saveCustomProps(); rerender(); }
+      } }] : []),
+      ...(PROP_TYPES[cp.type].options ? [{ header: 'Options' }, ...cp.options.map(o => ({ html: optPillHTML(o), value: '▸', keepOpen: true, onClick: row => openPop(row, [
+        { icon: 'pencil', label: 'Renommer', onClick: () => { const l = prompt('Nom de l\'option', o.label); if (l && l.trim()) { o.label = l.trim(); saveCustomProps(); rerender(); } } },
+        { header: 'Couleur' },
+        ...GROUP_COLORS.map(c => ({ html: `<span class="n-pill c-${c}" style="border-radius:4px">${esc(o.label)}</span>`, checked: o.color === c, onClick: () => { o.color = c; saveCustomProps(); rerender(); } })),
+        { sep: true },
+        { icon: 'trash', label: 'Supprimer l\'option', danger: true, onClick: () => { cp.options = cp.options.filter(x => x !== o); saveCustomProps(); rerender(); } },
+      ]) }))] : []),
+      ...visItems,
+      { sep: true },
+      { icon: 'copy', label: 'Dupliquer la propriété', onClick: () => {
+        const copy = { ...JSON.parse(JSON.stringify(cp)), key: 'p-' + uid() + uid(), name: cp.name + ' (copie)' };
+        CUSTOM_PROPS.splice(CUSTOM_PROPS.indexOf(cp) + 1, 0, copy); saveCustomProps();
+        [Store, Templates].forEach(St => St.list().forEach(doc => { if (doc.props && cp.key in doc.props) St.patch(doc.id, { props: { ...doc.props, [copy.key]: JSON.parse(JSON.stringify(doc.props[cp.key])) } }); }));
+        rerender();
+      } },
+      { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
+        if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les pages ?`)) return;
+        CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); rerender();
+      } },
+    ]);
+    const ni = $('#propNameInput');
+    ni.oninput = () => { if (ni.value.trim()) { cp.name = ni.value.trim(); saveCustomProps(); k.querySelector('.kname').textContent = cp.name; } };
+    ni.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); rerender(); } };
+  });
+
+  $('#moreProps')?.addEventListener('click', e => { e.stopPropagation(); toggleMore(); });
+
+  // Ajouter une propriété : nom + type (liste complète, comme Notion)
+  $('#addProp').onclick = e => {
+    e.stopPropagation();
+    let typed = '';   // le menu se ferme avant l'appel : on garde la saisie au fil de la frappe
+    const create = type => {
+      const cp = { key: 'p-' + uid() + uid(), name: typed.trim() || PROP_TYPES[type].label, type, options: DEFAULT_OPTIONS[type] ? DEFAULT_OPTIONS[type]() : [], pageVis: 'show' };
+      if (type === 'streak') cp.streakLength = 7;
+      CUSTOM_PROPS.push(cp); saveCustomProps(); rerender();
+      if (type === 'formula') { editFormula(cp, S.get(id)); rerender(); }
+      if (type === 'rollup') configureRollup(cp, rerender);
+    };
+    openPop(e.currentTarget, [
+      { html: '<input class="pop-input" id="newPropName" placeholder="Property name" autocomplete="off">', keepOpen: true },
+      { header: 'Type' },
+      ...Object.entries(PROP_TYPES).map(([k, t]) => ({ icon: t.icon, label: t.label, onClick: () => create(k) })),
+    ]);
+    const inp = $('#newPropName');
+    inp.focus();
+    inp.oninput = () => { typed = inp.value; };
+    inp.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); create('text'); } };
+  };
+}
+
+// Les modifications faites dans le storyboard (iframe) mettent à jour les propriétés affichées.
+addEventListener('storage', e => {
+  if (peek?.render && e.key && e.key.endsWith(':' + peek.id)) peek.render();
+});
 
 /* ---------- Tiroir (side peek) / fenêtre centrée pour les templates ---------- */
 let peek = null;   // { kind: 'vision' | 'template', id }
@@ -1918,111 +2704,26 @@ function openPeek(kind, id, { isNew = false } = {}) {
   $('#peekTitle').placeholder = 'Untitled';
   $('#peekTitle').oninput = e => { S.patch(id, { [titleKey]: e.target.value }); };
 
+  let showMore = false;
   const renderProps = () => {
     const d = S.get(id);
-    const g = groupDef(groupOf(d));
-    const vals = d.props || {};
-    const editor = cp => {
-      const v = vals[cp.key];
-      if (cp.type === 'checkbox') return `<label class="pv-check"><input type="checkbox" data-pv="${cp.key}" ${v ? 'checked' : ''}></label>`;
-      if (cp.type === 'select' || cp.type === 'multi') return `<button class="val" data-pv-select="${cp.key}"><span class="pills">${customValueHTML(cp, v) || '<span class="empty">Empty</span>'}</span></button>`;
-      const type = { number: 'number', date: 'date', url: 'url' }[cp.type] || 'text';
-      return `<input class="pv" type="${type}" data-pv="${cp.key}" value="${esc(v ?? '')}" placeholder="Empty">`;
-    };
-    $('#peekProps').innerHTML = `
-      <span class="k">${icon('status')} Status</span><button class="val" id="propStatus">${pill(statusDef(statusOf(d)))}</button>
-      <span class="k">${icon('select')} Pro/Perso</span><button class="val" id="propGroup"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>
-      ${CUSTOM_PROPS.map(cp => `
-        <span class="k custom" data-prop-menu="${cp.key}" title="Options de la propriété">${icon(PROP_TYPES[cp.type].icon)}<span class="kname">${esc(cp.name)}</span></span>
-        ${editor(cp)}`).join('')}
-      <button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
-
-    const setVal = (key, value) => { const cur = S.get(id); S.patch(id, { props: { ...(cur.props || {}), [key]: value } }); };
-    $('#peekProps').querySelectorAll('input[data-pv]').forEach(inp => {
-      if (inp.type === 'checkbox') inp.onchange = () => setVal(inp.dataset.pv, inp.checked);
-      else inp.oninput = () => setVal(inp.dataset.pv, inp.value);
+    if (!d) return;
+    const rowsAll = allProps().map(p => {
+      const vis = pageVisOf(p.key);
+      const v = p.key === 'status' || p.key === 'group' ? 1 : rawValue(d, p.key);
+      const empty = isEmptyVal(v) && !(v instanceof Error) && customDef(p.key)?.type !== 'streak';
+      return { p, hidden: vis === 'hide' || (vis === 'empty' && empty) };
     });
-    // Select / Multi-select : liste des options + création
-    $('#peekProps').querySelectorAll('[data-pv-select]').forEach(btn => btn.onclick = e => {
-      e.stopPropagation();
-      const cp = customDef(btn.dataset.pvSelect);
-      const openList = () => {
-        const cur = (S.get(id).props || {})[cp.key];
-        const has = oid => cp.type === 'multi' ? (cur || []).includes(oid) : cur === oid;
-        openPop(btn, [
-          { html: '<input class="pop-input" id="optInput" placeholder="Rechercher ou créer une option…" autocomplete="off">', keepOpen: true },
-          ...(cp.options.length ? [{ header: 'Options' }] : []),
-          ...cp.options.map(o => ({ html: `<span class="n-pill c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>`, checked: has(o.id), keepOpen: cp.type === 'multi', onClick: () => {
-            if (cp.type === 'multi') { const list = (S.get(id).props || {})[cp.key] || []; setVal(cp.key, has(o.id) ? list.filter(x => x !== o.id) : [...list, o.id]); renderProps(); openList(); }
-            else { setVal(cp.key, has(o.id) ? null : o.id); renderProps(); }
-          } })),
-        ]);
-        const inp = $('#optInput');
-        inp.focus();
-        inp.oninput = () => {
-          const q = inp.value.trim().toLowerCase();
-          document.querySelectorAll('#nPop .row').forEach((r, i) => { if (i > 0 && r.querySelector('.n-pill')) r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
-        };
-        inp.onkeydown = ev => {
-          if (ev.key !== 'Enter' || !inp.value.trim()) return;
-          const label = inp.value.trim();
-          let o = cp.options.find(x => x.label.toLowerCase() === label.toLowerCase());
-          if (!o) {
-            o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] };
-            cp.options.push(o); saveCustomProps();
-          }
-          const list = (S.get(id).props || {})[cp.key] || [];
-          setVal(cp.key, cp.type === 'multi' ? [...new Set([...list, o.id])] : o.id);
-          renderProps();
-          if (cp.type === 'multi') openList(); else closePop();
-        };
-      };
-      openList();
-    });
-    // Menu d'une propriété : renommer / supprimer
-    $('#peekProps').querySelectorAll('[data-prop-menu]').forEach(k => k.onclick = e => {
-      e.stopPropagation();
-      const cp = customDef(k.dataset.propMenu);
-      openPop(k, [
-        { header: PROP_TYPES[cp.type].label },
-        { icon: 'pencil', label: 'Renommer', onClick: () => {
-          const name = prompt('Nom de la propriété', cp.name);
-          if (name && name.trim()) { cp.name = name.trim(); saveCustomProps(); renderProps(); }
-        } },
-        { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
-          if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les cartes ?`)) return;
-          CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); renderProps();
-        } },
-      ]);
-    });
-    // Ajouter une propriété : nom + type
-    $('#addProp').onclick = e => {
-      e.stopPropagation();
-      let typed = '';   // le menu se ferme avant l'appel : on garde la saisie au fil de la frappe
-      const create = type => {
-        const name = typed.trim() || PROP_TYPES[type].label;
-        CUSTOM_PROPS.push({ key: 'p-' + uid() + uid(), name, type, options: [] });
-        saveCustomProps(); renderProps();
-      };
-      openPop(e.currentTarget, [
-        { html: '<input class="pop-input" id="newPropName" placeholder="Nom de la propriété" autocomplete="off">', keepOpen: true },
-        { header: 'Type' },
-        ...Object.entries(PROP_TYPES).map(([k, t]) => ({ icon: t.icon, label: t.label, onClick: () => create(k) })),
-      ]);
-      const inp = $('#newPropName');
-      inp.focus();
-      inp.oninput = () => { typed = inp.value; };
-      inp.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); create('text'); } };
-    };
-    $('#propStatus').onclick = e => {
-      e.stopPropagation();
-      openPop(e.currentTarget, STATUSES.map(st => ({ html: pill(st), checked: statusOf(S.get(id)) === st.key, onClick: () => { S.patch(id, { status: st.key }); renderProps(); } })));
-    };
-    $('#propGroup').onclick = e => {
-      e.stopPropagation();
-      openPop(e.currentTarget, GROUPS.map(gr => ({ html: `<span class="n-pill c-${gr.color}" style="border-radius:4px">${esc(gr.label)}</span>`, checked: groupOf(S.get(id)) === gr.key, onClick: () => { S.patch(id, { group: gr.key }); renderProps(); } })));
-    };
+    const shown = rowsAll.filter(r => !r.hidden), more = rowsAll.filter(r => r.hidden);
+    const rowHTML = ({ p }) => `
+      <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname">${esc(p.label)}</span></span>
+      ${propEditorHTML(d, p)}`;
+    $('#peekProps').innerHTML = shown.map(rowHTML).join('')
+      + (more.length ? `<button class="more-props" id="moreProps">${icon(showMore ? 'chevron' : 'chevRight')} ${showMore ? `Masquer ${more.length} propriété${more.length > 1 ? 's' : ''}` : `${more.length} more propert${more.length > 1 ? 'ies' : 'y'}`}</button>${showMore ? more.map(rowHTML).join('') : ''}` : '')
+      + `<button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
+    bindPropEditors(S, id, d, renderProps, { toggleMore: () => { showMore = !showMore; renderProps(); } });
   };
+  peek.render = renderProps;
   renderProps();
 
   $('#peekIcon').onclick = e => {
@@ -2099,7 +2800,7 @@ function seedDemo() {
   const blk = (name, value, extra = {}) => ({ id: uid(), name, value, isObstacle: false, ...extra });
   const exp = (obstacleId, date, step, expect, happened, learned) => ({ id: uid(), obstacleId, date: d(date), step, expect, happened, learned });
   let order = 0;
-  const vision = v => Store.save({ ...newBoard(v.id, v.title), experiments: [], obstacles: [], createdAt: ++order, ...v });
+  const vision = v => { ++order; Store.save({ ...newBoard(v.id, v.title), experiments: [], obstacles: [], createdAt: Date.now() - (20 - order) * 3 * DAY, statusSince: Date.now() - order * 1.5 * DAY, ...v }); };
 
   vision({
     id: 'demo-marathon', icon: '🏃', title: 'Vivre en athlète d\'endurance', status: 'wip', group: 'perso',
