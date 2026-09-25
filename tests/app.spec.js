@@ -66,6 +66,7 @@ test('run impossible : crée un obstacle et déverrouille le Kata', async ({ pag
 test('propriétés : ajout Number + Formula, valeur calculée et affichée sur la carte', async ({ page }) => {
   await card(page, 'demo-marathon').click();
   const add = async (name, type) => {
+    if (!(await page.locator('#addProp').count())) await page.click('#moreProps');
     await page.click('#addProp');
     await page.fill('#newPropName', name);
     await page.locator('#nPop .row').filter({ has: page.locator('.name', { hasText: new RegExp(`^${type}$`) }) }).click();
@@ -238,6 +239,7 @@ test('page : propriétés du storyboard modifiables, sélecteur d\'options, reno
 test('« Modifier la propriété » : réglages par type appliqués (nombre en euros, relation réciproque)', async ({ page }) => {
   await card(page, 'demo-marathon').click();
   const add = async (name, type) => {
+    if (!(await page.locator('#addProp').count())) await page.click('#moreProps');
     await page.click('#addProp');
     await page.fill('#newPropName', name);
     await page.locator('#nPop .row').filter({ has: page.locator('.name', { hasText: new RegExp(`^${type}$`) }) }).click();

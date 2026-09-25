@@ -763,7 +763,8 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
   $('#moreProps')?.addEventListener('click', e => { e.stopPropagation(); toggleMore(); });
 
   // Ajouter une propriété : nom + type (liste complète, comme Notion)
-  $('#addProp').onclick = e => {
+  const addProp = $('#addProp');
+  if (addProp) addProp.onclick = e => {
     e.stopPropagation();
     let typed = '';   // le menu se ferme avant l'appel : on garde la saisie au fil de la frappe
     const create = type => {
@@ -839,9 +840,14 @@ function openPeek(kind, id, { isNew = false } = {}) {
     const rowHTML = ({ p }) => `
       <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname"${p.kind === 'custom' || p.renamed ? ' data-user' : ''}>${esc(p.label)}</span></span>
       ${propEditorHTML(d, p)}`;
+    // Comme Notion : replié, « ˅ N autres propriétés » suit les propriétés visibles ;
+    // déplié, les propriétés masquées, puis « + Ajouter une propriété », puis « ˄ Masquer N propriétés »
+    const n = more.length, s = n > 1 ? 's' : '';
+    const addBtn = `<button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
     $('#peekProps').innerHTML = shown.map(rowHTML).join('')
-      + (more.length ? `<button class="more-props" id="moreProps">${icon(showMore ? 'chevron' : 'chevRight')} ${showMore ? `Masquer ${more.length} propriété${more.length > 1 ? 's' : ''}` : `${more.length} more propert${more.length > 1 ? 'ies' : 'y'}`}</button>${showMore ? more.map(rowHTML).join('') : ''}` : '')
-      + `<button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
+      + (!n ? addBtn
+        : showMore ? more.map(rowHTML).join('') + addBtn + `<button class="more-props" id="moreProps">${icon('chevUp')} Masquer ${n} propriété${s}</button>`
+        : `<button class="more-props" id="moreProps">${icon('chevron')} ${n} autre${s} propriété${s}</button>`);
     bindPropEditors(S, id, d, renderProps, { toggleMore: () => { showMore = !showMore; renderProps(); } });
   };
   peek.render = renderProps;
