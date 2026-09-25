@@ -488,9 +488,9 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .drawer.open { transform: none; transition: transform .26s cubic-bezier(.16, 1, .3, 1); }
 .peek-top { display: flex; align-items: center; gap: 4px; padding: 8px 12px; position: sticky; top: 0; z-index: 5; background: #fff; flex: none; }
 .peek-top .spacer { flex: 1; }
-.peek-banner { margin: 0 44px 6px; background: rgb(251, 243, 219); color: rgb(64, 44, 27); border-radius: 6px; padding: 7px 12px; font-size: 13px; }
+.peek-banner { margin: 0 84px 6px; background: rgb(251, 243, 219); color: rgb(64, 44, 27); border-radius: 6px; padding: 7px 12px; font-size: 13px; }
 .peek-banner[hidden] { display: none; }
-.peek-head { padding: 4px 44px 8px; }
+.peek-head { padding: 4px 84px 8px; }   /* Notion : colonne de 76 px + 8 px avant le texte */
 .peek-icon { font-size: 40px; line-height: 1; border: none; background: none; padding: 4px; border-radius: 6px; margin-left: -4px; }
 .peek-icon:hover { background: var(--n-hover); }
 .peek-title { display: block; width: 100%; border: none; outline: none; font: inherit; font-size: 32px; line-height: 38.4px; font-weight: 700; color: rgb(44,44,43); padding: 4px 0; background: transparent; }
