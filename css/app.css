@@ -861,10 +861,6 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
 .op-row.drop-before { box-shadow: inset 0 2px 0 #2383e2; }
 .op-create-lbl { color: rgba(55,53,47,.65); }
 /* Éditeur du Challenge et renommage sur place */
-.ch-edit { display: flex; flex-direction: column; gap: 6px; padding: 4px; min-width: 320px; }
-.ch-edit label { display: flex; align-items: center; gap: 6px; color: rgba(55,53,47,.7); font-size: 13px; }
-.ch-edit input { flex: 1; font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; outline: none; color: rgb(55,53,47); }
-.ch-edit input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
 .peek-props .k-rename { font: inherit; font-size: 14px; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 1px 4px; outline: none; width: 100%; min-width: 0; color: rgb(55,53,47); }
 
 /* Panneau « Modifier la propriété » */
@@ -919,3 +915,11 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
 .pv-pop textarea::placeholder { color: rgb(161,158,153); }
 /* Fenêtre centrée des templates : même marge que son en-tête */
 .drawer.center .tb, .drawer.center .tl, .drawer.center .kata-hist { --tl-pad: min(12vw, 150px); }
+/* Challenge : les trois blancs de la phrase dans la zone flottante, sans bordure (comme Notion) */
+.ch-pop { padding: 2px 0; font-size: 14px; line-height: 21px; color: rgb(44,44,43); }
+.ch-line { display: flex; align-items: baseline; gap: 8px; padding: 0 6px; }
+.ch-line + .ch-line { border-top: 1px solid rgba(55,53,47,.06); }
+.ch-k { flex: none; width: 48px; color: rgba(55,53,47,.5); }
+.ch-line input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font: inherit; color: inherit; padding: 6px 0; }
+.ch-line input::placeholder { color: rgb(161,158,153); }
+.pv-pop input:focus-visible, .pv-pop textarea:focus-visible { outline: none; }

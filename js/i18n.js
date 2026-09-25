@@ -62,6 +62,7 @@ const I18N = [
   ['Ajouter une propriété', 'Add a property'], ['Nom de la propriété', 'Property name'], ['Type', 'Type'], ['Changer le type', 'Change type'],
   ['Options de la propriété', 'Property options'], ['Valeur synchronisée avec le storyboard', 'Value synced with the storyboard'],
   ['Supprimer les données de démo', 'Delete demo data'],
+  ['Challenge : avril 2027', 'Challenge: April 2027'], ['Challenge : résultat mesurable', 'Challenge: measurable result'], ['Challenge : lien avec la Vision', 'Challenge: link to the Vision'],
   // Time block (ligne de vie)
   ['1 · Lire', '1 · Read'], ['2 · Run', '2 · Run'], ['3 · Kata', '3 · Kata'], ['Terminé', 'Done'], ['▶ Lancer', '▶ Start'],
   ['1 · LIRE', '1 · READ'], ['2 · RUN', '2 · RUN'], ['3 · KATA', '3 · KATA'], ['Se rappeler l\'objectif', 'Recall the goal'], ['Je prédis', 'I predict'],

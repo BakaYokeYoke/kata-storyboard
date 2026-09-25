@@ -592,19 +592,7 @@ function bindPropEditors(S, id, d, rerender) {
     const what = btn.dataset.story;
     if (what === 'goto-record') return $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (what === 'goto-step') return $('#drawer').scrollTo({ top: SB_ROOT.offsetTop - 42, behavior: 'smooth' });
-    if (what === 'challenge') {
-      const b = board?.id === id ? board : S.get(id);
-      openPop(btn, [{ keepOpen: true, html: `<div class="ch-edit">
-        <label>D'ici <input data-ch="challengeBy" value="${esc(b.challengeBy || '')}" placeholder="avril 2027"></label>
-        <label><input data-ch="challengeResult" value="${esc(b.challengeResult || '')}" placeholder="résultat mesurable"></label>
-        <label>, afin de <input data-ch="challengeVision" value="${esc(b.challengeVision || '')}" placeholder="lien avec la Vision"></label></div>` }]);
-      $('#nPop').querySelectorAll('[data-ch]').forEach(inp => {
-        inp.onchange = () => editBoard(bb => { bb[inp.dataset.ch] = inp.value; });
-        inp.onkeydown = ev => { if (ev.key === 'Enter') { inp.blur(); closePop(); } };
-      });
-      $('#nPop [data-ch]').focus();
-      return;
-    }
+    if (what === 'challenge') return openChallengePopover(btn, board?.id === id ? board : S.get(id), editBoard);
     if (what === 'obstacle') {
       const b = () => board?.id === id ? board : S.get(id);
       openOptionPicker(btn, {
@@ -800,6 +788,41 @@ function bindPropEditors(S, id, d, rerender) {
 }
 
 /* ---------- Zone d'édition flottante des propriétés texte (comme Notion) ---------- */
+// Challenge : même zone flottante, avec les trois blancs de la phrase (« D'ici … , … , afin de … »)
+function openChallengePopover(cell, b, editBoard) {
+  if ($('#pvPop')) return;
+  closePop();
+  const r = cell.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.id = 'pvPop'; pop.className = 'pv-pop ch-pop';
+  pop.innerHTML = [['challengeBy', 'D\'ici', 'avril 2027'], ['challengeResult', '', 'résultat mesurable'], ['challengeVision', 'afin de', 'lien avec la Vision']]
+    .map(([k, l, ph]) => `<label class="ch-line"><span class="ch-k">${l}</span><input data-ch="${k}" value="${esc(b[k] || '')}" placeholder="${ph}" aria-label="Challenge : ${ph}" autocomplete="off"></label>`).join('');
+  document.body.appendChild(pop);
+  pop.style.left = r.left + 'px';
+  pop.style.top = r.top + 'px';
+  pop.style.width = Math.min(r.width, innerWidth - r.left - 8) + 'px';
+  const inputs = [...pop.querySelectorAll('input')];
+  let done = false;
+  const close = () => {
+    if (done) return; done = true;
+    document.removeEventListener('pointerdown', outside, true);
+    $('#drawer')?.removeEventListener('scroll', close);
+    const vals = Object.fromEntries(inputs.map(i => [i.dataset.ch, i.value]));
+    pop.remove();
+    editBoard(bb => Object.assign(bb, vals));
+  };
+  const outside = e => { if (!pop.contains(e.target)) close(); };
+  document.addEventListener('pointerdown', outside, true);
+  $('#drawer')?.addEventListener('scroll', close);
+  inputs.forEach((inp, k) => inp.onkeydown = e => {
+    e.stopPropagation();   // Échap ne doit pas fermer le tiroir
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    if (e.key === 'Enter') { e.preventDefault(); inputs[k + 1] ? inputs[k + 1].focus() : close(); }
+  });
+  inputs[0].focus();
+  inputs[0].setSelectionRange(inputs[0].value.length, inputs[0].value.length);
+}
+
 // Posée sur la cellule, même largeur ; le texte y revient à la ligne et la zone grandit avec lui.
 // Entrée, Échap, Tab ou un clic ailleurs valident. L'input d'origine reste la source des événements de sauvegarde.
 function openTextPopover(inp) {

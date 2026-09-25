@@ -389,3 +389,18 @@ test('données de démo : suppression en un clic, les autres cartes restent', as
   await expect(page.locator('.n-card')).toHaveCount(1);
   await expect(page.locator('.n-card .tt')).toHaveText('Ma vraie carte');
 });
+
+test('page : le Challenge s\'édite dans la zone flottante (comme Notion)', async ({ page }) => {
+  await card(page, 'demo-usine').click();
+  await page.locator('#peekProps [data-story="challenge"]').click();
+  await expect(page.locator('#pvPop.ch-pop input').first()).toBeFocused();
+  await page.keyboard.press('Enter');   // blanc suivant
+  await expect(page.locator('#pvPop input').nth(1)).toBeFocused();
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.type('changer de série en moins de 5 min');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');   // dernier blanc : valide
+  await expect(page.locator('#pvPop')).toHaveCount(0);
+  await expect(page.locator('#peekProps [data-story="challenge"]')).toContainText('moins de 5 min');
+  await expect(page.locator('#drawer')).toHaveClass(/open/);
+});
