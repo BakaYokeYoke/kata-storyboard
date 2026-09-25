@@ -186,39 +186,248 @@ function inlineRenameProp(k, key, rerender) {
   input.onblur = () => commit(true);
 }
 
-// « Modifier la propriété » : type, formule, rollup, streak, bouton, ID, options
-function openPropertyEditor(anchor, cp, S, id, rerender) {
-  openPop(anchor, [
-    { header: cp.name },
-    { icon: PROP_TYPES[cp.type].icon, label: 'Type', value: `${PROP_TYPES[cp.type].label} ▸`, keepOpen: true, onClick: row => openPop(row, [
-      { header: 'Changer le type' },
-      ...Object.entries(PROP_TYPES).map(([t, def]) => ({ icon: def.icon, label: def.label, checked: cp.type === t, onClick: () => {
-        if (t !== cp.type && !confirm(`Passer « ${cp.name} » en ${def.label} ? Les valeurs incompatibles seront effacées.`)) return;
-        changePropType(cp, t); rerender();
-        if (t === 'formula' && !cp.formula) { editFormula(cp, S.get(id)); rerender(); }
-        if (t === 'rollup') configureRollup(cp, rerender);
-      } })),
-    ]) },
-    ...(cp.type === 'formula' ? [{ icon: 'sigma', label: 'Modifier la formule', onClick: () => { editFormula(cp, S.get(id)); rerender(); } }] : []),
-    ...(cp.type === 'rollup' ? [{ icon: 'search', label: 'Configurer le rollup', keepOpen: true, onClick: () => configureRollup(cp, rerender) }] : []),
-    ...(cp.type === 'streak' ? [{ icon: 'streakUI', label: 'Occurrences affichées', value: String(cp.streakLength || 7), onClick: () => {
-      const n = parseInt(prompt('Nombre d\'occurrences affichées', cp.streakLength || 7), 10);
-      if (n > 0) { cp.streakLength = Math.min(60, n); saveCustomProps(); rerender(); }
-    } }] : []),
-    ...(cp.type === 'button' ? [{ header: 'Action du bouton' },
-      { icon: 'check', label: 'Valider le run (Set as Done)', checked: (cp.action?.type || 'run_done') === 'run_done', onClick: () => { cp.action = { type: 'run_done' }; saveCustomProps(); rerender(); } },
-      ...STATUSES.map(st => ({ html: `<span class="name">Passer en</span> ${pill(st)}`, checked: cp.action?.type === 'status' && cp.action.status === st.key, onClick: () => { cp.action = { type: 'status', status: st.key }; saveCustomProps(); rerender(); } })),
-    ] : []),
-    ...(cp.type === 'id' ? [{ icon: 'idUI', label: 'Préfixe', value: cp.prefix || '—', onClick: () => {
-      const pr = prompt('Préfixe de l\'ID (ex. : VIS-)', cp.prefix || '');
-      if (pr !== null) { cp.prefix = pr; saveCustomProps(); rerender(); }
-    } }] : []),
-    ...(PROP_TYPES[cp.type].options ? [{ icon: 'select', label: 'Modifier les options', keepOpen: true, onClick: () => {
-      closePop();
-      const btn = anchor.nextElementSibling?.querySelector('[data-pv-select]') || anchor.nextElementSibling;
-      btn?.click();
-    } }] : []),
-  ]);
+// « Modifier la propriété » (comme Notion) : nom, type et réglages propres à chaque type
+const STATUS_GROUPS = [['todo', 'À faire'], ['doing', 'En cours'], ['done', 'Terminé']];
+function closePropertyEditor() { $('#propEditor')?.remove(); }
+function openPropertyEditor(anchor, key, S, id, rerender) {
+  closePop(); closeOptionPicker(); closePropertyEditor();
+  const cp = customDef(key), p = propDef(key);
+  const el = document.createElement('div');
+  el.className = 'pe'; el.id = 'propEditor';
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Modifier la propriété');
+  document.body.appendChild(el);
+  const r = anchor.getBoundingClientRect();
+  el.style.left = Math.max(8, Math.min(r.left, innerWidth - 330)) + 'px';
+  el.style.top = Math.max(8, Math.min(r.bottom + 6, innerHeight - 200)) + 'px';
+  const save = () => { saveCustomProps(); rerender(); };
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${String(cur ?? '') === String(v) ? 'selected' : ''}>${esc(l)}</option>`;
+  const sel = (field, pairs, cur, label) => `<label class="pe-row"><span class="pe-lbl">${label}</span><select data-set="${field}">${pairs.map(([v, l]) => opt(v, l, cur)).join('')}</select></label>`;
+  const sw = (field, on, label) => `<div class="pe-row" data-toggle="${field}" role="switch" aria-checked="${!!on}" tabindex="0"><span class="pe-lbl">${label}</span><span class="n-switch ${on ? 'on' : ''}"></span></div>`;
+  const optionRows = (list, groupKey) => list.map(o => `
+    <div class="pe-opt" draggable="true" data-opt="${esc(o.id)}"${groupKey ? ` data-group="${groupKey}"` : ''}>
+      <span class="grip">${icon('grip')}</span><span class="n-pill c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>
+      <span class="spacer"></span><button class="op-more" data-opt-more="${esc(o.id)}" title="Modifier l'option">${icon('dots')}</button>
+    </div>`).join('');
+  const addOpt = groupKey => `<input class="pe-add" data-add-opt${groupKey ? `="${groupKey}"` : ''} placeholder="+ Ajouter une option" aria-label="Ajouter une option">`;
+
+  const specific = () => {
+    if (!cp) {
+      if (key === 'group') return `<div class="pe-note">Les options de Pro/Perso sont les sous-groupes du tableau.</div><button class="pe-link" data-act="groups">Modifier les options…</button>`;
+      if (key === 'status') return `<div class="pe-note">Les options de Status sont les colonnes du tableau.</div><button class="pe-link" data-act="columns">Modifier les colonnes…</button>`;
+      return `<div class="pe-note">${p.kind === 'story' ? 'Cette propriété vient du storyboard : sa valeur se modifie dans la page ou dans le storyboard.' : 'Propriété intégrée des Runs récurrents.'}</div>`;
+    }
+    switch (cp.type) {
+      case 'number': return `
+        ${sel('numberFormat', Object.entries(NUMBER_FORMATS), cp.numberFormat || 'number', 'Format')}
+        ${sel('decimals', [['', 'Par défaut'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3']], cp.decimals ?? '', 'Décimales')}
+        ${sel('showAs', [['number', 'Nombre'], ['bar', 'Barre'], ['ring', 'Anneau']], cp.showAs || 'number', 'Afficher comme')}
+        ${cp.showAs && cp.showAs !== 'number' ? `
+          ${sel('barColor', Object.keys(ICON_COLORS).map(c => [c, { gray: 'Gris', brown: 'Marron', orange: 'Orange', yellow: 'Jaune', green: 'Vert', blue: 'Bleu', purple: 'Violet', pink: 'Rose', red: 'Rouge' }[c]]), cp.barColor || 'green', 'Couleur')}
+          <label class="pe-row"><span class="pe-lbl">Diviser par</span><input type="number" data-set="divideBy" value="${esc(cp.divideBy ?? 100)}"></label>
+          ${sw('hideNumber', !cp.hideNumber, 'Afficher le nombre')}` : ''}`;
+      case 'select': case 'multi': return `
+        ${sel('optionSort', [['manual', 'Manuel'], ['asc', 'Alphabétique'], ['desc', 'Alphabétique inverse']], cp.optionSort || 'manual', 'Tri')}
+        <div class="pe-sec">Options</div>${addOpt()}<div class="pe-opts">${optionRows(cp.options)}</div>`;
+      case 'person': return `
+        ${sel('limit', [['', 'Illimité'], ['1', '1 personne']], cp.limit || '', 'Limite')}
+        <div class="pe-sec">Personnes</div>${addOpt()}<div class="pe-opts">${optionRows(cp.options)}</div>`;
+      case 'status': return STATUS_GROUPS.map(([g, l]) => `
+        <div class="pe-sec">${l}</div><div class="pe-opts" data-group-zone="${g}">${optionRows(cp.options.filter(o => (o.group || 'todo') === g), g)}</div>${addOpt(g)}`).join('');
+      case 'date': return `
+        ${sel('dateFormat', Object.entries(DATE_FORMATS), cp.dateFormat || 'full', 'Format de date')}
+        ${sel('timeFormat', [['hidden', 'Masqué'], ['24', '24 heures'], ['12', '12 heures']], cp.timeFormat || 'hidden', 'Format horaire')}
+        ${sw('endDate', cp.endDate, 'Date de fin')}`;
+      case 'created_time': case 'edited_time': return `
+        ${sel('dateFormat', Object.entries(DATE_FORMATS), cp.dateFormat || 'full', 'Format de date')}
+        ${sel('timeFormat', [['hidden', 'Masqué'], ['24', '24 heures'], ['12', '12 heures']], cp.timeFormat || '24', 'Format horaire')}`;
+      case 'files': return sel('limit', [['', 'Illimité'], ['1', '1 fichier']], cp.limit || '', 'Limite');
+      case 'url': return sw('fullUrl', cp.fullUrl, 'Afficher l\'URL complète');
+      case 'formula': {
+        const doc = S.get(id), res = doc ? rawValue(doc, cp.key) : null;
+        const show = res instanceof Error ? `<span class="err">${esc(res.message)}</span>` : esc(res instanceof Date ? fmtDay(res) : Array.isArray(res) ? res.join(', ') : res ?? '—');
+        return `<div class="pe-sec">Formule</div>
+          <textarea class="pe-formula" data-formula spellcheck="false" aria-label="Formule">${esc(cp.formula || '')}</textarea>
+          <div class="pe-result">Résultat sur cette page : <b>${show}</b></div>
+          <details class="pe-help"><summary>Fonctions disponibles</summary>
+            <code>prop("Nom")</code> <code>if(c, a, b)</code> <code>c ? a : b</code> <code>and</code> <code>or</code> <code>not</code> <code>+ - * / % ^</code>
+            <code>concat()</code> <code>join()</code> <code>length()</code> <code>round(x, n)</code> <code>sum()</code> <code>mean()</code> <code>min()</code> <code>max()</code>
+            <code>now()</code> <code>today()</code> <code>dateBetween(a, b, "days")</code> <code>dateAdd(d, n, "days")</code> <code>formatDate(d)</code> <code>empty(x)</code> <code>contains(a, x)</code>
+          </details>`;
+      }
+      case 'relation': return `
+        <div class="pe-row static"><span class="pe-lbl">Base liée</span><span class="pe-val">${esc(boardTitle())}</span></div>
+        ${sel('limit', [['', 'Illimité'], ['1', '1 page']], cp.limit || '', 'Limite')}
+        ${sw('twoWay', !!cp.twoWay, 'Afficher sur la page liée')}
+        ${cp.twoWay ? `<div class="pe-note">Propriété réciproque : « ${esc(customDef(cp.twoWay)?.name || '')} »</div>` : ''}`;
+      case 'rollup': {
+        const rels = CUSTOM_PROPS.filter(x => x.type === 'relation');
+        const rr = cp.rollup || {};
+        return `
+          ${sel('rollup.relation', [['', '—'], ...rels.map(x => [x.key, x.name])], rr.relation || '', 'Relation')}
+          ${sel('rollup.target', [['', '—'], ['__title', 'Name'], ...allProps().filter(x => x.key !== cp.key).map(x => [x.key, x.label])], rr.target || '', 'Propriété')}
+          ${sel('rollup.calc', Object.entries(ROLLUP_CALCS), rr.calc || 'count', 'Calcul')}
+          ${!rels.length ? '<div class="pe-note">Ajoutez d\'abord une propriété de type Relation.</div>' : ''}`;
+      }
+      case 'id': return `<label class="pe-row"><span class="pe-lbl">Préfixe</span><input data-set="prefix" value="${esc(cp.prefix || '')}" placeholder="VIS-"></label>`;
+      case 'button': return sel('action', [['run_done', 'Valider le run (Set as Done)'], ...STATUSES.map(st => [`status:${st.key}`, `Passer en ${st.label}`])],
+        cp.action?.type === 'status' ? `status:${cp.action.status}` : 'run_done', 'Action');
+      case 'streak': return `<label class="pe-row"><span class="pe-lbl">Occurrences affichées</span><input type="number" min="1" max="60" data-set="streakLength" value="${esc(cp.streakLength || 7)}"></label>
+        <div class="pe-note">Une occurrence est réussie quand un run est validé dans sa période. La fréquence se règle sur chaque page.</div>`;
+      default: return '';
+    }
+  };
+
+  const draw = () => {
+    el.innerHTML = `
+      <div class="pe-head"><span>Modifier la propriété</span><button class="vp-x" data-act="close" title="Fermer">${icon('x')}</button></div>
+      <div class="pe-name">${icon(p.icon)}<input data-name value="${esc(p.label)}" aria-label="Nom de la propriété"></div>
+      ${cp ? `<div class="pe-row" data-act="type" role="button" tabindex="0"><span class="pe-lbl">Type</span><span class="pe-val">${icon(PROP_TYPES[cp.type].icon)} ${PROP_TYPES[cp.type].label}</span><span class="chev">${icon('chevRight')}</span></div>` : `<div class="pe-row static"><span class="pe-lbl">Type</span><span class="pe-val">${key === 'status' ? 'Status' : key === 'group' ? 'Select' : 'Intégrée'}</span></div>`}
+      <div class="pe-sep"></div>
+      ${specific()}
+      ${cp ? `<div class="pe-sep"></div>
+        <div class="pe-row" data-act="dup" role="button" tabindex="0">${icon('copy')}<span class="pe-lbl">Dupliquer la propriété</span></div>
+        <div class="pe-row danger" data-act="del" role="button" tabindex="0">${icon('trash')}<span class="pe-lbl">Supprimer la propriété</span></div>` : ''}`;
+    bind();
+  };
+
+  const bind = () => {
+    const name = el.querySelector('[data-name]');
+    name.onchange = () => { if (name.value.trim()) { renameProp(key, name.value.trim()); rerender(); } };
+    name.onkeydown = e => { if (e.key === 'Enter') name.blur(); };
+    el.querySelectorAll('[data-set]').forEach(inp => inp.onchange = () => {
+      const f = inp.dataset.set, v = inp.value;
+      if (f.startsWith('rollup.')) { cp.rollup ||= {}; cp.rollup[f.slice(7)] = v || undefined; }
+      else if (f === 'action') cp.action = v === 'run_done' ? { type: 'run_done' } : { type: 'status', status: v.slice(7) };
+      else if (['divideBy', 'streakLength'].includes(f)) cp[f] = Number(v) || undefined;
+      else cp[f] = v === '' ? undefined : v;
+      if (f === 'limit' && v === '1') enforceLimit(cp);
+      save(); draw();
+    });
+    el.querySelectorAll('[data-toggle]').forEach(t => t.onclick = () => {
+      const f = t.dataset.toggle;
+      if (f === 'twoWay') toggleTwoWay(cp);
+      else if (f === 'hideNumber') cp.hideNumber = !cp.hideNumber;
+      else if (f === 'endDate') { cp.endDate = !cp.endDate; convertDateValues(cp); }
+      else cp[f] = !cp[f];
+      save(); draw();
+    });
+    const formula = el.querySelector('[data-formula]');
+    if (formula) {
+      let timer;
+      formula.oninput = () => { clearTimeout(timer); timer = setTimeout(() => { cp.formula = formula.value; save(); const pos = formula.selectionStart; draw(); const f2 = el.querySelector('[data-formula]'); f2.focus(); f2.setSelectionRange(pos, pos); }, 400); };
+    }
+    // Options : ajouter, ⋯ (renommer / couleur / supprimer), glisser pour réordonner (et changer de groupe pour Status)
+    el.querySelectorAll('[data-add-opt]').forEach(inp => inp.onkeydown = e => {
+      if (e.key !== 'Enter' || !inp.value.trim()) return;
+      cp.options.push({ id: uid(), label: inp.value.trim(), color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length], ...(inp.dataset.addOpt ? { group: inp.dataset.addOpt } : {}) });
+      save(); draw();
+      el.querySelector(`[data-add-opt${inp.dataset.addOpt ? `="${inp.dataset.addOpt}"` : ''}]`)?.focus();
+    });
+    el.querySelectorAll('[data-opt-more]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      const o = optOf(cp, btn.dataset.optMore);
+      openPop(btn, [
+        { keepOpen: true, html: `<input class="pop-input" id="peOptName" value="${esc(o.label)}" aria-label="Nom de l'option">` },
+        { icon: 'trash', label: 'Supprimer', danger: true, onClick: () => { cp.options = cp.options.filter(x => x !== o); save(); draw(); } },
+        { sep: true }, { header: 'Couleurs' },
+        ...['default', ...GROUP_COLORS].map(c => ({ html: `<span class="sw c-${c}"></span><span class="name">${{ default: 'Par défaut', gray: 'Gris', brown: 'Marron', orange: 'Orange', yellow: 'Jaune', green: 'Vert', blue: 'Bleu', purple: 'Violet', pink: 'Rose', red: 'Rouge' }[c]}</span>`, checked: (o.color || 'default') === c, onClick: () => { o.color = c; save(); draw(); } })),
+      ]);
+      const ni = $('#peOptName');
+      ni.focus(); ni.select();
+      const commit = () => { if (ni.value.trim() && ni.value.trim() !== o.label) { o.label = ni.value.trim(); save(); draw(); } };
+      ni.onkeydown = ev => { if (ev.key === 'Enter') { commit(); closePop(); } };
+      ni.onchange = commit;
+    });
+    let drag = null;
+    el.querySelectorAll('.pe-opt').forEach(row => {
+      row.ondragstart = () => { drag = row.dataset.opt; };
+      row.ondragover = e => { e.preventDefault(); row.classList.add('drop-before'); };
+      row.ondragleave = () => row.classList.remove('drop-before');
+      row.ondrop = e => {
+        e.preventDefault();
+        const moved = optOf(cp, drag);
+        if (!moved || drag === row.dataset.opt) return draw();
+        if (row.dataset.group) moved.group = row.dataset.group;
+        const rest = cp.options.filter(o => o !== moved);
+        rest.splice(rest.findIndex(o => o.id === row.dataset.opt), 0, moved);
+        cp.options = rest; cp.optionSort = cp.type === 'status' ? cp.optionSort : 'manual';
+        save(); draw();
+      };
+    });
+    el.querySelectorAll('[data-group-zone]').forEach(z => {
+      z.ondragover = e => e.preventDefault();
+      z.ondrop = e => { if (e.target.closest('.pe-opt')) return; e.preventDefault(); const o = optOf(cp, drag); if (o) { o.group = z.dataset.groupZone; save(); draw(); } };
+    });
+    el.onclick = e => {
+      e.stopPropagation();
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (!act) return;
+      if (act === 'close') return closePropertyEditor();
+      if (act === 'groups') { closePropertyEditor(); return openOptionPicker(anchor.nextElementSibling, groupPickerConfig(() => [groupOf(S.get(id))], g => { S.patch(id, { group: g }); rerender(); }, rerender)); }
+      if (act === 'columns') { closePropertyEditor(); return openPanel('group'); }
+      if (act === 'type') return openPop(e.target.closest('[data-act]'), [
+        { header: 'Changer le type' },
+        ...Object.entries(PROP_TYPES).map(([t, def]) => ({ icon: def.icon, label: def.label, checked: cp.type === t, onClick: () => {
+          if (t !== cp.type && !confirm(`Passer « ${cp.name} » en ${def.label} ? Les valeurs incompatibles seront effacées.`)) return;
+          changePropType(cp, t); rerender(); draw();
+        } })),
+      ]);
+      if (act === 'dup') {
+        const copy = { ...JSON.parse(JSON.stringify(cp)), key: 'p-' + uid() + uid(), name: cp.name + ' (copie)', twoWay: undefined };
+        CUSTOM_PROPS.splice(CUSTOM_PROPS.indexOf(cp) + 1, 0, copy); saveCustomProps();
+        [Store, Templates].forEach(St => St.list().forEach(doc => { if (doc.props && cp.key in doc.props) St.patch(doc.id, { props: { ...doc.props, [copy.key]: JSON.parse(JSON.stringify(doc.props[cp.key])) } }); }));
+        closePropertyEditor(); return rerender();
+      }
+      if (act === 'del') {
+        if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les pages ?`)) return;
+        if (cp.twoWay) { const rev = customDef(cp.twoWay); if (rev) rev.twoWay = undefined; }
+        CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps();
+        closePropertyEditor(); return rerender();
+      }
+    };
+  };
+  draw();
+  el.querySelector('[data-name]').focus();
+}
+document.addEventListener('click', e => { if (!e.target.closest('#propEditor, #nPop')) closePropertyEditor(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#propEditor') && !$('#nPop')) { e.stopPropagation(); closePropertyEditor(); } }, true);
+
+// Limite à 1 élément : on ne garde que le premier sur toutes les pages
+function enforceLimit(cp) {
+  [Store, Templates].forEach(St => St.list().forEach(doc => {
+    const v = doc.props?.[cp.key];
+    if (Array.isArray(v) && v.length > 1) St.patch(doc.id, { props: { ...doc.props, [cp.key]: v.slice(0, 1) } });
+  }));
+}
+// Date de fin activée / désactivée : conversion des valeurs existantes
+function convertDateValues(cp) {
+  [Store, Templates].forEach(St => St.list().forEach(doc => {
+    const v = doc.props?.[cp.key];
+    if (!v) return;
+    const nv = cp.endDate ? (typeof v === 'object' ? v : { start: v, end: '' }) : (typeof v === 'object' ? v.start : v);
+    St.patch(doc.id, { props: { ...doc.props, [cp.key]: nv } });
+  }));
+}
+// Relation réciproque : une propriété jumelle sur les pages liées, tenue à jour dans les deux sens
+function toggleTwoWay(cp) {
+  if (cp.twoWay) {
+    const rev = cp.twoWay;
+    CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x.key !== rev);
+    cp.twoWay = undefined;
+    return;
+  }
+  const rev = { key: 'p-' + uid() + uid(), name: `${cp.name} (lié)`, type: 'relation', options: [], pageVis: 'show', twoWay: cp.key };
+  cp.twoWay = rev.key;
+  CUSTOM_PROPS.push(rev);
+  saveCustomProps();
+  Store.list().forEach(doc => (doc.props?.[cp.key] || []).forEach(tid => linkRelation(rev.key, tid, doc.id, true)));
+}
+function linkRelation(key, fromId, toId, add) {
+  const d = Store.get(fromId);
+  if (!d) return;
+  const list = d.props?.[key] || [];
+  const next = add ? [...new Set([...list, toId])] : list.filter(x => x !== toId);
+  if (next.length !== list.length || next.some((x, i) => x !== list[i])) Store.patch(fromId, { props: { ...(d.props || {}), [key]: next } });
 }
 
 /* ---------- Propriétés dans la page ouverte ---------- */
@@ -235,6 +444,17 @@ function propEditorHTML(d, p) {
   if (p.key === 'runEvery') return `<span class="pv-wrap"><input class="pv" type="number" min="1" data-recur="every" value="${esc(d.recur?.every ?? '')}" placeholder="Empty">${d.recur?.every ? '<span class="pv-unit">jours</span>' : ''}</span>`;
   if (p.key === 'runDue') return `<span class="pv-wrap"><input class="pv" type="date" data-recur="due" value="${esc(d.recur?.due ?? '')}">${d.recur?.due ? `<span class="pv-unit">${esc(relDay(d.recur.due))}</span>` : ''}</span>`;
   const cp = customDef(p.key), v = d.props?.[p.key], t = cp.type;
+  if (t === 'date') {
+    const val = v && typeof v === 'object' ? v : { start: v || '', end: '' };
+    const withTime = cp.timeFormat && cp.timeFormat !== 'hidden';
+    const fmt = x => !x ? '' : withTime ? (x.length > 10 ? x.slice(0, 16) : x + 'T09:00') : x.slice(0, 10);
+    const type = withTime ? 'datetime-local' : 'date';
+    return `<span class="pv-wrap"><input class="pv pv-date" type="${type}" data-date="start" data-key="${cp.key}" value="${esc(fmt(val.start))}" aria-label="${esc(cp.name)}">${cp.endDate ? `<span class="pv-unit">→</span><input class="pv pv-date" type="${type}" data-date="end" data-key="${cp.key}" value="${esc(fmt(val.end))}" aria-label="${esc(cp.name)} (fin)">` : ''}</span>`;
+  }
+  // Nombre mis en forme (format, barre, anneau) : affiché, puis champ de saisie au clic
+  if (t === 'number' && (cp.numberFormat && cp.numberFormat !== 'number' || cp.showAs && cp.showAs !== 'number' || cp.decimals !== undefined)) {
+    return `<button class="val" data-num="${cp.key}"><span class="pills">${v === null || v === undefined || v === '' ? empty : numberHTML(Number(v), cp, 'page')}</span></button>`;
+  }
   if (t === 'checkbox') return `<label class="pv-check"><input type="checkbox" data-pv="${cp.key}" ${v ? 'checked' : ''}></label>`;
   if (PROP_TYPES[t].options) return `<button class="val" data-pv-select="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
   if (t === 'files') return `<button class="val" data-pv-files="${cp.key}"><span class="pills">${valueHTML(d, cp.key, 'page') || empty}</span></button>`;
@@ -306,6 +526,27 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
   const setVal = (key, value) => { const cur = S.get(id); S.patch(id, { props: { ...(cur.props || {}), [key]: value } }); };
   const getVal = key => (S.get(id).props || {})[key];
 
+  root.querySelectorAll('[data-num]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    const key = btn.dataset.num;
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = 'any'; inp.className = 'pv';
+    inp.value = getVal(key) ?? '';
+    inp.setAttribute('aria-label', customDef(key).name);
+    btn.replaceWith(inp);
+    inp.focus();
+    let done = false;
+    const commit = () => { if (done) return; done = true; setVal(key, inp.value === '' ? null : Number(inp.value)); rerender(); };
+    inp.onblur = commit;
+    inp.onkeydown = ev => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') { done = true; rerender(); } };
+  });
+  root.querySelectorAll('input[data-date]').forEach(inp => inp.onchange = () => {
+    const cp = customDef(inp.dataset.key);
+    const wrap = inp.closest('.pv-wrap');
+    const start = wrap.querySelector('[data-date="start"]')?.value || '', end = wrap.querySelector('[data-date="end"]')?.value || '';
+    setVal(cp.key, cp.endDate ? (start || end ? { start, end } : null) : (start || null));
+    rerender();
+  });
   root.querySelectorAll('input[data-pv]').forEach(inp => {
     if (inp.type === 'checkbox') inp.onchange = () => { setVal(inp.dataset.pv, inp.checked); };
     else {
@@ -386,13 +627,14 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
   // Select / Multi-select / Status / Person : sélecteur d'options (comme Notion)
   root.querySelectorAll('[data-pv-select]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
-    const cp = customDef(btn.dataset.pvSelect), many = PROP_TYPES[cp.type].many;
-    const cur = () => { const v = getVal(cp.key); return many ? (v || []) : (v ? [v] : []); };
+    const cp = customDef(btn.dataset.pvSelect), many = PROP_TYPES[cp.type].many && cp.limit !== '1';
+    const cur = () => { const v = getVal(cp.key); return PROP_TYPES[cp.type].many ? (v || []) : (v ? [v] : []); };
+    const store = list => PROP_TYPES[cp.type].many ? list : (list[0] ?? null);
     openOptionPicker(btn, {
       many,
       state: () => ({ options: cp.options, selected: cur() }),
-      onSelect: oid => { const list = cur(); setVal(cp.key, many ? (list.includes(oid) ? list.filter(x => x !== oid) : [...list, oid]) : (list[0] === oid ? null : oid)); rerender(); },
-      onRemove: oid => { setVal(cp.key, many ? cur().filter(x => x !== oid) : null); rerender(); },
+      onSelect: oid => { const list = cur(); setVal(cp.key, store(many ? (list.includes(oid) ? list.filter(x => x !== oid) : [...list, oid]) : (list[0] === oid ? [] : [oid]))); rerender(); },
+      onRemove: oid => { setVal(cp.key, store(cur().filter(x => x !== oid))); rerender(); },
       onCreate: label => { const o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] }; cp.options.push(o); saveCustomProps(); onSel(o.id); return o.id; },
       onEdit: (oid, change) => {
         const o = optOf(cp, oid);
@@ -401,7 +643,7 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
       },
       onReorder: ids => { cp.options = ids.map(i => optOf(cp, i)).filter(Boolean); saveCustomProps(); rerender(); },
     });
-    function onSel(oid) { const list = cur(); setVal(cp.key, many ? [...new Set([...list, oid])] : oid); rerender(); }
+    function onSel(oid) { const list = cur(); setVal(cp.key, store(many ? [...new Set([...list, oid])] : [oid])); rerender(); }
   });
 
   // Files & media
@@ -422,7 +664,8 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
           if (f.size > 25 * 1024 * 1024) return toast('Fichier trop lourd (25 Mo max) : ajoutez plutôt un lien');
           const fileId = 'f-' + uid() + uid();
           IDB.put('files', { name: f.name, type: f.type, blob: f }, fileId).then(() => {
-            setVal(key, [...(getVal(key) || []), { name: f.name, fileId, type: f.type, size: f.size }]); rerender();
+            const one = customDef(key).limit === '1';
+            setVal(key, [...(one ? [] : getVal(key) || []), { name: f.name, fileId, type: f.type, size: f.size }]); rerender();
           }).catch(() => toast('Impossible d\'enregistrer le fichier'));
         };
         inp.click();
@@ -447,8 +690,15 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
         { html: '<input class="pop-input" id="relInput" placeholder="Rechercher une page…" autocomplete="off">', keepOpen: true },
         { header: 'Pages liées' },
         ...pages.map(x => ({ html: `<span class="tm-ico">${iconHTML(x.icon) || DEFAULT_PAGE_ICON}</span><span class="name">${esc(x.title || 'Sans titre')}</span>`, checked: cur.includes(x.id), keepOpen: true, onClick: () => {
-          const list = getVal(key) || [];
-          setVal(key, list.includes(x.id) ? list.filter(z => z !== x.id) : [...list, x.id]); rerender(); openList();
+          const rcp = customDef(key), list = getVal(key) || [];
+          const next = list.includes(x.id) ? list.filter(z => z !== x.id) : rcp.limit === '1' ? [x.id] : [...list, x.id];
+          setVal(key, next);
+          // Relation réciproque : la page liée pointe en retour vers celle-ci
+          if (rcp.twoWay && S === Store) {
+            list.filter(z => !next.includes(z)).forEach(z => linkRelation(rcp.twoWay, z, id, false));
+            next.filter(z => !list.includes(z)).forEach(z => linkRelation(rcp.twoWay, z, id, true));
+          }
+          rerender(); openList();
         } })),
       ]);
       const inp = $('#relInput');
@@ -484,14 +734,10 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
     const vis = pageVisOf(key);
     const view = loadView();
     const onBoard = view.props.includes(key);
-    const canEdit = !!cp || key === 'group' || key === 'status';
+    const canEdit = true;
     openPop(k, [
       { icon: 'edit', label: 'Renommer', onClick: () => inlineRenameProp(k, key, rerender) },
-      ...(canEdit ? [{ icon: 'sliders', label: 'Modifier la propriété', keepOpen: true, onClick: () => {
-        if (key === 'status') { closePop(); return openPanel('group'); }
-        if (key === 'group') { closePop(); return openOptionPicker(k.nextElementSibling, groupPickerConfig(() => [groupOf(S.get(id))], g => { S.patch(id, { group: g }); rerender(); }, rerender)); }
-        openPropertyEditor(k, cp, S, id, rerender);
-      } }] : []),
+      ...(canEdit ? [{ icon: 'sliders', label: 'Modifier la propriété', onClick: () => openPropertyEditor(k, key, S, id, rerender) }] : []),
       { sep: true },
       { icon: 'eyeOff', label: 'Visibilité de la propriété', value: '▸', keepOpen: true, onClick: row => openPop(row, [
         { header: 'Dans la page' },

@@ -770,3 +770,49 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
 .ch-edit input { flex: 1; font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; outline: none; color: rgb(55,53,47); }
 .ch-edit input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
 .peek-props .k-rename { font: inherit; font-size: 14px; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 1px 4px; outline: none; width: 100%; min-width: 0; color: rgb(55,53,47); }
+
+/* Panneau « Modifier la propriété » */
+.pe { position: fixed; z-index: 43; width: 320px; max-height: min(640px, calc(100vh - 16px)); overflow-y: auto; background: #fff; border-radius: 10px; padding: 8px 8px 10px;
+  box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px; font-size: 14px; color: rgb(55,53,47);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif; }
+.pe-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 8px; color: rgba(55,53,47,.65); font-weight: 500; }
+.pe-name { display: flex; align-items: center; gap: 6px; margin: 0 4px 6px; padding: 4px 8px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; background: rgba(242,241,238,.6); }
+.pe-name input { flex: 1; border: none; outline: none; background: transparent; font: inherit; color: inherit; min-width: 0; }
+.pe-name:focus-within { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
+.pe-row { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 6px; border-radius: 6px; cursor: pointer; }
+.pe-row:hover { background: rgba(55,53,47,.06); }
+.pe-row.static { cursor: default; }
+.pe-row.static:hover { background: none; }
+.pe-row.danger { color: rgb(212, 76, 71); }
+.pe-lbl { flex: 1; min-width: 0; }
+.pe-val { color: rgba(55,53,47,.6); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.pe-row select, .pe-row input { font: inherit; font-size: 13px; color: rgba(55,53,47,.8); border: 1px solid rgba(55,53,47,.16); border-radius: 5px; padding: 3px 6px; background: #fff; max-width: 150px; }
+.pe-row .chev { display: inline-flex; color: rgba(55,53,47,.45); }
+.pe-sep { border-top: 1px solid rgba(55,53,47,.09); margin: 6px 2px; }
+.pe-sec { font-size: 12px; color: rgba(55,53,47,.65); font-weight: 500; padding: 10px 6px 4px; }
+.pe-note { font-size: 12px; color: rgba(55,53,47,.6); padding: 4px 6px 6px; line-height: 1.45; }
+.pe-link { border: none; background: none; color: #2383e2; font: inherit; font-size: 13px; padding: 4px 6px; cursor: pointer; }
+.pe-add { width: calc(100% - 12px); margin: 2px 6px 4px; font: inherit; font-size: 13px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; }
+.pe-add:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
+.pe-opts { min-height: 8px; }
+.pe-opt { display: flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 6px; border-radius: 6px; }
+.pe-opt:hover { background: rgba(55,53,47,.06); }
+.pe-opt .grip { display: inline-flex; color: rgba(55,53,47,.35); cursor: grab; }
+.pe-opt .spacer { flex: 1; }
+.pe-opt:hover .op-more { visibility: visible; }
+.pe-opt.drop-before { box-shadow: inset 0 2px 0 #2383e2; }
+.pe-formula { width: calc(100% - 12px); margin: 0 6px; min-height: 76px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 6px 8px; outline: none; }
+.pe-formula:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
+.pe-result { font-size: 12.5px; color: rgba(55,53,47,.7); padding: 6px 6px 2px; }
+.pe-result .err { color: rgb(212,76,71); }
+.pe-help { font-size: 12px; padding: 4px 6px; color: rgba(55,53,47,.7); }
+.pe-help summary { cursor: pointer; }
+.pe-help code { display: inline-block; background: rgba(55,53,47,.06); border-radius: 3px; padding: 0 4px; margin: 2px 1px; font-size: 11.5px; }
+/* Nombres en barre ou anneau, dates avec fin */
+.num-vis { display: inline-flex; align-items: center; gap: 6px; }
+.num-bar { display: inline-block; width: 64px; height: 6px; border-radius: 3px; background: rgba(55,53,47,.12); overflow: hidden; }
+.num-bar span { display: block; height: 100%; border-radius: 3px; }
+.num-ring { width: 16px; height: 16px; }
+.peek-props .pv-date { width: auto; }
+.peek-props input[type=number].pv { width: 110px; flex: none; }
+.peek-props .pv-wrap .pv-unit { margin-left: 2px; }

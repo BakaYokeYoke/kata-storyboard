@@ -103,7 +103,7 @@ function streakData(b, cp) {
 const streakHTML = (data, clickable = false) => `<span class="streak">${data.cells.map(c =>
   `<i class="${c.done ? 'on' : ''} ${c.current ? 'cur' : ''}" ${clickable ? `data-streak-cell="${c.key}"` : ''} title="${new Date(c.start).toLocaleDateString(LOCALE())}${c.done ? ' · réussi' : ''}"></i>`).join('')}</span>`;
 const DEFAULT_OPTIONS = {
-  status: () => [{ id: uid(), label: 'Not started', color: 'gray' }, { id: uid(), label: 'In progress', color: 'blue' }, { id: uid(), label: 'Done', color: 'green' }],
+  status: () => [{ id: uid(), label: 'Pas commencé', color: 'gray', group: 'todo' }, { id: uid(), label: 'En cours', color: 'blue', group: 'doing' }, { id: uid(), label: 'Terminé', color: 'green', group: 'done' }],
   person: () => [{ id: uid(), label: 'Moi', color: 'gray' }],
 };
 const ME = 'Moi';
@@ -174,7 +174,7 @@ function rawValue(b, key, depth = 0) {
     case 'number': return v === '' || v === undefined || v === null ? null : Number(v);
     case 'select': case 'status': return optOf(cp, v)?.label || '';
     case 'multi': case 'person': return (v || []).map(id => optOf(cp, id)?.label).filter(Boolean);
-    case 'date': return toDate(v);
+    case 'date': return toDate(v?.start ?? v);
     case 'checkbox': return !!v;
     case 'files': return (v || []).map(f => f.name);
     case 'relation': return (v || []).map(id => Store.get(id)).filter(Boolean).map(c => c.title || 'Sans titre');
@@ -354,6 +354,70 @@ function computeRollup(b, cp, depth = 0) {
   }
 }
 
+// ---------- Réglages d'affichage par type (comme « Edit property » dans Notion) ----------
+const NUMBER_FORMATS = {
+  number: 'Nombre', commas: 'Nombre avec séparateurs', percent: 'Pourcentage', euro: 'Euro', dollar: 'Dollar', pound: 'Livre sterling', yen: 'Yen',
+};
+function formatNumber(v, cp) {
+  const f = cp.numberFormat || 'number';
+  const dec = cp.decimals === undefined || cp.decimals === null || cp.decimals === '' ? undefined : Number(cp.decimals);
+  const opts = { minimumFractionDigits: dec, maximumFractionDigits: dec ?? 6 };
+  if (f === 'number') return dec === undefined ? String(v) : v.toFixed(dec);
+  if (f === 'commas') return v.toLocaleString(LOCALE(), opts);
+  if (f === 'percent') return (v * 100).toLocaleString(LOCALE(), { ...opts, maximumFractionDigits: dec ?? 2 }) + ' %';
+  const cur = { euro: 'EUR', dollar: 'USD', pound: 'GBP', yen: 'JPY' }[f];
+  return v.toLocaleString(LOCALE(), { style: 'currency', currency: cur, minimumFractionDigits: dec, maximumFractionDigits: dec ?? 2 });
+}
+// Nombre affiché en texte, barre ou anneau (avec « diviser par »)
+function numberHTML(v, cp, ctx) {
+  const txt = esc(formatNumber(v, cp));
+  if (!cp.showAs || cp.showAs === 'number') return ctx === 'card' ? `<span class="n-chip">${txt}</span>` : txt;
+  const ratio = Math.max(0, Math.min(1, v / (Number(cp.divideBy) || 100)));
+  const color = ICON_COLORS[cp.barColor || 'green'] || ICON_COLORS.green;
+  const vis = cp.showAs === 'ring'
+    ? `<svg class="num-ring" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="rgba(55,53,47,.12)" stroke-width="3"/><circle cx="10" cy="10" r="7.5" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${(ratio * 47.1).toFixed(1)} 47.1" transform="rotate(-90 10 10)"/></svg>`
+    : `<span class="num-bar"><span style="width:${(ratio * 100).toFixed(1)}%;background:${color}"></span></span>`;
+  return `<span class="num-vis ${ctx === 'card' ? 'n-chip' : ''}">${cp.hideNumber ? '' : `<span>${txt}</span>`}${vis}</span>`;
+}
+const DATE_FORMATS = { full: 'Complet', dmy: 'Jour/Mois/Année', mdy: 'Mois/Jour/Année', ymd: 'Année/Mois/Jour', relative: 'Relatif' };
+function formatDateOnly(d, fmt = 'full') {
+  const p = n => String(n).padStart(2, '0');
+  if (fmt === 'dmy') return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+  if (fmt === 'mdy') return `${p(d.getMonth() + 1)}/${p(d.getDate())}/${d.getFullYear()}`;
+  if (fmt === 'ymd') return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())}`;
+  if (fmt === 'relative') return relDay(localISO(d));
+  return d.toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function formatDateValue(v, cfg = {}) {
+  const part = s => {
+    if (!s) return '';
+    const d = toDate(s);
+    if (!d || isNaN(d)) return '';
+    let out = formatDateOnly(d, cfg.dateFormat);
+    const withTime = cfg.includeTime ?? (cfg.timeFormat && cfg.timeFormat !== 'hidden');
+    if (withTime && String(s).length > 10 && cfg.timeFormat !== 'hidden') {
+      out += ' ' + d.toLocaleTimeString(cfg.timeFormat === '12' ? 'en-US' : LOCALE(), { hour: '2-digit', minute: '2-digit', hour12: cfg.timeFormat === '12' });
+    }
+    return out;
+  };
+  if (v && typeof v === 'object' && !(v instanceof Date)) return [part(v.start), part(v.end)].filter(Boolean).join(' → ');
+  return part(v);
+}
+// Options triées selon le réglage de la propriété (manuel, alphabétique, inverse)
+function sortedOptionIds(cp, ids) {
+  if (!cp.optionSort || cp.optionSort === 'manual') return ids;
+  const lbl = id => optOf(cp, id)?.label || '';
+  const out = [...ids].sort((a, z) => lbl(a).localeCompare(lbl(z), LOCALE()));
+  return cp.optionSort === 'desc' ? out.reverse() : out;
+}
+// Liens : seulement http(s), mailto et tel
+function safeUrl(v) {
+  const s = String(v || '').trim();
+  if (/^(https?:|mailto:|tel:)/i.test(s)) return s;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(s)) return '#';
+  return 'https://' + s;
+}
+
 // HTML d'une valeur ('' si vide). ctx : 'card' (pastilles du Kanban) ou 'page' (page ouverte)
 function valueHTML(b, key, ctx = 'card') {
   const chip = (t, cls = '') => ctx === 'card' ? `<span class="n-chip ${cls}">${t}</span>` : t;
@@ -375,23 +439,25 @@ function valueHTML(b, key, ctx = 'card') {
   if (!cp) return '';
   const v = b.props?.[key];
   switch (cp.type) {
-    case 'select': case 'status': return optPillHTML(optOf(cp, v));
-    case 'multi': case 'person': return (v || []).map(id => optPillHTML(optOf(cp, id))).join('');
+    case 'select': return optPillHTML(optOf(cp, v));
+    case 'status': { const o = optOf(cp, v); return o ? `<span class="n-pill ${ctx === 'card' ? 'small' : ''} c-${o.color}"><span class="dot"></span>${esc(o.label)}</span>` : ''; }
+    case 'multi': case 'person': return sortedOptionIds(cp, v || []).map(id => optPillHTML(optOf(cp, id))).join('');
     case 'checkbox': return v ? (ctx === 'card' ? chip(`☑ ${esc(cp.name)}`) : '☑') : '';
-    case 'date': return v ? chip(esc(fmtDay(toDate(v)))) : '';
-    case 'url': return v ? chip(`<a href="${esc(/^https?:/.test(v) ? v : 'https://' + v)}" target="_blank" rel="noopener">${esc(v.replace(/^https?:\/\//, ''))}</a>`) : '';
+    case 'date': return v ? chip(esc(formatDateValue(v, cp))) : '';
+    case 'url': return v ? chip(`<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(cp.fullUrl ? v : v.replace(/^https?:\/\//, '').replace(/^www\./, ''))}</a>`) : '';
     case 'email': return v ? chip(`<a href="mailto:${esc(v)}">${esc(v)}</a>`) : '';
     case 'phone': return v ? chip(`<a href="tel:${esc(v)}">${esc(v)}</a>`) : '';
     case 'files': return (v || []).map(f => chip(f.fileId
       ? `📎 <a href="#" data-file-id="${esc(f.fileId)}">${esc(f.name)}</a>`
       : `📎 <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>`)).join(ctx === 'card' ? '' : ' ');
     case 'relation': return (v || []).map(id => Store.get(id)).filter(Boolean).map(c => chip(`↗ ${esc(c.title || 'Sans titre')}`)).join(ctx === 'card' ? '' : ' ');
-    case 'created_time': case 'edited_time': { const d = rawValue(b, key); return d ? chip(esc(fmtDateTime(d))) : ''; }
+    case 'created_time': case 'edited_time': { const d = rawValue(b, key); return d ? chip(esc(formatDateValue(d.toISOString(), { dateFormat: cp.dateFormat, timeFormat: cp.timeFormat || '24', includeTime: cp.timeFormat !== 'hidden' }))) : ''; }
     case 'created_by': case 'edited_by': return chip(ME);
     case 'id': return b.seq != null ? chip(`${esc(cp.prefix || '')}${b.seq}`) : '';
     case 'button': return `<button class="n-btn-prop" data-btn-prop="${cp.key}" data-btn-card="${esc(b.id)}" title="${esc(cp.action?.type === 'status' ? `Passer en ${statusDef(cp.action.status)?.label}` : 'Valider le run du jour')}">${esc(cp.name)}</button>`;
     case 'streak': { const sd = streakData(b, cp); return ctx === 'card' ? `<span class="n-chip streak-chip" title="${esc(cp.name)} : ${sd.hits}/${sd.n} · série en cours ${sd.current}">${streakHTML(sd)}</span>` : streakHTML(sd); }
-    case 'formula': case 'rollup': case 'number': { const r = rawValue(b, key); return isEmptyVal(r) && !(r instanceof Error) ? '' : chip(fmt(r)); }
+    case 'number': { const r = rawValue(b, key); return r === null || isNaN(r) ? '' : numberHTML(r, cp, ctx); }
+    case 'formula': case 'rollup': { const r = rawValue(b, key); return isEmptyVal(r) && !(r instanceof Error) ? '' : chip(typeof r === 'number' && cp.numberFormat ? esc(formatNumber(r, cp)) : fmt(r)); }
     default: return v ? (ctx === 'card' ? esc(v) : esc(v)) : '';
   }
 }

@@ -234,3 +234,33 @@ test('page : propriétés du storyboard modifiables, sélecteur d\'options, reno
   await page.keyboard.press('Enter');
   await expect(page.locator('#peekProps .kname', { hasText: 'Processus' })).toBeVisible();
 });
+
+test('« Modifier la propriété » : réglages par type appliqués (nombre en euros, relation réciproque)', async ({ page }) => {
+  await card(page, 'demo-marathon').click();
+  const add = async (name, type) => {
+    await page.click('#addProp');
+    await page.fill('#newPropName', name);
+    await page.locator('#nPop .row').filter({ has: page.locator('.name', { hasText: new RegExp(`^${type}$`) }) }).click();
+  };
+  const menu = name => page.locator('#peekProps [data-prop-menu]', { hasText: name });
+  const value = name => menu(name).locator('xpath=following-sibling::*[1]');
+  await add('Budget', 'Nombre');
+  await value('Budget').locator('input').fill('42.5');
+  await value('Budget').locator('input').press('Tab');
+  await menu('Budget').click();
+  await page.locator('#nPop .row', { hasText: 'Modifier la propriété' }).click();
+  await page.locator('#propEditor [data-set="numberFormat"]').selectOption('euro');
+  await page.locator('#propEditor [data-set="decimals"]').selectOption('2');
+  await page.locator('#propEditor [data-act="close"]').click();
+  await expect(value('Budget')).toContainText('42,50 €');
+  // Relation réciproque
+  await add('Liée à', 'Relation');
+  await menu('Liée à').click();
+  await page.locator('#nPop .row', { hasText: 'Modifier la propriété' }).click();
+  await page.locator('#propEditor [data-toggle="twoWay"]').click();
+  await page.locator('#propEditor [data-act="close"]').click();
+  await value('Liée à').click();
+  await page.locator('#nPop .row', { hasText: 'piano' }).click();
+  const reverse = await page.evaluate(() => { const k = CUSTOM_PROPS.find(p => p.name === 'Liée à').twoWay; return Store.get('demo-piano').props[k]; });
+  expect(reverse).toEqual(['demo-marathon']);
+});
