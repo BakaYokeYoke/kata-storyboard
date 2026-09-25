@@ -120,6 +120,9 @@ function saveView(v) { try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); 
 let popReturnFocus = null;   // élément qui retrouve le focus à la fermeture du menu
 function openPop(anchor, items) {
   const returnTo = $('#nPop')?.contains(document.activeElement) ? popReturnFocus : document.activeElement;
+  // Position mesurée avant de fermer le menu parent (un sous-menu est ancré sur une de ses lignes)
+  const r = anchor.getBoundingClientRect();
+  const fromMenu = !!anchor.closest?.('#nPop');
   closePop(false);
   popReturnFocus = returnTo;
   const pop = document.createElement('div');
@@ -138,10 +141,15 @@ function openPop(anchor, items) {
     </div>`;
   }).join('');
   document.body.appendChild(pop);
-  const r = anchor.getBoundingClientRect();
   const w = pop.offsetWidth, h = pop.offsetHeight;
-  pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
-  pop.style.top = (r.bottom + 6 + h > innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+  if (fromMenu) {
+    // Sous-menu : à droite de la ligne parente, ou à gauche si la place manque (comme Notion)
+    pop.style.left = (r.right + 4 + w < innerWidth ? r.right + 4 : Math.max(8, r.left - w - 4)) + 'px';
+    pop.style.top = Math.max(8, Math.min(r.top - 6, innerHeight - h - 8)) + 'px';
+  } else {
+    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+    pop.style.top = (r.bottom + 6 + h > innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+  }
   pop.onclick = e => {
     e.stopPropagation();
     const row = e.target.closest('[data-i]');
