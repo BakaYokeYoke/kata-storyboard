@@ -909,6 +909,12 @@ function openPeek(kind, id, { isNew = false } = {}) {
   const S = kind === 'template' ? Templates : Store;
   const doc = S.get(id);
   if (!doc) return;
+  // Une autre carte était ouverte (clic sur une carte du Kanban, comme Notion) : on l'enregistre,
+  // ou on l'abandonne si c'était une nouvelle page restée sans titre.
+  if (peek && !(peek.kind === kind && peek.id === id)) {
+    if (peek.isNew && peek.kind === 'vision' && !(Store.get(peek.id)?.title || '').trim()) { cancelBoardSave(); Store.remove(peek.id); }
+    else flushBoardSave();
+  }
   peek = { kind, id, isNew };   // isNew : carte tout juste créée, abandonnée si le titre reste vide
   const isTpl = kind === 'template';
 
@@ -916,6 +922,7 @@ function openPeek(kind, id, { isNew = false } = {}) {
   $('#drawer').classList.toggle('center', isTpl);
   $('#drawer').classList.remove('full');
   $('#scrim').classList.toggle('center', isTpl);
+  $('#drawer').setAttribute('aria-modal', isTpl ? 'true' : 'false');   // side peek : le Kanban reste utilisable
   $('#peekExpand').hidden = !isTpl;
   $('#peekExpand').onclick = () => $('#drawer').classList.toggle('full');
   const banner = $('#peekBanner');

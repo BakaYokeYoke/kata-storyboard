@@ -18,7 +18,7 @@ test('le Kanban affiche les colonnes, les sous-groupes et la démo', async ({ pa
 test('une nouvelle page sans titre n\'est pas créée, avec un titre elle l\'est', async ({ page }) => {
   await page.click('#newMain');
   await expect(page.locator('#drawer')).toHaveClass(/open/);
-  await page.click('#scrim', { position: { x: 20, y: 400 } });
+  await page.mouse.click(20, 400);   // clic sur le Kanban, à côté du tiroir
   await expect(page.locator('.n-card')).toHaveCount(5);
 
   await page.click('#newMain');
@@ -318,4 +318,24 @@ test('page : supprimer une propriété intégrée puis la restaurer', async ({ p
   await page.locator('#nPop .row', { hasText: 'Focus Process' }).click();
   await expect(name('Focus Process')).toHaveCount(1);
   await expect(page.locator('#peekProps .prow').filter({ has: page.locator('.kname', { hasText: /^Focus Process$/ }) }).locator('input')).toHaveValue(/.+/);
+});
+
+test('side peek : 2/3 de l\'écran, Kanban visible, clic sur une autre carte = ouverture à la place', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 });
+  const cards = page.locator('.n-card');
+  await cards.first().click();
+  await expect(page.locator('#drawer')).toHaveClass(/open/);
+  expect(Math.round((await page.locator('#drawer').boundingBox()).width)).toBe(1000);
+  expect(await page.locator('#scrim').evaluate(el => getComputedStyle(el).pointerEvents)).toBe('none');
+  // Une autre carte, visible à gauche du tiroir
+  const openId = await cards.first().getAttribute('data-id');
+  const ids = await page.$$eval('.n-card', (els, o) => els.filter(e => e.dataset.id !== o && e.getBoundingClientRect().right < 480).map(e => e.dataset.id), openId);
+  const other = page.locator(`.n-card[data-id="${ids[0]}"]`);
+  const title = await other.locator('.tt').innerText();
+  await other.click();
+  await expect(page.locator('#peekTitle')).toHaveValue(title);
+  await expect(page.locator('#drawer')).toHaveClass(/open/);
+  // Clic ailleurs sur le Kanban : fermeture
+  await page.mouse.click(30, 850);
+  await expect(page.locator('#drawer')).not.toHaveClass(/open/);
 });

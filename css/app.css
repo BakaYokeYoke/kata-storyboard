@@ -477,8 +477,10 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .scrim { position: fixed; inset: 0; background: rgba(15,15,15,.25); opacity: 0; pointer-events: none; transition: opacity .18s ease-in; z-index: 20; }
 .scrim.open { transition: opacity .26s ease-out; }
 .scrim.open { opacity: 1; pointer-events: auto; }
+/* Side peek : pas de voile, le Kanban reste visible et cliquable (comme Notion). Seuls les templates (au centre) gardent le voile. */
+.scrim.open:not(.center) { background: none; pointer-events: none; }
 .drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; width: min(1180px, 94vw); background: #fff; z-index: 21;
+  position: fixed; top: 0; right: 0; bottom: 0; width: max(min(640px, 100vw), calc(100vw * 2 / 3)); background: #fff; z-index: 21;   /* Notion : 2/3 de l'écran */
   /* Animation façon Notion : entrée décélérée, sortie plus rapide */
   transform: translateX(100%); transition: transform .18s cubic-bezier(.4, 0, 1, 1); display: flex; flex-direction: column;
   box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px;

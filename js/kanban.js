@@ -539,6 +539,15 @@ function renderKanban() {
   $('#newCaret').onclick = e => { e.stopPropagation(); closePop(); closePanel(); toggleTemplateMenu(); };
 
   $('#scrim').onclick = closePeek;
+  // Side peek (comme Notion) : le Kanban reste visible et utilisable derrière le tiroir.
+  // Un clic ailleurs sur la page ferme le tiroir ; un clic sur une carte l'y ouvre à la place.
+  if (!renderKanban.peekOutside) {
+    renderKanban.peekOutside = true;
+    document.addEventListener('pointerdown', e => {
+      if (!peek || peek.kind === 'template' || e.button !== 0) return;
+      if (e.target.closest('main') && !e.target.closest('.n-card')) closePeek();
+    });
+  }
   $('#drawerClose').onclick = closePeek;
   document.onclick = () => { $('#tplMenu').hidden = true; closeIconPicker(); closePop(); closePanel(); };
   document.onkeydown = e => {
