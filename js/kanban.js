@@ -353,13 +353,10 @@ function renderKanban() {
     card.querySelector('[data-card="rename"]').onclick = e => { e.stopPropagation(); renameInline(card); };
     card.querySelector('[data-card="more"]').onclick = e => {
       e.stopPropagation();
-      const b = Store.get(id);
       openPop(e.currentTarget, [
         { icon: 'peek', label: 'Ouvrir en aperçu', onClick: () => openPeek('vision', id) },
         { icon: 'pencil', label: 'Renommer', onClick: () => renameInline(card) },
         { icon: 'copy', label: 'Dupliquer', onClick: () => { duplicateVision(id); renderKanban(); } },
-        { sep: true }, { header: 'Déplacer vers' },
-        ...STATUSES.map(st => ({ html: pill(st), checked: statusOf(b) === st.key, onClick: () => { setStatus(Store, id, st.key); renderKanban(); } })),
         { sep: true },
         { icon: 'trash', label: 'Supprimer', danger: true, onClick: () => { moveToTrash('vision', id); renderKanban(); } },
       ]);
