@@ -44,7 +44,10 @@ function renderBoard(id, root = $('#app')) {
       <span class="status" id="status"></span>
     </div>` : ''}
     ${isTplDoc() ? '' : '<div class="tb" id="tb"></div>'}
+    <div class="tl" id="tl">
     <div id="stage"></div>
+    <div class="tl-seg tl-kata" id="tlKataSeg">
+    <div id="tlKata"></div>
     <div class="frame" id="sbFrame">
       <div class="sheet">
         <div class="head">
@@ -96,7 +99,11 @@ function renderBoard(id, root = $('#app')) {
           </div>
         </div>
       </div>
-    </div>`;
+    </div>
+    </div>
+    <div id="tlEnd"></div>
+    </div>
+    <section class="kata-hist" id="kataHist"></section>`;
 
   // Champs simples (data-field accepte un chemin : "target.outcome")
   SB_ROOT.querySelectorAll('[data-field]').forEach(el => {

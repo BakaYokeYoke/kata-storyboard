@@ -1,15 +1,14 @@
-/* Time block Lire → Run → Kata et section Run (Routine / Flux). */
+/* Time block (maquette 3a « Page complète avec ligne de vie ») :
+   barre du minuteur, ligne de vie Lire → Run → Kata → Terminer, historique de Kata. */
 
 /* ============================================================
-   Time block : Lire → Run → Kata
-   Le Kata (cycle de coaching) n'est accessible qu'après le Run.
+   Time block : Lire → Run → Kata → Terminé
+   Le storyboard n'est éditable qu'à l'étape Kata (et après l'enregistrement du cycle).
    ============================================================ */
-const STEPS = [
-  { key: 'read', label: 'Lire' },
-  { key: 'run',  label: 'Run' },
-  { key: 'kata', label: 'Kata' },
-];
+const TB_ORDER = ['read', 'run', 'kata', 'done'];
 let tbInterval = null;
+let tbHistOpen = false;   // « Historique de Kata » replié par défaut
+let tbDrag = null;        // index de l'étape de routine en cours de déplacement
 const isTplDoc = () => DocStore === Templates;
 
 function newSession(cardId, durationMin = 60) {
@@ -22,46 +21,51 @@ function currentExperiment() {
   const list = active ? board.experiments.filter(x => x.obstacleId === active.id) : board.experiments;
   return list.length ? { x: list[list.length - 1], n: list.length, obstacle: active } : null;
 }
+function updateReminder() {}   // ancien rappel d'expérience : remplacé par la section Lire
 
-function reminderHTML() {
-  const cur = currentExperiment();
-  if (!cur) return 'Aucune expérience en cours : définissez-la à l\'étape Kata.';
-  return `<b>Expérience #${cur.n}</b> ${esc(cur.x.step || '(étape non renseignée)')}<span class="sep">·</span><b>Prédiction</b> ${esc(cur.x.expect || '—')}`;
+/* ---------- État dérivé ---------- */
+const TB_DONE_COL = 'done';
+function flowColumns() {
+  return [
+    { id: 'todo', label: 'À faire', kind: 'todo' },
+    ...board.current.asIs.map(b => ({
+      id: b.id, label: b.name || 'Étape sans nom', kind: b.isObstacle ? 'warn' : 'step',
+      meta: [b.value, typeof b.waitAfter === 'string' && b.waitAfter ? `attente ${b.waitAfter}` : ''].filter(Boolean).join(' · '),
+    })),
+    { id: TB_DONE_COL, label: 'Fait', kind: 'done' },
+  ];
 }
-function updateReminder() {
-  const el = $('#tbReminder');
-  el.innerHTML = reminderHTML();
-  el.classList.toggle('empty', !currentExperiment());
+function runProgress() {
+  const R = board.run.routine, items = board.run.flow ? board.run.items : [];
+  const known = new Set(flowColumns().map(c => c.id));
+  const colOf = it => known.has(it.column) ? it.column : 'todo';
+  const rDone = R.filter(r => r.done).length, fDone = items.filter(it => colOf(it) === TB_DONE_COL).length;
+  return { rDone, rN: R.length, fDone, fN: items.length, colOf, allDone: rDone === R.length && fDone === items.length };
 }
 
+/* ---------- Rendu d'ensemble ---------- */
 function renderTimeblock() {
   clearInterval(tbInterval);
   if (isTplDoc()) { renderStage(); return; }
-  const s = board.session;
-  const idx = STEPS.findIndex(st => st.key === s.step);
+  renderBar();
+  renderStage();
+}
 
-  const actions = {
-    read: `<button class="tb-btn primary" data-tb="start">Commencer le run</button>`,
-    run:  `<button class="tb-btn primary" data-tb="validate">✔ Valider le run</button>
-           <button class="tb-btn danger" data-tb="impossible">Run impossible</button>`,
-    kata: `<button class="tb-btn primary" data-tb="save">Enregistrer le cycle</button>`,
-  }[s.step];
-
+// Barre collante : Time block · phase · ▶ Lancer · minuteur / durée · Run impossible
+function renderBar() {
+  const s = board.session, i = TB_ORDER.indexOf(s.step);
   $('#tb').innerHTML = `
     <div class="tb-row">
-      <div class="stepper" aria-label="Étapes du time block">
-        ${STEPS.map((st, i) => {
-          const state = i < idx ? 'done' : i === idx ? 'active' : 'locked';
-          const mark = state === 'done' ? '✓' : state === 'active' ? '●' : '🔒';
-          return `${i ? `<span class="link ${i <= idx ? 'done' : ''}"></span>` : ''}
-            <span class="st ${state}" ${state === 'locked' ? 'aria-disabled="true" title="Verrouillé"' : ''}${state === 'active' ? ' aria-current="step"' : ''}><span class="mark">${mark}</span>${i + 1}. ${st.label}</span>`;
-        }).join('')}
-      </div>
+      <span class="tb-label">Time block</span>
+      <span class="tb-phase">${['1 · Lire', '2 · Run', '3 · Kata', 'Terminé'][i]}</span>
       <span class="tb-spacer"></span>
-      <span class="timer" id="timer"></span>
-      <span class="tb-actions">${actions}</span>
+      ${!s.startedAt && s.step !== 'done' ? '<button class="tb-btn" data-tb="launch">▶ Lancer</button>' : ''}
+      <span class="tb-timer" id="timer"></span>
+      <span class="tb-dur">/ ${s.startedAt || s.step === 'done'
+        ? s.durationMin
+        : `<input type="number" id="tbDuration" min="5" max="480" step="5" value="${s.durationMin}" aria-label="Durée du time block (min)">`} min</span>
+      ${s.step === 'run' ? '<button class="tb-btn danger" data-tb="impossible">Run impossible</button>' : ''}
     </div>
-    <div class="tb-reminder ${currentExperiment() ? '' : 'empty'}" id="tbReminder">${reminderHTML()}</div>
     <div class="tb-impossible" id="tbImpossible" hidden>
       <textarea id="impossibleText" placeholder="Qu'est-ce qui a empêché le run ? Ce texte devient un obstacle dans le Parking Lot."></textarea>
       <div class="row">
@@ -69,46 +73,36 @@ function renderTimeblock() {
         <button class="tb-btn" data-tb="impossibleCancel">Annuler</button>
       </div>
     </div>`;
-
   $('#tb').querySelectorAll('[data-tb]').forEach(btn => btn.onclick = () => tbAction(btn.dataset.tb));
+  const dur = $('#tbDuration');
+  if (dur) dur.onchange = () => {
+    s.durationMin = Math.max(5, Math.min(480, parseInt(dur.value, 10) || 60));
+    dur.value = s.durationMin;
+    scheduleSave(); renderTimer();
+  };
   renderTimer();
-  if (s.startedAt) tbInterval = setInterval(renderTimer, 1000);
-  renderStage();
+  if (s.startedAt && s.step !== 'done') tbInterval = setInterval(renderTimer, 1000);
 }
 
+// Temps restant (au-delà de la durée : « +MM:SS » en rouge)
 function renderTimer() {
-  const s = board.session;
-  const el = $('#timer');
+  const s = board.session, el = $('#timer');
   if (!el) return;
-  if (!s.startedAt) {
-    el.className = 'timer';
-    el.innerHTML = `⏱ <input type="number" id="tbDuration" min="5" max="480" step="5" value="${s.durationMin}" title="Durée du time block"> min`;
-    $('#tbDuration').onchange = e => {
-      s.durationMin = Math.max(5, Math.min(480, parseInt(e.target.value, 10) || 60));
-      e.target.value = s.durationMin;
-      scheduleSave();
-    };
-    return;
-  }
-  const left = Math.round((s.startedAt + s.durationMin * 60000 - Date.now()) / 1000);
-  const abs = Math.abs(left);
-  const mmss = `${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
-  el.className = `timer running ${left < 0 ? 'over' : ''}`;
-  el.innerHTML = `⏱ <strong>${left < 0 ? '+' : ''}${mmss}</strong> <span style="color:var(--muted)">/ ${s.durationMin} min</span>`;
+  const elapsed = s.startedAt ? Math.floor(((s.endedAt || Date.now()) - s.startedAt) / 1000) : 0;
+  const left = s.durationMin * 60 - elapsed, abs = Math.abs(left);
+  el.textContent = `${left < 0 ? '+' : ''}${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
+  el.classList.toggle('over', left < 0);
 }
 
 function tbAction(act) {
   const s = board.session;
-  if (act === 'start') {
-    board.session = { ...newSession(board.id, s.durationMin), step: 'run', startedAt: Date.now() };
-    board.run.routine.forEach(r => r.done = false);   // nouveau time block : checklist décochée
+  if (act === 'launch') s.startedAt = Date.now();
+  if (act === 'read') {
+    s.step = 'run';
+    board.run.routine.forEach(r => r.done = false);   // nouveau run : checklist décochée
   }
   if (act === 'validate') Object.assign(s, { step: 'kata', runStatus: 'done' });
-  if (act === 'impossible') {
-    $('#tbImpossible').hidden = false;
-    $('#impossibleText').focus();
-    return;
-  }
+  if (act === 'impossible') { $('#tbImpossible').hidden = false; $('#impossibleText').focus(); return; }
   if (act === 'impossibleCancel') { $('#tbImpossible').hidden = true; return; }
   if (act === 'impossibleConfirm') {
     const text = $('#impossibleText').value.trim();
@@ -121,162 +115,208 @@ function tbAction(act) {
   if (act === 'save') {
     // Historique et récurrence : écrits directement dans le stockage (champs partagés avec la page)
     const stored = DocStore.get(board.id) || board;
-    const timeblocks = [...(stored.timeblocks || []), { ...s, endedAt: Date.now() }];
+    Object.assign(s, { step: 'done', endedAt: Date.now() });
+    const timeblocks = [...(stored.timeblocks || []), { ...s }];
     const fields = { timeblocks };
     if (s.runStatus === 'done' && stored.recur?.every) fields.recur = { ...stored.recur, due: addDaysISO(localISO(), stored.recur.every) };
     if (s.runStatus === 'done' && ['goal', 'wip'].includes(statusOf(stored))) Object.assign(fields, { status: 'success', statusSince: Date.now() });
     DocStore.patch(board.id, fields);
     board.timeblocks = timeblocks;
-    board.session = newSession(board.id, s.durationMin);
     toast(fields.recur ? `Cycle enregistré · prochain run ${relDay(fields.recur.due)}` : 'Cycle enregistré');
   }
   scheduleSave();
   renderTimeblock();
-  if (board.session.step === 'kata') setTimeout(() => $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  else if (inDrawer && SB_ROOT?.closest('.drawer')) {
-    const drawer = SB_ROOT.closest('.drawer');
-    const top = drawer.querySelector('.peek-top')?.offsetHeight || 0;
-    if (drawer.scrollTop > SB_ROOT.offsetTop - top) drawer.scrollTo({ top: SB_ROOT.offsetTop - top, behavior: 'smooth' });
-  }
-  else scrollTo({ top: 0, behavior: 'smooth' });
+  if (act === 'validate' || act === 'impossibleConfirm') setTimeout(() => $('#tlKata')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 }
 
-/* Premier plan selon l'étape + verrouillage du storyboard */
+/* ---------- Ligne de vie ---------- */
+// Cercle : done (vert ✓), active (anneau + point bleu), ready (anneau bleu + halo, 🔒), open (anneau + halo), locked (gris 🔒)
+function tlNode(state, { act, label } = {}) {
+  const inner = { done: '✓', active: '<span class="dot"></span>', ready: '🔒', locked: '🔒', open: '' }[state];
+  return act
+    ? `<button class="tl-node ${state}" data-tb="${act}" title="${esc(label)}" aria-label="${esc(label)}">${inner}</button>`
+    : `<span class="tl-node ${state}" aria-hidden="true">${inner}</span>`;
+}
+
 function renderStage() {
-  const step = isTplDoc() ? 'template' : board.session.step;
+  const tpl = isTplDoc();
+  const step = tpl ? 'template' : board.session.step;
+  const i = TB_ORDER.indexOf(step);
   const readonly = step === 'read' || step === 'run';
   $('#sbFrame').inert = readonly;
   $('#sbFrame').classList.toggle('readonly', readonly);
   $('section.experiments').classList.toggle('spot', step === 'kata');
+  $('#tl').classList.toggle('no-rail', tpl);
 
-  const cur = currentExperiment();
-  let html = '';
-  if (step === 'read') {
-    html = `
-      <div class="stage-card">
-        <h3>1. Lire — l'expérience du jour</h3>
-        ${cur ? `<dl class="focus-exp">
-          ${cur.obstacle ? `<dt>Obstacle</dt><dd>${esc(cur.obstacle.text)}</dd>` : ''}
-          <dt>Expérience #${cur.n}</dt><dd>${esc(cur.x.step || '(étape non renseignée)')}</dd>
-          <dt>Prédiction</dt><dd>${esc(cur.x.expect || '—')}</dd>
-        </dl>` : `<p class="muted">Aucune expérience définie. Lancez quand même le run, ou passez par le Kata pour en définir une.</p>`}
-        <div class="muted">Relisez le storyboard ci-dessous (Challenge, Target / Current Condition), préparez le run, puis cliquez sur « Commencer le run ».</div>
-      </div>
-      ${runSectionHTML('prep')}`;
-  } else if (step === 'run') {
-    html = runSectionHTML('run');
-  } else if (step === 'kata') {
-    html = `
-      <div class="stage-card">
-        <h3>3. Kata — cycle de coaching</h3>
-        <div class="muted">Run ${board.session.runStatus === 'impossible' ? 'impossible : l\'obstacle a été ajouté au Parking Lot' : 'validé'}. Le storyboard est éditable : complétez l'Experimenting Record (Happened / Learned), puis définissez la prochaine expérience.</div>
-        <ol>
-          <li>Quelle est la Target Condition ?</li>
-          <li>Quelle est la condition actuelle ?</li>
-          <li>Qu'aviez-vous prévu ? Que s'est-il passé ? Qu'avez-vous appris ?</li>
-          <li>Quels obstacles vous empêchent d'atteindre la Target Condition ? Lequel traitez-vous maintenant ?</li>
-          <li>Quelle est votre prochaine étape ? Qu'en attendez-vous ?</li>
-          <li>Quand pourrons-nous voir ce que vous avez appris ?</li>
-        </ol>
-      </div>`;
-  } else {
-    html = runSectionHTML('template');
+  if (tpl) {
+    $('#stage').innerHTML = `<div class="tl-seg tl-run"><div class="tl-body">${routineHTML('template')}</div></div>
+      <div class="tl-seg tl-flux"><div class="tl-body">${fluxHTML('template')}</div></div>`;
+    $('#tlKata').innerHTML = ''; $('#tlEnd').innerHTML = ''; $('#kataHist').innerHTML = '';
+    bindRun('template');
+    return;
   }
-  $('#stage').innerHTML = html;
-  bindRunSection(step === 'run' ? 'run' : step === 'read' ? 'prep' : 'template');
+
+  const P = runProgress(), isRun = step === 'run';
+  const on = n => i > n ? ' on' : '';   // tronçon de ligne vert une fois l'étape franchie
+  const cur = currentExperiment();
+  const chal = board.challengeBy || board.challengeResult || board.challengeVision
+    ? `D'ici <b data-user>${esc(board.challengeBy || '…')}</b>, <b data-user>${esc(board.challengeResult || '…')}</b>, afin de <b data-user>${esc(board.challengeVision || '…')}</b>.`
+    : '<span class="tl-muted">Challenge non défini : complétez-le dans le storyboard à l\'étape Kata.</span>';
+  const chip = (cls, k, v) => `<div class="tl-chip ${cls}"><span class="k">${k}</span><span class="v"${v ? ' data-user' : ''}>${v ? esc(v) : '<span class="tl-muted">—</span>'}</span></div>`;
+  const arrow = '<div class="tl-arrow" aria-hidden="true">→</div>';
+  const n3ready = isRun && P.allDone;
+
+  $('#stage').innerHTML = `
+    <div class="tl-seg tl-read${on(0)}">
+      ${tlNode(i > 0 ? 'done' : 'active', i === 0 ? { act: 'read', label: 'Valider la lecture' } : {})}
+      <div class="tl-body">
+        <div class="tl-title"><span class="tl-kicker ${i > 0 ? 'g' : 'b'}">1 · LIRE</span><h3>Se rappeler l'objectif</h3></div>
+        <div class="tl-challenge">${chal}</div>
+        <div class="tl-chain">
+          ${chip('', 'Target Condition', board.target.outcome)}${arrow}
+          ${chip('c-obs', 'Obstacle', cur?.obstacle?.text || board.obstacles.find(o => o.focus && !o.done)?.text)}${arrow}
+          ${chip('c-exp', `Expérience${cur ? ` #${cur.n}` : ''}`, cur?.x.step)}${arrow}
+          ${chip('', 'Je prédis', cur?.x.expect)}
+        </div>
+      </div>
+    </div>
+    <div class="tl-seg tl-check${on(0)}"><div class="tl-body">
+      ${i === 0 ? '<span class="tl-hint">Cliquez le cercle ● pour valider la lecture</span>' : '<span class="tl-hint g">Lu ✓</span>'}
+    </div></div>
+    <div class="tl-seg tl-run${on(1)}">
+      ${tlNode(i > 1 ? 'done' : isRun ? 'active' : 'locked')}
+      <div class="tl-body">
+        <div class="tl-title"><span class="tl-kicker ${i > 1 ? 'g' : isRun ? 'b' : ''}">2 · RUN</span><h3>Dérouler le standard</h3><span class="tl-note">≈ 90 % du time block</span></div>
+        ${routineHTML(step)}
+      </div>
+    </div>
+    <div class="tl-seg tl-flux${on(1)}"><div class="tl-body">${fluxHTML(step)}</div></div>
+    <div class="tl-seg tl-check tl-check2${on(1)}"><div class="tl-body">
+      ${i > 1 ? `<span class="tl-hint g">${board.session.runStatus === 'impossible' ? 'Run impossible · obstacle ajouté au Parking Lot' : 'Run validé ✓'}</span>`
+        : n3ready ? '<span class="tl-hint b">Run terminé · cliquez le cadenas 🔒 pour passer au Kata</span>'
+        : `<span class="tl-hint">${i === 0 ? 'Le Kata s\'ouvre une fois le run terminé' : `Reste : routine ${P.rDone}/${P.rN}${board.run.flow ? ` · flux ${P.fDone}/${P.fN}` : ''}`}</span>`}
+    </div></div>`;
+
+  // 3 · Kata : en-tête et bandeau d'état, le storyboard (#sbFrame) suit dans le même tronçon
+  $('#tlKataSeg').classList.toggle('on', i > 2);
+  $('#tlKata').innerHTML = `
+    ${tlNode(i > 2 ? 'done' : step === 'kata' ? 'active' : n3ready ? 'ready' : 'locked', n3ready ? { act: 'validate', label: 'Passer au Kata' } : {})}
+    <div class="tl-title"><span class="tl-kicker ${i > 2 ? 'g' : step === 'kata' ? 'b' : ''}">3 · KATA</span><h3>Storyboard</h3><span class="tl-note">≈ 10 %</span></div>
+    ${i < 2 ? `<div class="tl-banner locked"><span aria-hidden="true">🔒</span><span class="grow">Lecture seule. Le storyboard devient éditable une fois le run validé.</span><span class="tl-muted">Routine ${P.rDone}/${P.rN}${board.run.flow ? ` · Flux ${P.fDone}/${P.fN}` : ''}</span></div>`
+      : step === 'kata' ? `<div class="tl-banner open"><span aria-hidden="true">✎</span><span class="grow">Éditable. ${cur ? `Complétez l'expérience #${cur.n} (Happened / Learned), puis définissez la suivante.` : 'Définissez la prochaine expérience.'}</span></div>` : ''}`;
+
+  const every = DocStore.get(board.id)?.recur?.every;
+  $('#tlEnd').innerHTML = `
+    <div class="tl-seg tl-end${on(2)}">
+      ${tlNode(i > 2 ? 'done' : step === 'kata' ? 'open' : 'locked', step === 'kata' ? { act: 'save', label: 'Terminer le time block' } : {})}
+      <div class="tl-body">
+        <span class="tl-end-label ${i > 2 ? 'g' : step === 'kata' ? '' : 'off'}">Terminer le time block</span>
+        ${step === 'kata' ? `<span class="tl-hint b">cliquez le cercle pour enregistrer le cycle${every ? ` · prochain run dans ${every} j` : ''}</span>` : ''}
+        ${i > 2 ? '<span class="tl-hint g">Cycle enregistré ✓</span>' : ''}
+      </div>
+    </div>`;
+
+  $('#tl').querySelectorAll('[data-tb]').forEach(btn => btn.onclick = () => tbAction(btn.dataset.tb));
+  bindRun(step);
+  renderHistory();
 }
 
-/* ---------- Section Run ---------- */
-// ctx : 'prep' (préparation, étape Lire), 'run' (exécution), 'template' (configuration)
-function flowColumns() {
-  return [
-    { id: 'todo', label: 'À faire', edge: true },
-    ...board.current.asIs.map(b => ({ id: b.id, label: b.name || 'Étape sans nom' })),
-    { id: 'done', label: 'Fait', edge: true },
-  ];
+/* ---------- 2 · Run : Routine ---------- */
+function routineHTML(step) {
+  const R = board.run.routine, isRun = step === 'run';
+  const cur = isRun ? R.findIndex(r => !r.done) : -1;
+  const done = R.filter(r => r.done).length;
+  return `
+    <div class="rt" id="rtSec">
+      <div class="rt-head"><span class="rt-h">Routine</span><span class="grow"></span>
+        <span class="rt-count">${done} / ${R.length}</span>
+        <div class="rt-bar" aria-hidden="true"><div style="width:${R.length ? Math.round(done / R.length * 100) : 0}%"></div></div>
+      </div>
+      <div class="rt-list ${step === 'read' ? 'dim' : ''}">
+        ${R.map((r, k) => `
+          <div class="rt-row ${r.done ? 'done' : ''} ${k === cur ? 'cur' : ''}" data-k="${k}">
+            <span class="rt-grip" draggable="true" title="Glisser pour réordonner" aria-hidden="true">⋮⋮</span>
+            <button class="rt-box" role="checkbox" aria-checked="${r.done}" ${isRun ? '' : 'aria-disabled="true"'} title="${isRun ? 'Fait' : 'Se coche pendant le run'}" aria-label="${esc(r.label || 'Étape du standard')}">${r.done ? '✓' : ''}</button>
+            <input class="rt-lbl" data-rid="${r.id}" value="${esc(r.label)}" placeholder="Étape du standard" aria-label="Étape du standard">
+            ${k === cur ? '<span class="rt-tag">en cours</span>' : ''}
+          </div>`).join('')}
+        <button class="rt-add" id="addRoutine">+ Étape du standard</button>
+      </div>
+    </div>`;
 }
 
-function runSectionHTML(ctx) {
-  const run = board.run;
-  const canCheck = ctx === 'run';
-  const hint = {
-    prep: 'Préparation : ajustez le standard avant de commencer.',
-    run: run.mode === 'routine' ? 'Cochez chaque étape réalisée.' : 'Faites avancer les items d\'une colonne à l\'autre.',
-    template: 'Configuration reprise par chaque nouvelle Vision.',
-  }[ctx];
-
-  let body;
-  if (run.mode === 'routine') {
-    const done = run.routine.filter(r => r.done).length;
-    body = `
-      <ul class="routine">
-        ${run.routine.map(r => `
-          <li class="${r.done ? 'done' : ''}" data-id="${r.id}">
-            <input type="checkbox" ${r.done ? 'checked' : ''} ${canCheck ? '' : 'disabled'} title="${canCheck ? 'Fait' : 'Se coche pendant le run'}">
-            <input class="lbl" value="${esc(r.label)}" placeholder="Étape du standard de travail">
-            <button class="icon del" title="Supprimer">✕</button>
-          </li>`).join('')}
-      </ul>
-      <button class="add" id="addRoutine">+ Étape du standard</button>
-      ${run.routine.length && ctx === 'run' ? `<div class="routine-progress" style="margin-top:6px">${done} / ${run.routine.length} étapes faites</div>` : ''}`;
-  } else if (ctx === 'template') {
-    body = `<p class="hint">Mode Flux : les colonnes reprendront les blocs du diagramme As Is de chaque Vision.</p>`;
-  } else {
-    const cols = flowColumns();
-    const known = new Set(cols.map(c => c.id));
-    body = `<div class="flow">
-      ${cols.map(c => {
-        const items = run.items.filter(it => (known.has(it.column) ? it.column : 'todo') === c.id);
-        return `<div class="fcol ${c.edge ? 'edge' : ''}" data-col="${c.id}">
-          <div class="fcol-h"><span title="${esc(c.label)}">${esc(c.label)}</span><span>${items.length}</span></div>
-          ${items.map(it => `<div class="fitem" draggable="${canCheck}" data-id="${it.id}"><span>${esc(it.title)}</span><button class="icon del" title="Supprimer">✕</button></div>`).join('')}
-          ${c.id === 'todo' ? `<input class="new-item" id="newItem" placeholder="+ Item (Entrée)">` : ''}
+/* ---------- 2 · Run : Flux (optionnel selon la carte) ---------- */
+function fluxHTML(step) {
+  const run = board.run, isRun = step === 'run', P = runProgress();
+  const head = `<div class="fx-head"><span class="rt-h">Flux</span><span class="fx-tag">optionnel</span>
+    <span class="tl-note">${run.flow ? 'cliquez une carte pour l\'avancer' : 'non utilisé sur cette carte'}</span><span class="grow"></span>
+    ${run.flow ? `<span class="rt-count">${P.fDone} / ${P.fN} fait</span>` : ''}
+    <button class="tb-btn" id="fluxCfg">⚙ Personnaliser</button></div>`;
+  if (!run.flow) return head;
+  const cols = flowColumns();
+  return head + `
+    <div class="fx-grid ${step === 'read' ? 'dim' : ''}" style="grid-template-columns:repeat(${cols.length},minmax(0,1fr))">
+      ${cols.map((c, ci) => {
+        const items = run.items.filter(it => P.colOf(it) === c.id);
+        const movable = isRun && c.id !== TB_DONE_COL;
+        return `<div class="fx-col ${c.kind}">
+          <div class="fx-col-h"><span class="fx-pill" title="${esc(c.label)}"${c.kind === 'step' || c.kind === 'warn' ? ' data-user' : ''}>${c.kind === 'warn' ? '⚠ ' : ''}${esc(c.label)}</span><span class="fx-n">${items.length}</span></div>
+          ${c.meta ? `<div class="fx-meta" data-user>${esc(c.meta)}</div>` : ''}
+          ${items.map(it => `<div class="fx-card ${movable ? 'movable' : ''}" data-id="${it.id}" data-ci="${ci}" ${movable ? `role="button" tabindex="0" title="Avancer d'une colonne"` : ''}>
+            <span data-user>${esc(it.title)}</span><button class="fx-del" title="Supprimer" aria-label="Supprimer ${esc(it.title)}">✕</button></div>`).join('')}
+          ${c.id === 'todo' ? `<input class="fx-new" id="newItem" placeholder="+ Carte (Entrée)" aria-label="Nouvelle carte du flux">` : ''}
         </div>`;
       }).join('')}
     </div>
-    ${!board.current.asIs.length ? '<p class="hint">Ajoutez des blocs au diagramme As Is (Current Condition) pour créer les colonnes intermédiaires.</p>' : ''}`;
-  }
-
-  return `
-    <section class="run" id="runSec">
-      <div class="run-head">
-        <h3>${ctx === 'run' ? '2. Run' : 'Run'}</h3>
-        <div class="seg" role="group" aria-label="Mode du run">
-          <button data-mode="routine" class="${run.mode === 'routine' ? 'on' : ''}">Routine</button>
-          <button data-mode="flow" class="${run.mode === 'flow' ? 'on' : ''}">Flux</button>
-        </div>
-        <span class="hint-inline">${hint}</span>
-      </div>
-      ${body}
-    </section>`;
+    ${!board.current.asIs.length ? '<p class="tl-muted fx-hint">Ajoutez des étapes au diagramme As Is (Current Condition) pour créer les colonnes intermédiaires.</p>' : ''}`;
 }
 
-function bindRunSection(ctx) {
-  const sec = $('#runSec');
-  if (!sec) return;
-  const run = board.run;
-  const rerender = () => { $('#stage').querySelector('#runSec').outerHTML = runSectionHTML(ctx); bindRunSection(ctx); };
+function bindRun(step) {
+  const run = board.run, isRun = step === 'run';
+  const rerender = focusId => {
+    renderStage();
+    if (focusId) { const el = $(`#tl input[data-rid="${focusId}"]`); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  };
+  const R = () => run.routine;
 
-  sec.querySelectorAll('[data-mode]').forEach(btn => btn.onclick = () => { run.mode = btn.dataset.mode; scheduleSave(); rerender(); });
-
-  // Routine
-  sec.querySelectorAll('.routine li').forEach(li => {
-    const r = run.routine.find(x => x.id === li.dataset.id);
-    li.querySelector('input[type=checkbox]').onchange = e => { r.done = e.target.checked; scheduleSave(); rerender(); };
-    const lbl = li.querySelector('input.lbl');
+  // Routine : cocher (pendant le run), éditer, Entrée / Retour arrière / ↑ ↓, glisser ⋮⋮
+  $('#tl').querySelectorAll('.rt-row').forEach(row => {
+    const k = +row.dataset.k, r = R()[k];
+    row.querySelector('.rt-box').onclick = () => { if (!isRun) return; r.done = !r.done; scheduleSave(); rerender(); };
+    const lbl = row.querySelector('.rt-lbl');
     lbl.oninput = () => { r.label = lbl.value; scheduleSave(); };
-    lbl.onkeydown = e => { if (e.key === 'Enter') $('#addRoutine').click(); };
-    li.querySelector('.del').onclick = () => { run.routine = run.routine.filter(x => x !== r); scheduleSave(); rerender(); };
+    lbl.onkeydown = e => {
+      if (e.key === 'Enter') { e.preventDefault(); const nid = uid(); R().splice(k + 1, 0, { id: nid, label: '', done: false }); scheduleSave(); rerender(nid); }
+      if (e.key === 'Backspace' && !lbl.value && R().length > 1) { e.preventDefault(); const to = (R()[k - 1] || R()[k + 1]).id; R().splice(k, 1); scheduleSave(); rerender(to); }
+      if (e.key === 'ArrowUp' && k > 0) { e.preventDefault(); rerender(R()[k - 1].id); }
+      if (e.key === 'ArrowDown' && k < R().length - 1) { e.preventDefault(); rerender(R()[k + 1].id); }
+    };
+    const grip = row.querySelector('.rt-grip');
+    grip.ondragstart = e => { tbDrag = k; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(k)); };
+    grip.ondragend = () => { tbDrag = null; $('#tl').querySelectorAll('.rt-row.over').forEach(x => x.classList.remove('over')); };
+    row.ondragover = e => { if (tbDrag == null) return; e.preventDefault(); row.classList.add('over'); };
+    row.ondragleave = () => row.classList.remove('over');
+    row.ondrop = e => {
+      e.preventDefault();
+      const from = tbDrag; tbDrag = null;
+      if (from == null || from === k) return rerender();
+      const [m] = R().splice(from, 1); R().splice(k, 0, m);
+      scheduleSave(); rerender();
+    };
   });
   const addR = $('#addRoutine');
-  if (addR) addR.onclick = () => {
-    run.routine.push({ id: uid(), label: '', done: false });
-    scheduleSave(); rerender();
-    const lbls = $('#runSec').querySelectorAll('input.lbl');
-    lbls[lbls.length - 1]?.focus();
-  };
+  if (addR) addR.onclick = () => { const nid = uid(); R().push({ id: nid, label: '', done: false }); scheduleSave(); rerender(nid); };
 
-  // Flux
+  // Flux : Personnaliser (activer sur cette carte, colonnes = As Is), ajouter, avancer d'une colonne, supprimer
+  const cfg = $('#fluxCfg');
+  if (cfg) cfg.onclick = e => {
+    e.stopPropagation();
+    openPop(cfg, [
+      { icon: 'board', label: 'Utiliser le flux sur cette carte', switch: !!run.flow, onClick: () => { run.flow = !run.flow; scheduleSave(); rerender(); } },
+      { sep: true },
+      { icon: 'edit', label: 'Colonnes : étapes du diagramme As Is', onClick: () => $('#diag-current')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) },
+    ]);
+  };
   const newItem = $('#newItem');
   if (newItem) newItem.onkeydown = e => {
     if (e.key !== 'Enter' || !newItem.value.trim()) return;
@@ -284,21 +324,60 @@ function bindRunSection(ctx) {
     scheduleSave(); rerender();
     $('#newItem')?.focus();
   };
-  sec.querySelectorAll('.fitem').forEach(el => {
+  const cols = flowColumns();
+  $('#tl').querySelectorAll('.fx-card').forEach(el => {
     const it = run.items.find(x => x.id === el.dataset.id);
-    el.querySelector('.del').onclick = () => { run.items = run.items.filter(x => x !== it); scheduleSave(); rerender(); };
-    el.ondragstart = e => e.dataTransfer.setData('text/plain', it.id);
+    el.querySelector('.fx-del').onclick = e => { e.stopPropagation(); run.items = run.items.filter(x => x !== it); scheduleSave(); rerender(); };
+    if (!el.classList.contains('movable')) return;
+    const advance = () => { it.column = cols[+el.dataset.ci + 1].id; scheduleSave(); rerender(); };
+    el.onclick = advance;
+    el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); } };
   });
-  if (ctx === 'run') sec.querySelectorAll('.fcol').forEach(col => {
-    col.ondragover = e => { e.preventDefault(); col.classList.add('drop'); };
-    col.ondragleave = () => col.classList.remove('drop');
-    col.ondrop = e => {
-      e.preventDefault();
-      const it = run.items.find(x => x.id === e.dataTransfer.getData('text/plain'));
-      if (it) { it.column = col.dataset.col; scheduleSave(); }
-      rerender();
-    };
-  });
+}
+
+/* ---------- Historique de Kata ---------- */
+const fmtShort = iso => iso ? new Date(iso + 'T00:00').toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short' }) : '…';
+function renderHistory() {
+  const el = $('#kataHist');
+  if (!el) return;
+  const start = board.tcStartedAt || localISO(new Date(board.createdAt || Date.now()));
+  const past = board.tcHistory || [];
+  const hasCurrent = !!(board.target.outcome || board.target.process || board.targetDate);
+  const nExp = board.experiments.filter(x => !x.date || x.date >= start).length;
+  const n = past.length + (hasCurrent ? 1 : 0);
+  el.innerHTML = `
+    <div class="kh-head">
+      <button class="kh-toggle" id="khToggle" aria-expanded="${tbHistOpen}"><span class="kh-arrow" aria-hidden="true">${tbHistOpen ? '▼' : '▶'}</span><span class="kh-title">Historique de Kata</span></button>
+      <span class="tl-note">${n} Target Condition${n > 1 ? 's' : ''}</span>
+      <span class="grow"></span>
+      ${hasCurrent ? '<button class="tb-btn" id="closeTc">Clore la Target Condition</button>' : ''}
+    </div>
+    ${tbHistOpen ? `
+      <div class="kh-row kh-th"><span></span><span>Target Condition</span><span>Période</span><span>Expériences</span></div>
+      ${hasCurrent ? `<div class="kh-row"><span class="b">●</span><span class="cur"><span${board.target.outcome ? ' data-user' : ''}>${esc(board.target.outcome || 'Target Condition sans résultat')}</span> <span class="tl-muted">· en cours</span></span><span class="tl-muted">${fmtShort(start)} → ${fmtShort(board.targetDate)}</span><span class="tl-muted">${nExp}</span></div>` : ''}
+      ${[...past].reverse().map(h => `<div class="kh-row"><span class="g">✓</span><span${h.outcome ? ' data-user' : ''}>${esc(h.outcome || 'Target Condition sans résultat')}</span><span class="tl-muted">${fmtShort(h.from)} → ${fmtShort(h.to)}</span><span class="tl-muted">${h.experiments}</span></div>`).join('')}
+      ${!n ? '<div class="tl-muted kh-empty">Aucune Target Condition pour l\'instant.</div>' : ''}` : ''}`;
+  $('#khToggle').onclick = () => { tbHistOpen = !tbHistOpen; renderHistory(); };
+  const close = $('#closeTc');
+  if (close) close.onclick = closeTargetCondition;
+}
+
+// Archive la Target Condition en cours et en ouvre une vierge (Current Condition, obstacles et record sont conservés)
+function closeTargetCondition() {
+  if (!confirm('Clore la Target Condition en cours ? Elle passe dans l\'historique et une nouvelle Target Condition vierge la remplace.')) return;
+  const start = board.tcStartedAt || localISO(new Date(board.createdAt || Date.now()));
+  board.tcHistory = [...(board.tcHistory || []), {
+    id: uid(), outcome: board.target.outcome, process: board.target.process, pattern: board.target.pattern,
+    targetDate: board.targetDate, from: start, to: localISO(),
+    experiments: board.experiments.filter(x => !x.date || x.date >= start).length,
+  }];
+  board.target = { ...emptyCondition(), toBe: [] };
+  board.targetDate = '';
+  board.tcStartedAt = localISO();
+  tbHistOpen = true;
+  saveBoardNow();
+  renderBoard(board.id, SB_ROOT);
+  toast('Target Condition close · définissez la suivante dans le storyboard');
 }
 
 function conditionFields(side) {

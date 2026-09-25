@@ -33,6 +33,8 @@ function seedDemo() {
   let order = 0;
   const vision = v => { ++order; Store.save({ ...newBoard(v.id, v.title), experiments: [], obstacles: [], createdAt: Date.now() - (20 - order) * 3 * DAY, statusSince: Date.now() - order * 1.5 * DAY, ...v }); };
 
+  // Marathon (maquette 3a) : colonnes du flux = étapes As Is ; une carte déjà dans « Footing »
+  const mFooting = blk('Footing', '45 min');
   vision({
     id: 'demo-marathon', icon: '🏃', title: 'Vivre en athlète d\'endurance', status: 'wip', group: 'perso',
     recur: { every: 2, due: localISO() },
@@ -40,7 +42,11 @@ function seedDemo() {
       outcome: { target: 95, unit: 'min (semi)', better: 'down', points: [108, 104, 103, 100, 99, 97].map((v, i) => ({ id: uid(), date: addDaysISO(localISO(), (i - 5) * 7), value: v, note: i === 3 ? 'Nouveau plan de fractionné' : '' })) },
       process: { target: 4, unit: 'sorties / sem.', better: 'up', points: [2, 2, 3, 2, 3, 4].map((v, i) => ({ id: uid(), date: addDaysISO(localISO(), (i - 5) * 7), value: v, note: '' })) },
     },
-    run: { mode: 'routine', items: [], routine: [
+    run: { mode: 'routine', flow: true, items: [
+      { id: uid(), title: 'Sortie longue dimanche', column: 'todo' },
+      { id: uid(), title: 'Fractionné mardi', column: 'todo' },
+      { id: uid(), title: 'Footing jeudi', column: mFooting.id },
+    ], routine: [
       { id: uid(), label: 'Échauffement 15 min', done: false },
       { id: uid(), label: '8 × 400 m à 4:20 / km, récup 1 min 30', done: false },
       { id: uid(), label: 'Retour au calme 10 min', done: false },
@@ -52,7 +58,13 @@ function seedDemo() {
     target:  { outcome: 'Semi-marathon en 1h35', process: '4 sorties / semaine tenues 4 semaines de suite', pattern: 'Sortie longue le dimanche, fractionné le mardi, 2 footings lents.',
       toBe: [blk('Échauffement', '15 min'), blk('Fractionné', '8 × 400 m'), blk('Retour au calme', '10 min')] },
     current: { outcome: '10 km en 46 min', process: '2 sorties / semaine en moyenne', pattern: 'Sorties au feeling, souvent annulées le soir.',
-      asIs: [blk('Décision de sortir', 'le soir', { isObstacle: true, waitAfter: '1 h' }), blk('Footing', '45 min'), blk('Étirements', '0 min', { isObstacle: true })] },
+      asIs: [blk('Décision de sortir', 'le soir', { isObstacle: true, waitAfter: '1 h' }), mFooting, blk('Étirements', '0 min', { isObstacle: true })] },
+    // Historique de Kata : Target Conditions précédentes
+    tcStartedAt: d(-28),
+    tcHistory: [
+      { id: uid(), outcome: 'Courir 5 km sans marcher', process: '3 sorties / semaine', pattern: '', targetDate: d(-87), from: d(-136), to: d(-87), experiments: 5 },
+      { id: uid(), outcome: '10 km en 46 min', process: '3 sorties / semaine', pattern: '', targetDate: d(-29), from: d(-86), to: d(-29), experiments: 7 },
+    ],
     obstacles: [
       { id: 'o-m-1', text: 'Sorties du soir annulées après le travail', done: true, focus: false },
       { id: 'o-m-2', text: 'Pas d\'allure cible pour le fractionné', done: false, focus: true },

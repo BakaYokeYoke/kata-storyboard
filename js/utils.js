@@ -55,7 +55,10 @@ function migrate(b) {
   b.target.toBe ||= [];
   b.run ||= { mode: 'routine', routine: [], items: [] };
   b.run.routine ||= []; b.run.items ||= [];
+  if (b.run.flow === undefined) b.run.flow = b.run.mode === 'flow';   // Flux : optionnel selon la carte, en plus de la routine
   b.session ||= newSession(b.id);
+  if (b.session.step === 'done') b.session = newSession(b.id, b.session.durationMin);   // cycle enregistré : nouveau time block
+  b.tcHistory ||= [];
   b.timeblocks ||= [];
   b.metrics ||= {};
   b.current.asIs ||= [];

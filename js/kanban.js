@@ -531,6 +531,7 @@ function renderKanban() {
       { icon: 'download', label: 'Exporter (JSON)', onClick: exportAll },
       { icon: 'clip', label: 'Importer (JSON)…', onClick: importData },
       { sep: true },
+      ...(Store.list().some(b => b.id.startsWith('demo-')) ? [{ icon: 'trash', label: 'Supprimer les données de démo', danger: true, onClick: deleteDemo }] : []),
       { icon: 'reset', label: 'Réinitialiser la démo', danger: true, onClick: resetDemo },
     ]);
   };
@@ -612,6 +613,17 @@ function renameInline(card) {
   };
   input.onkeydown = e => { if (e.key === 'Enter') commit(true); if (e.key === 'Escape') { e.stopPropagation(); commit(false); } };
   input.onblur = () => commit(true);
+}
+
+// Retire les Visions de démo (identifiants « demo-… ») et leur historique ; tes propres cartes et les templates restent.
+async function deleteDemo() {
+  const demo = Store.list().filter(b => b.id.startsWith('demo-'));
+  if (!demo.length || !confirm(`Supprimer les ${demo.length} Visions de démo ? Tes propres cartes ne sont pas touchées. (⌘Z annule)`)) return;
+  await backupNow('demo-delete');
+  if (peek && demo.some(b => b.id === peek.id)) closePeek();
+  demo.forEach(b => Store.remove(b.id));
+  renderKanban();
+  toast(`${demo.length} Visions de démo supprimées`, { action: 'Annuler', onAction: undo });
 }
 
 async function resetDemo() {

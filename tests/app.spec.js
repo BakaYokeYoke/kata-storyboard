@@ -3,6 +3,12 @@ const { test, expect } = require('@playwright/test');
 
 const card = (page, id) => page.locator(`.n-card[data-id="${id}"]`);
 const store = (page, id) => page.evaluate(i => Store.get(i), id);
+// Time block : valider la lecture, puis finir le run (routine cochée, cartes du flux jusqu'à « Fait »)
+async function finishRun(page) {
+  await page.click('[data-tb="read"]');
+  for (const box of await page.locator('.rt-box').all()) await box.click();
+  while (await page.locator('.fx-card.movable').count()) await page.locator('.fx-card.movable').first().click();
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto('index.html');
@@ -36,29 +42,57 @@ test('glisser-déposer : changer de colonne et réordonner', async ({ page }) =>
   await expect(page.locator('.n-cell[data-status="success"][data-group="perso"] .n-card .tt').first()).toHaveText(/piano/);
 });
 
-test('time block : Lire → Run → Kata, storyboard verrouillé puis éditable', async ({ page }) => {
+test('time block : Lire → Run → Kata → Terminer, storyboard verrouillé puis éditable', async ({ page }) => {
   await card(page, 'demo-marathon').click();
   await expect(page.locator('#sbFrame')).toHaveClass(/readonly/);
-  await page.click('[data-tb="start"]');
-  await page.locator('.routine input[type=checkbox]').first().check();
+  await expect(page.locator('[data-tb="validate"]')).toHaveCount(0);   // cadenas du Kata : pas avant la fin du run
+  await page.click('[data-tb="launch"]');
+  await expect(page.locator('#timer')).toHaveText(/^(60:00|59:5\d)$/);
+  await finishRun(page);
+  await expect(page.locator('.tl-check2')).toContainText('Run terminé');
   await page.click('[data-tb="validate"]');
   await expect(page.locator('#sbFrame')).not.toHaveClass(/readonly/);
-  await expect(page.locator('.stepper .st.active')).toHaveText(/Kata/);
+  await expect(page.locator('.tb-phase')).toHaveText('3 · Kata');
   await page.click('[data-tb="save"]');
-  await expect(page.locator('.stepper .st.active')).toHaveText(/Lire/);
+  await expect(page.locator('.tl-end')).toContainText('Cycle enregistré');
   await page.click('#drawerClose');
   const b = await store(page, 'demo-marathon');
   expect(b.timeblocks).toHaveLength(1);
   expect(b.timeblocks[0].runStatus).toBe('done');
+  expect(b.run.items.every(it => it.column === 'done')).toBe(true);
+});
+
+test('routine : Entrée ajoute une étape, Retour arrière la supprime', async ({ page }) => {
+  await card(page, 'demo-marathon').click();
+  const n = await page.locator('.rt-lbl').count();
+  await page.locator('.rt-lbl').first().press('End');
+  await page.locator('.rt-lbl').first().press('Enter');
+  await expect(page.locator('.rt-lbl')).toHaveCount(n + 1);
+  await expect(page.locator('.rt-lbl').nth(1)).toBeFocused();
+  await page.keyboard.press('Backspace');
+  await expect(page.locator('.rt-lbl')).toHaveCount(n);
+});
+
+test('historique de Kata : clore la Target Condition', async ({ page }) => {
+  await card(page, 'demo-marathon').click();
+  await page.click('#khToggle');
+  await expect(page.locator('.kh-row:not(.kh-th)')).toHaveCount(3);
+  page.once('dialog', d => d.accept());
+  await page.click('#closeTc');
+  await expect(page.locator('.kh-row:not(.kh-th)')).toHaveCount(3);   // l'ancienne TC passe en ✓, la nouvelle est vierge
+  await page.waitForTimeout(400);
+  const b = await store(page, 'demo-marathon');
+  expect(b.tcHistory.map(h => h.outcome)).toContain('Semi-marathon en 1h35');
+  expect(b.target.outcome).toBe('');
 });
 
 test('run impossible : crée un obstacle et déverrouille le Kata', async ({ page }) => {
   await card(page, 'demo-marathon').click();
-  await page.click('[data-tb="start"]');
+  await page.click('[data-tb="read"]');
   await page.click('[data-tb="impossible"]');
   await page.fill('#impossibleText', 'Piste fermée');
   await page.click('[data-tb="impossibleConfirm"]');
-  await expect(page.locator('.stepper .st.active')).toHaveText(/Kata/);
+  await expect(page.locator('.tb-phase')).toHaveText('3 · Kata');
   await page.click('#drawerClose');
   expect((await store(page, 'demo-marathon')).obstacles.map(o => o.text)).toContain('Piste fermée');
 });
@@ -121,7 +155,7 @@ test('export puis import : les données reviennent à l\'identique', async ({ pa
 test('storyboard seul (?board=…) : verrouillé à l\'étape Lire, saisie enregistrée au Kata', async ({ page }) => {
   await page.goto('index.html?board=demo-piano');
   await expect(page.locator('#sbFrame')).toHaveClass(/readonly/);
-  await page.click('[data-tb="start"]');
+  await finishRun(page);
   await page.click('[data-tb="validate"]');
   await page.fill('#focusProcess', 'Séance du soir');
   await page.waitForTimeout(500);
@@ -181,7 +215,8 @@ test('langue : bascule en anglais depuis les réglages, contenu saisi inchangé'
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(card(page, 'demo-marathon').locator('.tt')).toHaveText("Vivre en athlète d'endurance");   // titre saisi : jamais traduit
   await card(page, 'demo-marathon').click();
-  await expect(page.locator('[data-tb="start"]')).toHaveText('Start the run');
+  await expect(page.locator('[data-tb="launch"]')).toHaveText('▶ Start');
+  await expect(page.locator('.tl-read h3')).toHaveText('Recall the goal');
   await expect(page.locator('[data-field="target.outcome"]')).toHaveAttribute('placeholder', 'Target result, quantified…');
 });
 
@@ -341,4 +376,16 @@ test('side peek : 2/3 de l\'écran, Kanban visible, clic sur une autre carte = o
   // Clic ailleurs sur le Kanban : fermeture
   await page.mouse.click(30, 850);
   await expect(page.locator('#drawer')).not.toHaveClass(/open/);
+});
+
+test('données de démo : suppression en un clic, les autres cartes restent', async ({ page }) => {
+  await page.click('#newMain');
+  await page.fill('#peekTitle', 'Ma vraie carte');
+  await page.click('#drawerClose');
+  await expect(page.locator('.n-card')).toHaveCount(6);
+  await page.click('#pageMore');
+  page.once('dialog', d => d.accept());
+  await page.locator('#nPop .row', { hasText: 'Supprimer les données de démo' }).click();
+  await expect(page.locator('.n-card')).toHaveCount(1);
+  await expect(page.locator('.n-card .tt')).toHaveText('Ma vraie carte');
 });
