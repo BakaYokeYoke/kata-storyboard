@@ -495,7 +495,27 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .peek-icon:hover { background: var(--n-hover); }
 .peek-title { display: block; width: 100%; border: none; outline: none; font: inherit; font-size: 30px; font-weight: 700; color: var(--n-ink); padding: 4px 0; background: transparent; }
 .peek-title::placeholder { color: rgba(55,53,47,.2); }
-.peek-props { display: grid; grid-template-columns: 140px 1fr; gap: 2px 8px; font-size: 14px; margin-top: 6px; align-items: center; }
+.peek-props { position: relative; display: flex; flex-direction: column; gap: 2px; font-size: 14px; margin-top: 6px; }
+.peek-props .psec { display: flex; flex-direction: column; gap: 2px; }
+.peek-props .psec + .psec { margin-top: 18px; }
+.peek-props .prow { position: relative; display: grid; grid-template-columns: 140px 1fr; column-gap: 8px; align-items: center; min-width: 0; }
+.peek-props .prow > * { min-width: 0; }
+/* Poignée ⋮⋮ à gauche de la propriété, visible au survol (comme Notion) */
+.peek-props .p-grip { position: absolute; left: -24px; top: 50%; transform: translateY(-50%); width: 18px; height: 24px; display: flex; align-items: center; justify-content: center; color: rgba(55,53,47,.35); border-radius: 4px; cursor: grab; opacity: 0; touch-action: none; }
+.peek-props .prow:hover .p-grip, .peek-props .p-grip:focus-visible { opacity: 1; }
+.peek-props .p-grip:hover { background: var(--n-hover); color: rgba(55,53,47,.6); }
+.peek-props .prow.dragging { opacity: .4; }
+body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-select: none; }
+.peek-props .p-drop-line { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; background: rgba(35,131,226,.43); pointer-events: none; z-index: 2; }
+@media (hover: none) { .peek-props .p-grip { opacity: 1; } }
+/* En-tête de section : nom + chevron (replier / déplier) */
+.peek-props .psec-head { display: flex; align-items: center; gap: 2px; padding: 4px 0; }
+.peek-props .psec-name { border: none; background: none; font: inherit; font-size: 14px; font-weight: 500; color: rgba(55,53,47,.65); padding: 2px 6px; margin-left: -6px; border-radius: 4px; }
+.peek-props .psec-name:hover, .peek-props .psec-toggle:hover { background: var(--n-hover); }
+.peek-props .psec-toggle { border: none; background: none; color: rgba(55,53,47,.45); padding: 3px; border-radius: 4px; display: inline-flex; }
+.peek-props .psec-rename { font: inherit; font-size: 14px; font-weight: 500; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 1px 4px; outline: none; color: rgb(55,53,47); }
+.peek-props .psec-empty { color: rgba(55,53,47,.35); font-size: 13px; padding: 5px 0; }
+.peek-props .more-props, .peek-props .add-prop { align-self: flex-start; }
 .peek-props .k { color: var(--n-muted); padding: 5px 0; }
 .peek-props .k { display: flex; align-items: center; gap: 6px; }
 .peek-props .val { justify-self: stretch; border: none; background: none; text-align: left; padding: 4px 6px; border-radius: 4px; margin-left: -6px; }

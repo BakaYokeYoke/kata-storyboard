@@ -146,6 +146,43 @@ function setPageVis(key, vis) {
   m[key] = vis; try { localStorage.setItem(PAGE_VIS_KEY, JSON.stringify(m)); } catch (e) {}
 }
 
+// Ordre et sections des propriétés dans la page (communs à toutes les pages, comme Notion).
+// [{ id, name, collapsed, keys: [...] }] ; la première section peut être sans nom (pas d'en-tête).
+const PAGE_LAYOUT_KEY = 'kata-page-layout';
+function pageLayout() {
+  let L = null; try { L = JSON.parse(localStorage.getItem(PAGE_LAYOUT_KEY)); } catch (e) {}
+  if (!Array.isArray(L) || !L.length) L = [{ id: 'main', name: '', keys: [] }];
+  const all = allProps().map(p => p.key), seen = new Set();
+  L.forEach(sec => { sec.keys = (sec.keys || []).filter(k => all.includes(k) && !seen.has(k) && seen.add(k)); });
+  all.filter(k => !seen.has(k)).forEach(k => L[L.length - 1].keys.push(k));   // nouvelles propriétés : à la fin
+  return L;
+}
+function savePageLayout(L) { try { localStorage.setItem(PAGE_LAYOUT_KEY, JSON.stringify(L)); } catch (e) {} }
+function movePropTo(key, secId, index) {
+  const L = pageLayout(), from = L.find(x => x.keys.includes(key)), to = L.find(x => x.id === secId);
+  if (!from || !to) return;
+  const old = from.keys.indexOf(key);
+  from.keys.splice(old, 1);
+  if (from === to && old < index) index--;
+  to.keys.splice(Math.max(0, Math.min(index, to.keys.length)), 0, key);
+  savePageLayout(L);
+}
+// Nouvelle section qui commence à cette propriété (elle et les suivantes y passent)
+function splitSectionAt(key) {
+  const L = pageLayout(), i = L.findIndex(x => x.keys.includes(key)), sec = L[i], at = sec.keys.indexOf(key);
+  if (at === 0 && !sec.name) { sec.name = 'Nouvelle section'; savePageLayout(L); return sec.id; }
+  const nsec = { id: 's-' + uid(), name: 'Nouvelle section', keys: sec.keys.splice(at) };
+  L.splice(i + 1, 0, nsec); savePageLayout(L);
+  return nsec.id;
+}
+function deleteSection(secId) {
+  const L = pageLayout(), i = L.findIndex(x => x.id === secId);
+  if (i < 0) return;
+  if (L.length === 1) { L[0].name = ''; L[0].collapsed = false; }
+  else { const into = L[i > 0 ? i - 1 : 1]; into.keys = i > 0 ? [...into.keys, ...L[i].keys] : [...L[i].keys, ...into.keys]; L.splice(i, 1); }
+  savePageLayout(L);
+}
+
 const isEmptyVal = v => v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length) || (typeof v === 'number' && isNaN(v));
 const fmtDay = d => d.toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric' });
 const fmtDateTime = d => d.toLocaleString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });

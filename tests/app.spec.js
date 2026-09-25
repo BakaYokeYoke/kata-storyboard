@@ -266,3 +266,37 @@ test('« Modifier la propriété » : réglages par type appliqués (nombre en e
   const reverse = await page.evaluate(() => { const k = CUSTOM_PROPS.find(p => p.name === 'Liée à').twoWay; return Store.get('demo-piano').props[k]; });
   expect(reverse).toEqual(['demo-marathon']);
 });
+
+test('page : réordonner les propriétés par glisser-déposer et les grouper en sections', async ({ page }) => {
+  await card(page, 'demo-usine').click();
+  const names = () => page.locator('#peekProps .prow .kname').allInnerTexts();
+  const row = name => page.locator('#peekProps .prow').filter({ has: page.locator('.kname', { hasText: new RegExp(`^${name}$`) }) });
+  // Glisser « Status » sous « Challenge »
+  const grip = row('Status').locator('[data-grip]');
+  await row('Status').hover();
+  const from = await grip.boundingBox(), to = await row('Challenge').boundingBox();
+  await page.mouse.move(from.x + 5, from.y + 5);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 5, to.y + to.height - 2, { steps: 8 });
+  await page.mouse.up();
+  const after = await names();
+  expect(after.indexOf('Status')).toBe(after.indexOf('Challenge') + 1);
+  // Clavier : ↑ remonte d'un cran
+  await row('Status').locator('[data-grip]').focus();
+  await page.keyboard.press('ArrowUp');
+  expect((await names()).indexOf('Status')).toBe((await names()).indexOf('Challenge') - 1);
+  // Créer une section à partir de « Focus Process », la renommer, la replier
+  await row('Focus Process').locator('[data-prop-menu]').click();
+  await page.locator('#nPop .row', { hasText: 'Créer une section ici' }).click();
+  await page.locator('.psec-rename').fill('Storyboard');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.psec-name', { hasText: 'Storyboard' })).toBeVisible();
+  await expect(page.locator('.psec').nth(1).locator('.kname').first()).toHaveText('Focus Process');
+  await page.click('[data-sec-toggle]');
+  await expect(row('Focus Process')).toHaveCount(0);
+  // L'ordre et les sections sont conservés après rechargement
+  await page.reload();
+  await card(page, 'demo-usine').click();
+  await expect(page.locator('.psec-name', { hasText: 'Storyboard' })).toBeVisible();
+  await expect(row('Focus Process')).toHaveCount(0);
+});

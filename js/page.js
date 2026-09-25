@@ -521,7 +521,7 @@ function configureRollup(cp, after) {
   openPop(anchor, [{ header: 'Relation' }, ...rels.map(r => ({ icon: 'arrowUR', label: r.name, checked: cp.rollup.relation === r.key, keepOpen: true, onClick: () => { cp.rollup.relation = r.key; step2(); } }))]);
 }
 
-function bindPropEditors(S, id, d, rerender, { toggleMore }) {
+function bindPropEditors(S, id, d, rerender) {
   const root = $('#peekProps');
   const setVal = (key, value) => { const cur = S.get(id); S.patch(id, { props: { ...(cur.props || {}), [key]: value } }); };
   const getVal = key => (S.get(id).props || {})[key];
@@ -745,6 +745,10 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
         { sep: true },
         { icon: 'board', label: 'Afficher sur le tableau', switch: onBoard, onClick: () => { const v = loadView(); v.props = onBoard ? v.props.filter(x => x !== key) : [...v.props, key]; saveView(v); } },
       ]) },
+      // Sections (comme Notion) : en créer une à partir de cette propriété, ou y déplacer la propriété
+      { icon: 'group', label: 'Créer une section ici', onClick: () => { const sid = splitSectionAt(key); rerender(); renameSectionInline(sid, rerender); } },
+      ...(pageLayout().some(x => x.name) ? [{ icon: 'move', label: 'Déplacer vers la section', value: '▸', keepOpen: true, onClick: row => openPop(row,
+        pageLayout().map(x => ({ label: x.name || 'Sans section', checked: x.keys.includes(key), onClick: () => { movePropTo(key, x.id, x.keys.length); rerender(); } }))) }] : []),
       ...(cp ? [
         { icon: 'copy', label: 'Dupliquer la propriété', onClick: () => {
           const copy = { ...JSON.parse(JSON.stringify(cp)), key: 'p-' + uid() + uid(), name: cp.name + ' (copie)' };
@@ -759,8 +763,6 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
       ] : []),
     ]);
   });
-
-  $('#moreProps')?.addEventListener('click', e => { e.stopPropagation(); toggleMore(); });
 
   // Ajouter une propriété : nom + type (liste complète, comme Notion)
   const addProp = $('#addProp');
@@ -785,6 +787,111 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
     inp.oninput = () => { typed = inp.value; };
     inp.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); create('text'); } };
   };
+}
+
+/* ---------- Ordre et sections des propriétés (glisser-déposer, comme Notion) ---------- */
+function renameSectionInline(secId, rerender) {
+  const btn = document.querySelector(`[data-sec-menu="${secId}"]`);
+  if (!btn) return;
+  const input = document.createElement('input');
+  input.className = 'psec-rename';
+  input.value = pageLayout().find(x => x.id === secId)?.name || '';
+  input.setAttribute('aria-label', 'Nom de la section');
+  btn.replaceWith(input);
+  input.focus(); input.select();
+  let done = false;
+  const commit = save => {
+    if (done) return; done = true;
+    const L = pageLayout(), sec = L.find(x => x.id === secId);
+    if (save && sec && input.value.trim()) { sec.name = input.value.trim(); savePageLayout(L); }
+    rerender();
+  };
+  input.onclick = e => e.stopPropagation();
+  input.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') commit(true); if (e.key === 'Escape') commit(false); };
+  input.onblur = () => commit(true);
+}
+
+function bindPropLayout(root, rerender, showMore) {
+  root.querySelectorAll('[data-more-sec]').forEach(b => b.onclick = e => {
+    e.stopPropagation(); showMore[b.dataset.moreSec] = !showMore[b.dataset.moreSec]; rerender();
+  });
+  root.querySelectorAll('[data-sec-toggle]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const L = pageLayout(), sec = L.find(x => x.id === b.dataset.secToggle);
+    sec.collapsed = !sec.collapsed; savePageLayout(L); rerender();
+  });
+  root.querySelectorAll('[data-sec-menu]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const secId = b.dataset.secMenu, sec = pageLayout().find(x => x.id === secId);
+    openPop(b, [
+      { icon: 'edit', label: 'Renommer la section', onClick: () => renameSectionInline(secId, rerender) },
+      { icon: sec.collapsed ? 'chevron' : 'chevRight', label: sec.collapsed ? 'Déplier la section' : 'Replier la section', onClick: () => {
+        const L = pageLayout(); L.find(x => x.id === secId).collapsed = !sec.collapsed; savePageLayout(L); rerender();
+      } },
+      { sep: true },
+      { icon: 'trash', label: 'Supprimer la section', danger: true, onClick: () => { deleteSection(secId); rerender(); } },
+    ]);
+  });
+
+  // Clavier : ↑ / ↓ sur la poignée déplacent la propriété (en passant d'une section à l'autre)
+  root.querySelectorAll('[data-grip]').forEach(grip => grip.onkeydown = e => {
+    if (!['ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    e.preventDefault();
+    const key = grip.closest('.prow').dataset.key, L = pageLayout();
+    const si = L.findIndex(x => x.keys.includes(key)), i = L[si].keys.indexOf(key);
+    if (e.key === 'ArrowUp') {
+      if (i > 0) movePropTo(key, L[si].id, i - 1);
+      else if (si > 0) movePropTo(key, L[si - 1].id, L[si - 1].keys.length);
+    } else if (i < L[si].keys.length - 1) movePropTo(key, L[si].id, i + 2);
+    else if (si < L.length - 1) movePropTo(key, L[si + 1].id, 0);
+    rerender();
+    root.querySelector(`.prow[data-key="${key}"] [data-grip]`)?.focus();
+  });
+
+  // Glisser-déposer à la souris ou au doigt, par la poignée ⋮⋮ (un simple clic ouvre le menu de la propriété)
+  root.querySelectorAll('[data-grip]').forEach(grip => grip.onpointerdown = e => {
+    if (e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    const row = grip.closest('.prow'), key = row.dataset.key, x0 = e.clientX, y0 = e.clientY;
+    let dragging = false, target = null, line = null;
+    // Points d'insertion : avant chaque ligne, après la dernière ligne de chaque section, sous l'en-tête d'une section vide ou repliée
+    const points = () => {
+      const L = pageLayout(), top = root.getBoundingClientRect().top, pts = [];
+      root.querySelectorAll('.psec').forEach(el => {
+        const sec = L.find(x => x.id === el.dataset.sec);
+        if (!sec) return;
+        const rows = [...el.querySelectorAll('.prow')];
+        rows.forEach(r => pts.push({ sec: sec.id, index: sec.keys.indexOf(r.dataset.key), y: r.getBoundingClientRect().top }));
+        if (rows.length) {
+          const lr = rows[rows.length - 1];
+          pts.push({ sec: sec.id, index: sec.keys.indexOf(lr.dataset.key) + 1, y: lr.getBoundingClientRect().bottom });
+        } else {
+          const h = el.querySelector('.psec-head');
+          pts.push({ sec: sec.id, index: sec.keys.length, y: h ? h.getBoundingClientRect().bottom : el.getBoundingClientRect().top || top });
+        }
+      });
+      return pts;
+    };
+    let pts = null;
+    const move = ev => {
+      if (!dragging) {
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 4) return;
+        dragging = true; pts = points();
+        row.classList.add('dragging'); document.body.classList.add('prop-dragging');
+        line = document.createElement('div'); line.className = 'p-drop-line'; root.appendChild(line);
+      }
+      target = pts.reduce((best, p) => Math.abs(p.y - ev.clientY) < Math.abs(best.y - ev.clientY) ? p : best, pts[0]);
+      line.style.top = (target.y - root.getBoundingClientRect().top - 2) + 'px';
+    };
+    const up = () => {
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      document.body.classList.remove('prop-dragging');
+      if (!dragging) { row.querySelector('[data-prop-menu]')?.click(); return; }
+      line?.remove(); row.classList.remove('dragging');
+      if (target) { movePropTo(key, target.sec, target.index); rerender(); }
+    };
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  });
 }
 
 // Les modifications faites dans le storyboard (iframe) mettent à jour les propriétés affichées.
@@ -826,29 +933,46 @@ function openPeek(kind, id, { isNew = false } = {}) {
   $('#peekTitle').placeholder = 'Untitled';
   $('#peekTitle').oninput = e => { S.patch(id, { [titleKey]: e.target.value }); };
 
-  let showMore = false;
+  const showMore = {};   // section id → propriétés masquées dépliées
   const renderProps = () => {
     const d = S.get(id);
     if (!d) return;
-    const rowsAll = allProps().map(p => {
+    const byKey = Object.fromEntries(allProps().map(p => [p.key, p]));
+    const isHidden = p => {
       const vis = pageVisOf(p.key);
       const v = p.key === 'status' || p.key === 'group' ? 1 : rawValue(d, p.key);
       const empty = isEmptyVal(v) && !(v instanceof Error) && !['streak', 'button'].includes(customDef(p.key)?.type);
-      return { p, hidden: vis === 'hide' || (vis === 'empty' && empty) };
-    });
-    const shown = rowsAll.filter(r => !r.hidden), more = rowsAll.filter(r => r.hidden);
-    const rowHTML = ({ p }) => `
+      return vis === 'hide' || (vis === 'empty' && empty);
+    };
+    const rowHTML = (p, sec) => `<div class="prow" data-key="${p.key}" data-sec="${sec.id}">
+      <span class="p-grip" data-grip tabindex="0" role="button" title="Glisser pour déplacer" aria-label="Déplacer ${esc(p.label)}">${icon('grip')}</span>
       <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname"${p.kind === 'custom' || p.renamed ? ' data-user' : ''}>${esc(p.label)}</span>${p.kind === 'story' ? `<span class="k-synced" title="Valeur synchronisée avec le storyboard">${icon('synced')}</span>` : ''}</span>
-      ${propEditorHTML(d, p)}`;
-    // Comme Notion : replié, « ˅ N autres propriétés » suit les propriétés visibles ;
-    // déplié, les propriétés masquées, puis « + Ajouter une propriété », puis « ˄ Masquer N propriétés »
-    const n = more.length, s = n > 1 ? 's' : '';
+      ${propEditorHTML(d, p)}</div>`;
+    // Comme Notion, par section : replié, « ˅ N autres propriétés » suit les propriétés visibles ;
+    // déplié, les propriétés masquées puis « ˄ Masquer N propriétés ». « + Ajouter une propriété » termine la dernière section.
     const addBtn = `<button class="add-prop" id="addProp">${icon('plus')} Add a property</button>`;
-    $('#peekProps').innerHTML = shown.map(rowHTML).join('')
-      + (!n ? addBtn
-        : showMore ? more.map(rowHTML).join('') + addBtn + `<button class="more-props" id="moreProps">${icon('chevUp')} Masquer ${n} propriété${s}</button>`
-        : `<button class="more-props" id="moreProps">${icon('chevron')} ${n} autre${s} propriété${s}</button>`);
-    bindPropEditors(S, id, d, renderProps, { toggleMore: () => { showMore = !showMore; renderProps(); } });
+    const L = pageLayout();
+    $('#peekProps').innerHTML = L.map((sec, i) => {
+      const last = i === L.length - 1;
+      const props = sec.keys.map(k => byKey[k]).filter(Boolean);
+      const shown = props.filter(p => !isHidden(p)), more = props.filter(isHidden);
+      const n = more.length, s = n > 1 ? 's' : '', open = showMore[sec.id];
+      const head = sec.name ? `<div class="psec-head" data-sec-head="${sec.id}">
+          <button class="psec-name" data-sec-menu="${sec.id}" data-user>${esc(sec.name)}</button>
+          <button class="psec-toggle" data-sec-toggle="${sec.id}" aria-expanded="${!sec.collapsed}" aria-label="Replier la section">${icon(sec.collapsed ? 'chevRight' : 'chevron')}</button>
+        </div>` : '';
+      if (sec.collapsed) return `<div class="psec" data-sec="${sec.id}">${head}</div>`;
+      const moreBtn = (label, ic) => `<button class="more-props"${last ? ' id="moreProps"' : ''} data-more-sec="${sec.id}">${icon(ic)} ${label}</button>`;
+      return `<div class="psec" data-sec="${sec.id}">${head}`
+        + shown.map(p => rowHTML(p, sec)).join('')
+        + (!props.length && sec.name ? '<div class="psec-empty">Glisser une propriété ici</div>' : '')
+        + (!n ? (last ? addBtn : '')
+          : open ? more.map(p => rowHTML(p, sec)).join('') + (last ? addBtn : '') + moreBtn(`Masquer ${n} propriété${s}`, 'chevUp')
+          : moreBtn(`${n} autre${s} propriété${s}`, 'chevron'))
+        + '</div>';
+    }).join('');
+    bindPropEditors(S, id, d, renderProps);
+    bindPropLayout($('#peekProps'), renderProps, showMore);
   };
   peek.render = renderProps;
   renderProps();

@@ -60,7 +60,7 @@ const I18N = [
   ['Aucune propriété numérique', 'No numeric property'], ['Aucune propriété de date', 'No date property'],
   // Page ouverte, propriétés
   ['Ajouter une propriété', 'Add a property'], ['Nom de la propriété', 'Property name'], ['Type', 'Type'], ['Changer le type', 'Change type'],
-  ['Options de la propriété', 'Property options'], ['Valeur synchronisée avec le storyboard', 'Value synced with the storyboard'], ['Dans la page', 'In the page'], ['Toujours afficher', 'Always show'], ['Masquer si vide', 'Hide when empty'],
+  ['Options de la propriété', 'Property options'], ['Valeur synchronisée avec le storyboard', 'Value synced with the storyboard'], ['Créer une section ici', 'Create a section here'], ['Déplacer vers la section', 'Move to section'], ['Sans section', 'No section'], ['Renommer la section', 'Rename section'], ['Replier la section', 'Collapse section'], ['Déplier la section', 'Expand section'], ['Supprimer la section', 'Delete section'], ['Glisser une propriété ici', 'Drag a property here'], ['Glisser pour déplacer', 'Drag to move'], ['Nom de la section', 'Section name'], ['Dans la page', 'In the page'], ['Toujours afficher', 'Always show'], ['Masquer si vide', 'Hide when empty'],
   ['Toujours masquer', 'Always hide'], ['Dupliquer la propriété', 'Duplicate property'], ['Supprimer la propriété', 'Delete property'], ['Modifier la formule', 'Edit formula'],
   ['Configurer le rollup', 'Configure rollup'], ['Occurrences affichées', 'Occurrences shown'], ['Préfixe', 'Prefix'], ['Action du bouton', 'Button action'],
   ['Valider le run (Set as Done)', 'Complete the run (Set as Done)'], ['Passer en', 'Move to'], ['Supprimer l\'option', 'Delete option'],
