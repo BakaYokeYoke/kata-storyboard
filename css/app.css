@@ -769,7 +769,7 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; scroll-behavior: auto !important; }
 }
 /* Titre du Kanban : pas de contour de focus pendant la saisie, comme dans Notion */
-.n-title:focus, .n-title:focus-visible { outline: none; }
+.n-title:focus, .n-title:focus-visible, .peek-title:focus, .peek-title:focus-visible { outline: none; }
 
 /* Sélecteur d'options (comme Notion) */
 .op { position: fixed; z-index: 44; background: #fff; border-radius: 10px; box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px; font-size: 14px; color: rgb(55,53,47); overflow: hidden;
