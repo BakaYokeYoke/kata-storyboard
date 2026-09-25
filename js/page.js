@@ -838,7 +838,7 @@ function openPeek(kind, id, { isNew = false } = {}) {
     });
     const shown = rowsAll.filter(r => !r.hidden), more = rowsAll.filter(r => r.hidden);
     const rowHTML = ({ p }) => `
-      <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname"${p.kind === 'custom' || p.renamed ? ' data-user' : ''}>${esc(p.label)}</span></span>
+      <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname"${p.kind === 'custom' || p.renamed ? ' data-user' : ''}>${esc(p.label)}</span>${p.kind === 'story' ? `<span class="k-synced" title="Valeur synchronisée avec le storyboard">${icon('synced')}</span>` : ''}</span>
       ${propEditorHTML(d, p)}`;
     // Comme Notion : replié, « ˅ N autres propriétés » suit les propriétés visibles ;
     // déplié, les propriétés masquées, puis « + Ajouter une propriété », puis « ˄ Masquer N propriétés »

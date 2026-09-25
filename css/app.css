@@ -504,6 +504,9 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .peek-props .k.custom { cursor: pointer; border-radius: 4px; margin-left: -4px; padding-left: 4px; }
 .peek-props .k.custom:hover { background: var(--n-hover); }
 .peek-props .k .kname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Propriété alimentée par le storyboard : petite icône de lien après le nom */
+.peek-props .k .k-synced { flex: none; display: inline-flex; margin-left: -2px; color: rgba(35,131,226,.8); }
+.peek-props .k .k-synced svg { width: 12px; height: 12px; }
 .peek-props .pv { border: none; outline: none; font: inherit; font-size: 14px; color: var(--n-ink); background: transparent; padding: 4px 6px; margin-left: -6px; border-radius: 4px; width: 100%; min-width: 0; }
 .peek-props .pv:hover, .peek-props .pv:focus { background: var(--n-hover); }
 .peek-props .pv::placeholder, .peek-props .empty { color: rgba(55,53,47,.35); }

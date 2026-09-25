@@ -59,6 +59,7 @@ const ICONS = {
   x:      '<path d="M4 4l8 8M12 4l-8 8"/>',
   chevRight: '<path d="M6 3.5L10.5 8 6 12.5"/>',
   chevUp: '<path d="M4.5 9.5L8 6l3.5 3.5"/>',
+  synced: '<path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8"/>',
   grip:   '<circle cx="6" cy="4" r=".9" fill="currentColor"/><circle cx="10" cy="4" r=".9" fill="currentColor"/><circle cx="6" cy="8" r=".9" fill="currentColor"/><circle cx="10" cy="8" r=".9" fill="currentColor"/><circle cx="6" cy="12" r=".9" fill="currentColor"/><circle cx="10" cy="12" r=".9" fill="currentColor"/>',
   text:   '<path d="M2.5 4h11M2.5 8h11M2.5 12h7"/>',
   calendar:'<rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/>',
