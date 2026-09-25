@@ -1,7 +1,7 @@
 /* Service worker : l'app fonctionne hors connexion.
    Stratégie « réseau d'abord » : on sert toujours la dernière version publiée quand le réseau
    est disponible, et la copie locale sinon. Le nom du cache est mis à jour à chaque commit. */
-const CACHE = 'kata-20260925-152527';
+const CACHE = 'kata-20260925-153351';
 const SHELL = [
   './', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png',
   ...['store', 'utils', 'i18n', 'kanban', 'properties', 'view-settings', 'icons', 'templates', 'page', 'demo', 'storyboard', 'timeblock', 'diagrams', 'metrics', 'a11y', 'main'].map(n => `js/${n}.js`),

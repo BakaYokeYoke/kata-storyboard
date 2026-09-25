@@ -844,3 +844,8 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
 .peek-props .pv-date { width: auto; }
 .peek-props input[type=number].pv { width: 110px; flex: none; }
 .peek-props .pv-wrap .pv-unit { margin-left: 2px; }
+
+/* Zone d'édition flottante d'une propriété texte (comme Notion) */
+.pv-pop { position: fixed; z-index: 60; background: #fff; border-radius: 6px; box-shadow: rgba(15,15,15,.05) 0 0 0 1px, rgba(15,15,15,.1) 0 3px 6px, rgba(15,15,15,.2) 0 9px 24px; }
+.pv-pop textarea { display: block; width: 100%; min-height: 34px; max-height: 60vh; resize: none; border: none; outline: none; background: transparent; font: inherit; font-size: 14px; line-height: 21px; color: rgb(44,44,43); padding: 6px 6px 7px; overflow-y: auto; }
+.pv-pop textarea::placeholder { color: rgb(161,158,153); }

@@ -583,6 +583,10 @@ function bindPropEditors(S, id, d, rerender) {
     rerender();
   };
   root.querySelectorAll('[data-story-field]').forEach(inp => inp.onchange = () => editBoard(b => { b[inp.dataset.storyField] = inp.value; }));
+  // Texte, URL, e-mail, téléphone : zone d'édition flottante au-dessus de la cellule (comme Notion)
+  root.querySelectorAll('input.pv:not([type]), input.pv[type=text], input.pv[type=url], input.pv[type=email], input.pv[type=tel]').forEach(inp => {
+    inp.onfocus = () => { if (inp._skipFocus) { inp._skipFocus = false; return; } openTextPopover(inp); };
+  });
   root.querySelectorAll('[data-story]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
     const what = btn.dataset.story;
@@ -793,6 +797,50 @@ function bindPropEditors(S, id, d, rerender) {
     inp.oninput = () => { typed = inp.value; };
     inp.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); create('text'); } };
   };
+}
+
+/* ---------- Zone d'édition flottante des propriétés texte (comme Notion) ---------- */
+// Posée sur la cellule, même largeur ; le texte y revient à la ligne et la zone grandit avec lui.
+// Entrée, Échap, Tab ou un clic ailleurs valident. L'input d'origine reste la source des événements de sauvegarde.
+function openTextPopover(inp) {
+  if ($('#pvPop')) return;
+  const cell = inp.closest('.pv-wrap') || inp, r = cell.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.id = 'pvPop'; pop.className = 'pv-pop';
+  const ta = document.createElement('textarea');
+  ta.rows = 1; ta.value = inp.value; ta.placeholder = inp.placeholder || '';
+  ta.setAttribute('aria-label', inp.getAttribute('aria-label') || inp.closest('.prow')?.querySelector('.kname')?.textContent || '');
+  pop.appendChild(ta);
+  document.body.appendChild(pop);
+  pop.style.left = r.left + 'px';
+  pop.style.top = r.top + 'px';
+  pop.style.width = Math.min(r.width, innerWidth - r.left - 8) + 'px';
+  const fit = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+  fit();
+  ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  let done = false;
+  const close = refocus => {
+    if (done) return; done = true;
+    document.removeEventListener('pointerdown', outside, true);
+    $('#drawer')?.removeEventListener('scroll', onScroll);
+    pop.remove();
+    inp.value = ta.value;
+    inp.dispatchEvent(new Event('change'));
+    if (refocus && inp.isConnected) { inp._skipFocus = true; inp.focus({ preventScroll: true }); }
+  };
+  const outside = e => { if (!pop.contains(e.target)) close(false); };
+  const onScroll = () => close(false);
+  document.addEventListener('pointerdown', outside, true);
+  $('#drawer')?.addEventListener('scroll', onScroll);
+  ta.oninput = () => {
+    ta.value = ta.value.replace(/\n/g, ' ');   // une seule ligne logique : le retour à la ligne est visuel
+    fit(); inp.value = ta.value; inp.dispatchEvent(new Event('input'));
+  };
+  ta.onkeydown = e => {
+    e.stopPropagation();   // Échap ne doit pas fermer le tiroir
+    if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); close(true); }
+  };
+  ta.onblur = () => close(false);
 }
 
 /* ---------- Ordre et sections des propriétés (glisser-déposer, comme Notion) ---------- */

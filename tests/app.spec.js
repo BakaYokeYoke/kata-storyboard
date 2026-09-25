@@ -225,8 +225,11 @@ test('page : propriétés du storyboard modifiables, sélecteur d\'options, reno
   await page.keyboard.press('Enter');
   await expect(value('Pro/Perso')).toContainText('Famille');
   // Focus Process : modifié depuis la page, reporté dans le storyboard
-  await value('Focus Process').locator('input').fill('Presse P12');
-  await value('Focus Process').locator('input').press('Tab');
+  await value('Focus Process').locator('input').click();
+  await expect(page.locator('#pvPop textarea')).toBeFocused();   // zone d'édition flottante, comme Notion
+  await page.locator('#pvPop textarea').fill('Presse P12');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#pvPop')).toHaveCount(0);
   await expect(page.locator('#focusProcess')).toHaveValue('Presse P12');
   // Renommer la propriété sur place
   await page.locator('#peekProps [data-prop-menu]', { hasText: 'Focus Process' }).click();
