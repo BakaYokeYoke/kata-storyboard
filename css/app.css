@@ -740,3 +740,5 @@ textarea.free::placeholder, .metric textarea::placeholder, .head input::placehol
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; scroll-behavior: auto !important; }
 }
+/* Titre du Kanban : pas de contour de focus pendant la saisie, comme dans Notion */
+.n-title:focus, .n-title:focus-visible { outline: none; }

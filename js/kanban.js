@@ -270,7 +270,6 @@ function renderKanban() {
       <button class="n-icon-btn" id="pageMore" title="Plus d'actions">${icon('dots')}</button>
     </header>
     <main class="n-page" aria-label="Tableau">
-      <div class="backup-banner" id="backupBanner" hidden></div>
       <h1 class="n-title" id="boardTitle" contenteditable="true" spellcheck="false" data-placeholder="Sans titre">${esc(boardTitle())}</h1>
       <div class="n-bar">
         <span class="spacer"></span>
