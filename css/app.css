@@ -523,7 +523,6 @@ body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-sel
 .peek-props .k { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 6px; border-radius: 6px; color: rgb(125,122,117); line-height: 20px; }
 .peek-props .k > svg { width: 16px; height: 16px; margin: 0 1px; flex: none; color: rgb(142,139,134); }
 .peek-props .val { justify-self: stretch; border: none; background: none; font: inherit; color: inherit; text-align: left; min-height: 34px; padding: 6px; border-radius: 4px; }
-.peek-props .val:hover { background: var(--n-hover); }
 .peek-props .v { color: rgb(44,44,43); min-height: 34px; padding: 6px; }
 .peek-props .k.custom { cursor: pointer; }
 .peek-props .k.custom:hover { background: var(--n-hover); }
@@ -532,7 +531,6 @@ body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-sel
 .peek-props .k .k-synced { flex: none; display: inline-flex; margin-left: -2px; color: rgba(35,131,226,.8); }
 .peek-props .k .k-synced svg { width: 12px; height: 12px; }
 .peek-props .pv { border: none; outline: none; font: inherit; font-size: 14px; line-height: 21px; color: rgb(44,44,43); background: transparent; height: 34px; padding: 6px; border-radius: 4px; width: 100%; min-width: 0; }
-.peek-props .pv:hover, .peek-props .pv:focus { background: var(--n-hover); }
 .peek-props .pv::placeholder, .peek-props .empty { color: rgb(161,158,153); }
 .peek-props .pv[type=date] { width: auto; justify-self: start; }
 .peek-props .pv-check { min-height: 34px; padding: 0 6px; display: inline-flex; align-items: center; }
