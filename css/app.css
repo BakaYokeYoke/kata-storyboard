@@ -493,15 +493,15 @@ svg.i { width: 16px; height: 16px; display: block; flex: none; }
 .peek-head { padding: 4px 44px 8px; }
 .peek-icon { font-size: 40px; line-height: 1; border: none; background: none; padding: 4px; border-radius: 6px; margin-left: -4px; }
 .peek-icon:hover { background: var(--n-hover); }
-.peek-title { display: block; width: 100%; border: none; outline: none; font: inherit; font-size: 30px; font-weight: 700; color: var(--n-ink); padding: 4px 0; background: transparent; }
+.peek-title { display: block; width: 100%; border: none; outline: none; font: inherit; font-size: 32px; line-height: 38.4px; font-weight: 700; color: rgb(44,44,43); padding: 4px 0; background: transparent; }
 .peek-title::placeholder { color: rgba(55,53,47,.2); }
-.peek-props { position: relative; display: flex; flex-direction: column; gap: 2px; font-size: 14px; margin-top: 6px; }
-.peek-props .psec { display: flex; flex-direction: column; gap: 2px; }
-.peek-props .psec + .psec { margin-top: 18px; }
-.peek-props .prow { position: relative; display: grid; grid-template-columns: 140px 1fr; column-gap: 8px; align-items: center; min-width: 0; }
+.peek-props { position: relative; display: flex; flex-direction: column; font-size: 14px; line-height: 21px; color: rgb(44,44,43); margin: 8px 0 12px -6px; padding-bottom: 8px; }
+.peek-props .psec { display: flex; flex-direction: column; gap: 4px; }
+.peek-props .psec + .psec { margin-top: 20px; }
+.peek-props .prow { position: relative; display: grid; grid-template-columns: 160px 1fr; column-gap: 8px; align-items: start; min-width: 0; }
 .peek-props .prow > * { min-width: 0; }
 /* Poignée ⋮⋮ à gauche de la propriété, visible au survol (comme Notion) */
-.peek-props .p-grip { position: absolute; left: -24px; top: 50%; transform: translateY(-50%); width: 18px; height: 24px; display: flex; align-items: center; justify-content: center; color: rgba(55,53,47,.35); border-radius: 4px; cursor: grab; opacity: 0; touch-action: none; }
+.peek-props .p-grip { position: absolute; left: -20px; top: 5px; width: 18px; height: 24px; display: flex; align-items: center; justify-content: center; color: rgba(55,53,47,.35); border-radius: 4px; cursor: grab; opacity: 0; touch-action: none; }
 .peek-props .prow:hover .p-grip, .peek-props .p-grip:focus-visible { opacity: 1; }
 .peek-props .p-grip:hover { background: var(--n-hover); color: rgba(55,53,47,.6); }
 .peek-props .prow.dragging { opacity: .4; }
@@ -509,32 +509,37 @@ body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-sel
 .peek-props .p-drop-line { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; background: rgba(35,131,226,.43); pointer-events: none; z-index: 2; }
 @media (hover: none) { .peek-props .p-grip { opacity: 1; } }
 /* En-tête de section : nom + chevron (replier / déplier) */
-.peek-props .psec-head { display: flex; align-items: center; gap: 2px; padding: 4px 0; }
-.peek-props .psec-name { border: none; background: none; font: inherit; font-size: 14px; font-weight: 500; color: rgba(55,53,47,.65); padding: 2px 6px; margin-left: -6px; border-radius: 4px; }
-.peek-props .psec-name:hover, .peek-props .psec-toggle:hover { background: var(--n-hover); }
-.peek-props .psec-toggle { border: none; background: none; color: rgba(55,53,47,.45); padding: 3px; border-radius: 4px; display: inline-flex; }
-.peek-props .psec-rename { font: inherit; font-size: 14px; font-weight: 500; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 1px 4px; outline: none; color: rgb(55,53,47); }
-.peek-props .psec-empty { color: rgba(55,53,47,.35); font-size: 13px; padding: 5px 0; }
+.peek-props .psec-head { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 6px; border-radius: 6px; align-self: flex-start; }
+.peek-props .psec-head:hover { background: var(--n-hover); }
+.peek-props .psec-name { border: none; background: none; font: inherit; font-size: 13px; line-height: 19.5px; font-weight: 500; color: rgb(125,122,117); padding: 0; }
+.peek-props .psec-toggle { border: none; background: none; color: rgb(173,169,163); padding: 0; display: inline-flex; }
+.peek-props .psec-toggle svg { width: 14px; height: 14px; }
+.peek-props .psec-rename { font: inherit; font-size: 13px; font-weight: 500; border: 1px solid #2383e2; box-shadow: 0 0 0 1px #2383e2; border-radius: 4px; padding: 0 4px; outline: none; color: rgb(44,44,43); }
+.peek-props .psec-empty { color: rgb(161,158,153); font-size: 14px; line-height: 34px; padding: 0 6px; }
 .peek-props .more-props, .peek-props .add-prop { align-self: flex-start; }
-.peek-props .k { color: var(--n-muted); padding: 5px 0; }
-.peek-props .k { display: flex; align-items: center; gap: 6px; }
-.peek-props .val { justify-self: stretch; border: none; background: none; text-align: left; padding: 4px 6px; border-radius: 4px; margin-left: -6px; }
+.more-props svg, .add-prop svg { width: 16px; height: 16px; color: rgb(173,169,163); flex: none; }
+.peek-props .k { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 6px; border-radius: 6px; color: rgb(125,122,117); line-height: 20px; }
+.peek-props .k > svg { width: 16px; height: 16px; margin: 0 1px; flex: none; color: rgb(142,139,134); }
+.peek-props .val { justify-self: stretch; border: none; background: none; font: inherit; color: inherit; text-align: left; min-height: 34px; padding: 6px; border-radius: 4px; }
 .peek-props .val:hover { background: var(--n-hover); }
-.peek-props .v { color: var(--n-ink); padding: 5px 0; }
-.peek-props .k.custom { cursor: pointer; border-radius: 4px; margin-left: -4px; padding-left: 4px; }
+.peek-props .v { color: rgb(44,44,43); min-height: 34px; padding: 6px; }
+.peek-props .k.custom { cursor: pointer; }
 .peek-props .k.custom:hover { background: var(--n-hover); }
 .peek-props .k .kname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Propriété alimentée par le storyboard : petite icône de lien après le nom */
 .peek-props .k .k-synced { flex: none; display: inline-flex; margin-left: -2px; color: rgba(35,131,226,.8); }
 .peek-props .k .k-synced svg { width: 12px; height: 12px; }
-.peek-props .pv { border: none; outline: none; font: inherit; font-size: 14px; color: var(--n-ink); background: transparent; padding: 4px 6px; margin-left: -6px; border-radius: 4px; width: 100%; min-width: 0; }
+.peek-props .pv { border: none; outline: none; font: inherit; font-size: 14px; line-height: 21px; color: rgb(44,44,43); background: transparent; height: 34px; padding: 6px; border-radius: 4px; width: 100%; min-width: 0; }
 .peek-props .pv:hover, .peek-props .pv:focus { background: var(--n-hover); }
-.peek-props .pv::placeholder, .peek-props .empty { color: rgba(55,53,47,.35); }
+.peek-props .pv::placeholder, .peek-props .empty { color: rgb(161,158,153); }
 .peek-props .pv[type=date] { width: auto; justify-self: start; }
-.peek-props .pv-check { padding: 4px 0; display: inline-flex; }
+.peek-props .pv-check { min-height: 34px; padding: 0 6px; display: inline-flex; align-items: center; }
 .peek-props .pv-check input { width: 16px; height: 16px; accent-color: #2383e2; }
-.peek-props .val .pills { display: inline-flex; gap: 4px; flex-wrap: wrap; }
-.peek-props .v.ro { color: var(--n-ink); padding: 4px 0; min-height: 28px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; cursor: default; }
+.peek-props .val .pills { display: inline-flex; gap: 6px 8px; flex-wrap: wrap; vertical-align: top; }
+/* Pastilles dans la page : 20 px de haut, 0 6 px, coins 4 px, graisse normale (comme Notion) */
+.peek-props .n-pill { font-size: 14px; font-weight: 400; line-height: 20px; height: 20px; padding: 0 6px; }
+.peek-props .n-pill:has(.dot) { padding: 0 8px 0 6px; border-radius: 10px; }
+.peek-props .v.ro { color: rgb(44,44,43); padding: 6px; min-height: 34px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; cursor: default; }
 .peek-props .v.ro[title] { color: rgba(55,53,47,.85); }
 .peek-props .err { color: rgb(212, 76, 71); font-size: 13px; }
 .peek-props .pv-wrap { display: flex; align-items: center; gap: 4px; min-width: 0; }
@@ -542,7 +547,7 @@ body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-sel
 .peek-props .pv-open:hover { background: var(--n-hover); color: var(--n-ink); }
 .peek-props a { color: inherit; }
 .peek-props .val .pills a, .n-chip a { color: inherit; text-decoration: underline; text-decoration-color: rgba(55,53,47,.3); }
-.more-props { grid-column: 1 / -1; justify-self: start; border: none; background: none; color: rgba(55,53,47,.45); font: inherit; font-size: 14px; padding: 5px 6px; margin-left: -6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: center; }
+.more-props { border: none; background: none; color: rgb(161,158,153); font: inherit; font-size: 14px; line-height: 16.8px; height: 34px; padding: 0 8px 0 6px; border-radius: 6px; display: inline-flex; gap: 6px; align-items: center; }
 .more-props:hover { background: var(--n-hover); }
 .streak { display: inline-flex; gap: 3px; align-items: center; vertical-align: middle; }
 .streak i { width: 10px; height: 10px; border-radius: 2px; background: rgba(55,53,47,.13); display: inline-block; }
@@ -556,7 +561,7 @@ body.prop-dragging, body.prop-dragging * { cursor: grabbing !important; user-sel
 .streak-edit .every input { width: 44px; font: inherit; font-size: 13px; padding: 1px 4px; border: 1px solid rgba(55,53,47,.16); border-radius: 4px; }
 .vp-flabel { display: flex; align-items: center; gap: 6px; }
 .n-pop { max-height: 70vh; overflow-y: auto; }
-.add-prop { grid-column: 1 / -1; justify-self: start; border: none; background: none; color: rgba(55,53,47,.45); font: inherit; font-size: 14px; padding: 5px 6px; margin-left: -6px; border-radius: 4px; display: inline-flex; gap: 6px; align-items: center; }
+.add-prop { border: none; background: none; color: rgb(161,158,153); font: inherit; font-size: 14px; line-height: 16.8px; height: 34px; padding: 0 8px 0 6px; border-radius: 6px; display: inline-flex; gap: 6px; align-items: center; }
 .add-prop:hover { background: var(--n-hover); color: rgba(55,53,47,.8); }
 .n-pop input.pop-input { width: 100%; font: inherit; font-size: 14px; border: 1px solid rgba(55,53,47,.16); border-radius: 6px; padding: 5px 8px; outline: none; background: rgba(242,241,238,.6); }
 .n-pop input.pop-input:focus { border-color: #2383e2; box-shadow: 0 0 0 1px #2383e2; }
