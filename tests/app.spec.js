@@ -300,3 +300,22 @@ test('page : réordonner les propriétés par glisser-déposer et les grouper en
   await expect(page.locator('.psec-name', { hasText: 'Storyboard' })).toBeVisible();
   await expect(row('Focus Process')).toHaveCount(0);
 });
+
+test('page : supprimer une propriété intégrée puis la restaurer', async ({ page }) => {
+  await card(page, 'demo-usine').click();
+  const name = n => page.locator('#peekProps .kname', { hasText: new RegExp(`^${n}$`) });
+  await page.locator('#peekProps [data-prop-menu]', { hasText: 'Focus Process' }).click();
+  await page.locator('#nPop .row', { hasText: 'Supprimer la propriété' }).click();
+  await expect(name('Focus Process')).toHaveCount(0);
+  await expect(page.locator('#toast')).toContainText('supprimée');
+  // Status ne peut pas être supprimé (il porte les colonnes du Kanban)
+  await page.locator('#peekProps [data-prop-menu]', { hasText: 'Status' }).click();
+  await expect(page.locator('#nPop .row', { hasText: 'Supprimer la propriété' })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  // Restaurer depuis « Ajouter une propriété » : la valeur de la carte revient
+  if (!(await page.locator('#addProp').count())) await page.click('#moreProps');
+  await page.click('#addProp');
+  await page.locator('#nPop .row', { hasText: 'Focus Process' }).click();
+  await expect(name('Focus Process')).toHaveCount(1);
+  await expect(page.locator('#peekProps .prow').filter({ has: page.locator('.kname', { hasText: /^Focus Process$/ }) }).locator('input')).toHaveValue(/.+/);
+});

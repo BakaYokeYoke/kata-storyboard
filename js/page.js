@@ -731,6 +731,7 @@ function bindPropEditors(S, id, d, rerender) {
   root.querySelectorAll('[data-prop-menu]').forEach(k => k.onclick = e => {
     e.stopPropagation();
     const key = k.dataset.propMenu, cp = customDef(key);
+    const propLabelBefore = propDef(key)?.label || '';
     const vis = pageVisOf(key);
     const view = loadView();
     const onBoard = view.props.includes(key);
@@ -756,11 +757,14 @@ function bindPropEditors(S, id, d, rerender) {
           [Store, Templates].forEach(St => St.list().forEach(doc => { if (doc.props && cp.key in doc.props) St.patch(doc.id, { props: { ...doc.props, [copy.key]: JSON.parse(JSON.stringify(doc.props[cp.key])) } }); }));
           rerender();
         } },
-        { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
-          if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les pages ?`)) return;
-          CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); rerender();
-        } },
       ] : []),
+      ...(UNDELETABLE_PROPS.includes(key) ? [] : [
+        { sep: true },
+        { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
+          deleteProp(key); rerender();
+          toast(`Propriété « ${propLabelBefore} » supprimée`, { action: 'Annuler', onAction: () => { restoreProp(key); rerender(); } });
+        } },
+      ]),
     ]);
   });
 
@@ -781,6 +785,8 @@ function bindPropEditors(S, id, d, rerender) {
       { html: '<input class="pop-input" id="newPropName" placeholder="Property name" autocomplete="off">', keepOpen: true },
       { header: 'Type' },
       ...Object.entries(PROP_TYPES).map(([k, t]) => ({ icon: t.icon, label: t.label, onClick: () => create(k) })),
+      ...(deletedProps().length ? [{ sep: true }, { header: 'Propriétés supprimées' },
+        ...deletedProps().map(item => ({ icon: 'reset', label: deletedLabel(item), value: 'Restaurer', onClick: () => { restoreProp(item.key); rerender(); } }))] : []),
     ]);
     const inp = $('#newPropName');
     inp.focus();

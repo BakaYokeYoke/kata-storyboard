@@ -61,7 +61,7 @@ const I18N = [
   // Page ouverte, propriétés
   ['Ajouter une propriété', 'Add a property'], ['Nom de la propriété', 'Property name'], ['Type', 'Type'], ['Changer le type', 'Change type'],
   ['Options de la propriété', 'Property options'], ['Valeur synchronisée avec le storyboard', 'Value synced with the storyboard'], ['Créer une section ici', 'Create a section here'], ['Déplacer vers la section', 'Move to section'], ['Sans section', 'No section'], ['Renommer la section', 'Rename section'], ['Replier la section', 'Collapse section'], ['Déplier la section', 'Expand section'], ['Supprimer la section', 'Delete section'], ['Glisser une propriété ici', 'Drag a property here'], ['Glisser pour déplacer', 'Drag to move'], ['Nom de la section', 'Section name'], ['Dans la page', 'In the page'], ['Toujours afficher', 'Always show'], ['Masquer si vide', 'Hide when empty'],
-  ['Toujours masquer', 'Always hide'], ['Dupliquer la propriété', 'Duplicate property'], ['Supprimer la propriété', 'Delete property'], ['Modifier la formule', 'Edit formula'],
+  ['Toujours masquer', 'Always hide'], ['Dupliquer la propriété', 'Duplicate property'], ['Supprimer la propriété', 'Delete property'], ['Propriétés supprimées', 'Deleted properties'], ['Restaurer', 'Restore'], ['Modifier la formule', 'Edit formula'],
   ['Configurer le rollup', 'Configure rollup'], ['Occurrences affichées', 'Occurrences shown'], ['Préfixe', 'Prefix'], ['Action du bouton', 'Button action'],
   ['Valider le run (Set as Done)', 'Complete the run (Set as Done)'], ['Passer en', 'Move to'], ['Supprimer l\'option', 'Delete option'],
   ['Rechercher ou créer une option…', 'Search or create an option…'], ['Sélectionnez une option', 'Select an option'], ['Sélectionnez une ou plusieurs options', 'Select one or more options'],
@@ -150,6 +150,7 @@ const KATA_TERMS = [
 // Textes dynamiques : [motif français, motif anglais, gabarit]
 const I18N_PATTERNS = [
   [/^(\d+) autres? propriétés?$/, /^(\d+) more propert(?:y|ies)$/, n => ({ fr: `${n} autre${n > 1 ? 's' : ''} propriété${n > 1 ? 's' : ''}`, en: `${n} more propert${n > 1 ? 'ies' : 'y'}` })],
+  [/^Propriété « (.+) » supprimée$/, /^Property “(.+)” deleted$/, n => ({ fr: `Propriété « ${n} » supprimée`, en: `Property “${n}” deleted` })],
   [/^Masquer (\d+) propriétés?$/, /^Hide (\d+) propert(?:y|ies)$/, n => ({ fr: `Masquer ${n} propriété${n > 1 ? 's' : ''}`, en: `Hide ${n} propert${n > 1 ? 'ies' : 'y'}` })],
   [/^Templates pour (.+)$/, /^Templates for (.+)$/, t => ({ fr: `Templates pour ${t}`, en: `Templates for ${t}` })],
   [/^Vous modifiez un template dans$/, /^You're editing a template in$/, () => ({ fr: 'Vous modifiez un template dans', en: 'You\'re editing a template in' })],

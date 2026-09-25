@@ -116,9 +116,30 @@ const customDef = k => CUSTOM_PROPS.find(p => p.key === k);
 // Les propriétés intégrées peuvent être renommées (le nouveau nom est gardé à part)
 const PROP_NAMES_KEY = 'kata-prop-names';
 const propNameOverrides = () => { try { return JSON.parse(localStorage.getItem(PROP_NAMES_KEY) || '{}'); } catch (e) { return {}; } };
+// Propriétés supprimées (restaurables depuis « Ajouter une propriété », comme Notion).
+// Les valeurs restent dans les cartes : restaurer une propriété les fait réapparaître.
+// Status et Pro/Perso portent les colonnes et les lignes du Kanban : elles ne se suppriment pas.
+const UNDELETABLE_PROPS = ['status', 'group'];
+const DELETED_PROPS_KEY = 'kata-deleted-props';
+const deletedProps = () => { try { return JSON.parse(localStorage.getItem(DELETED_PROPS_KEY)) || []; } catch (e) { return []; } };
+const saveDeletedProps = list => { try { localStorage.setItem(DELETED_PROPS_KEY, JSON.stringify(list)); } catch (e) {} };
+function deleteProp(key) {
+  if (UNDELETABLE_PROPS.includes(key)) return;
+  const cp = customDef(key), list = deletedProps().filter(x => x.key !== key);
+  list.push(cp ? { key, def: cp } : { key });
+  if (cp) { CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); }
+  saveDeletedProps(list);
+}
+function restoreProp(key) {
+  const list = deletedProps(), item = list.find(x => x.key === key);
+  if (!item) return;
+  if (item.def && !customDef(key)) { CUSTOM_PROPS.push(item.def); saveCustomProps(); }
+  saveDeletedProps(list.filter(x => x !== item));
+}
+const deletedLabel = item => item.def ? item.def.name : (propNameOverrides()[item.key] || BUILTIN_PROPS.find(p => p.key === item.key)?.label || item.key);
 const allProps = () => {
-  const o = propNameOverrides();
-  return [...BUILTIN_PROPS.map(p => o[p.key] ? { ...p, label: o[p.key], renamed: true } : p),
+  const o = propNameOverrides(), gone = new Set(deletedProps().map(x => x.key));
+  return [...BUILTIN_PROPS.filter(p => !gone.has(p.key)).map(p => o[p.key] ? { ...p, label: o[p.key], renamed: true } : p),
     ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon, kind: 'custom' }))];
 };
 function renameProp(key, name) {
