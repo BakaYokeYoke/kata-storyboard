@@ -242,7 +242,7 @@ test('« Modifier la propriété » : réglages par type appliqués (nombre en e
     await page.fill('#newPropName', name);
     await page.locator('#nPop .row').filter({ has: page.locator('.name', { hasText: new RegExp(`^${type}$`) }) }).click();
   };
-  const menu = name => page.locator('#peekProps [data-prop-menu]', { hasText: name });
+  const menu = name => page.locator('#peekProps [data-prop-menu]').filter({ has: page.locator('.kname', { hasText: new RegExp(`^${name}$`) }) });
   const value = name => menu(name).locator('xpath=following-sibling::*[1]');
   await add('Budget', 'Nombre');
   await value('Budget').locator('input').fill('42.5');
