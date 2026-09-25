@@ -41,12 +41,197 @@ async function migrateFilesToIDB() {
   }
 }
 
+/* ---------- Sélecteur d'options (comme Notion) ----------
+   cfg : state() → { options: [{ id, label, color }], selected: [ids] }, many, onSelect(id), onRemove(id),
+         onCreate(label) → id (création si fourni), onEdit(id, { label | color | delete }), onReorder(ids) */
+function closeOptionPicker() { $('#optPicker')?.remove(); }
+function openOptionPicker(anchor, cfg) {
+  closePop(); closeOptionPicker();
+  const el = document.createElement('div');
+  el.className = 'op'; el.id = 'optPicker';
+  el.setAttribute('role', 'listbox');
+  document.body.appendChild(el);
+  const r = (anchor.closest('.val, .pv-wrap') || anchor).getBoundingClientRect();
+  const width = Math.max(320, Math.min(520, r.width + 40));
+  el.style.width = width + 'px';
+  el.style.left = Math.max(8, Math.min(r.left - 8, innerWidth - width - 8)) + 'px';
+  el.style.top = Math.max(8, r.top - 6) + 'px';
+  let query = '';
+  const pillOf = o => o.dot ? `<span class="n-pill c-${o.color}"><span class="dot"></span>${esc(o.label)}</span>` : `<span class="n-pill c-${o.color}" style="border-radius:4px">${esc(o.label)}</span>`;
+  const render = () => {
+    const { options, selected } = cfg.state();
+    const q = query.trim().toLowerCase();
+    const list = options.filter(o => !q || o.label.toLowerCase().includes(q));
+    const exact = options.some(o => o.label.toLowerCase() === q);
+    el.innerHTML = `
+      <div class="op-top">
+        ${selected.map(sid => options.find(o => o.id === sid)).filter(Boolean).map(o => `<span class="op-sel">${pillOf(o).replace('</span>', '')}${cfg.onRemove ? `<button class="op-x" data-rm="${esc(o.id)}" title="Retirer">${icon('x')}</button>` : ''}</span></span>`).join('')}
+        <input class="op-input" value="${esc(query)}" autocomplete="off" aria-label="Rechercher une option">
+      </div>
+      <div class="op-label">${cfg.onCreate ? 'Sélectionnez une option ou créez-en une' : 'Sélectionnez une option'}</div>
+      <div class="op-list">
+        ${list.map(o => `
+          <div class="op-row ${selected.includes(o.id) ? 'on' : ''}" data-opt="${esc(o.id)}" role="option" aria-selected="${selected.includes(o.id)}" tabindex="-1" ${cfg.onReorder && !q ? 'draggable="true"' : ''}>
+            ${cfg.onReorder ? `<span class="grip">${icon('grip')}</span>` : ''}${pillOf(o)}<span class="spacer"></span>
+            ${cfg.onEdit ? `<button class="op-more" data-more="${esc(o.id)}" title="Modifier l'option">${icon('dots')}</button>` : ''}
+          </div>`).join('')}
+        ${cfg.onCreate && q && !exact ? `<div class="op-row op-create" data-create role="option" tabindex="-1"><span class="op-create-lbl">Créer</span> <span class="n-pill c-gray" style="border-radius:4px">${esc(query.trim())}</span></div>` : ''}
+      </div>`;
+    const inp = el.querySelector('.op-input');
+    inp.focus(); inp.setSelectionRange(query.length, query.length);
+    inp.oninput = () => { query = inp.value; render(); };
+    inp.onkeydown = e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const t = query.trim();
+        const hit = options.find(o => o.label.toLowerCase() === t.toLowerCase()) || (t ? list[0] : null);
+        if (hit && (hit.label.toLowerCase() === t.toLowerCase() || !cfg.onCreate)) cfg.onSelect(hit.id);
+        else if (t && cfg.onCreate) cfg.onCreate(t);
+        query = '';
+        if (!cfg.many) return closeOptionPicker();
+        return render();
+      }
+      if (e.key === 'Backspace' && !query && selected.length && cfg.onRemove) { cfg.onRemove(selected.at(-1)); render(); }
+      if (e.key === 'Escape') { e.stopPropagation(); closeOptionPicker(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); el.querySelector('.op-row')?.focus(); }
+    };
+    // Glisser pour réordonner
+    let drag = null;
+    el.querySelectorAll('.op-row[draggable]').forEach(row => {
+      row.ondragstart = () => { drag = row.dataset.opt; };
+      row.ondragover = e => { e.preventDefault(); row.classList.add('drop-before'); };
+      row.ondragleave = () => row.classList.remove('drop-before');
+      row.ondrop = e => {
+        e.preventDefault();
+        const ids = cfg.state().options.map(o => o.id).filter(x => x !== drag);
+        ids.splice(ids.indexOf(row.dataset.opt), 0, drag);
+        cfg.onReorder(ids); render();
+      };
+    });
+  };
+  el.onclick = e => {
+    e.stopPropagation();
+    const rm = e.target.closest('[data-rm]'), more = e.target.closest('[data-more]'), row = e.target.closest('[data-opt], [data-create]');
+    if (rm) { cfg.onRemove(rm.dataset.rm); return render(); }
+    if (more) {
+      const o = cfg.state().options.find(x => x.id === more.dataset.more);
+      openPop(more, [
+        { keepOpen: true, html: `<input class="pop-input" id="optRename" value="${esc(o.label)}" autocomplete="off" aria-label="Nom de l'option">` },
+        { icon: 'trash', label: 'Supprimer', danger: true, onClick: () => { cfg.onEdit(o.id, { delete: true }); render(); } },
+        { sep: true }, { header: 'Couleurs' },
+        ...['default', ...GROUP_COLORS].map(c => ({ html: `<span class="sw c-${c}"></span><span class="name">${{ default: 'Par défaut', gray: 'Gris', brown: 'Marron', orange: 'Orange', yellow: 'Jaune', green: 'Vert', blue: 'Bleu', purple: 'Violet', pink: 'Rose', red: 'Rouge' }[c]}</span>`, checked: (o.color || 'default') === c, onClick: () => { cfg.onEdit(o.id, { color: c }); render(); } })),
+      ]);
+      const ri = $('#optRename');
+      ri.focus(); ri.select();
+      ri.onkeydown = ev => { if (ev.key === 'Enter') { if (ri.value.trim()) cfg.onEdit(o.id, { label: ri.value.trim() }); closePop(); render(); } };
+      ri.onchange = () => { if (ri.value.trim()) { cfg.onEdit(o.id, { label: ri.value.trim() }); render(); } };
+      return;
+    }
+    if (row?.dataset.create !== undefined && cfg.onCreate) { cfg.onCreate(query.trim()); query = ''; if (!cfg.many) return closeOptionPicker(); return render(); }
+    if (row?.dataset.opt) { cfg.onSelect(row.dataset.opt); if (!cfg.many) return closeOptionPicker(); render(); }
+  };
+  el.onkeydown = e => {
+    const row = e.target.closest?.('.op-row');
+    if (!row) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); (row.nextElementSibling || row).focus(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); row.previousElementSibling ? row.previousElementSibling.focus() : el.querySelector('.op-input').focus(); }
+    if (e.key === 'Escape') { e.stopPropagation(); closeOptionPicker(); }
+  };
+  render();
+}
+document.addEventListener('click', e => { if (!e.target.closest('#optPicker, #nPop')) closeOptionPicker(); });
+
+// Pro/Perso : les options sont les sous-groupes du Kanban (créer, renommer, colorer, réordonner, supprimer)
+function groupPickerConfig(getSelected, select, after) {
+  return {
+    state: () => ({ options: GROUPS.map(g => ({ id: g.key, label: g.label, color: g.color })), selected: getSelected() }),
+    onSelect: select,
+    onCreate: label => {
+      const used = GROUPS.map(g => g.color);
+      const g = { key: 'g-' + uid(), label, color: GROUP_COLORS.find(c => !used.includes(c)) || 'gray' };
+      GROUPS.push(g); saveGroups(); select(g.key); return g.key;
+    },
+    onEdit: (key, change) => {
+      const g = groupDef(key);
+      if (change.delete) {
+        if (GROUPS.length === 1) return toast('Il faut garder au moins un groupe');
+        if (!confirm(`Supprimer le groupe « ${g.label} » ? Ses cartes passeront dans « ${GROUPS.find(x => x !== g).label} ».`)) return;
+        GROUPS = GROUPS.filter(x => x !== g); saveGroups();
+        Store.list().filter(b => b.group === key).forEach(b => Store.patch(b.id, { group: GROUPS[0].key }));
+      } else { Object.assign(g, change.label ? { label: change.label } : {}, change.color ? { color: change.color } : {}); saveGroups(); }
+      after?.();
+    },
+    onReorder: keys => { GROUPS = keys.map(k => groupDef(k)).filter(Boolean); saveGroups(); after?.(); },
+  };
+}
+
+// Renommer une propriété directement sur place
+function inlineRenameProp(k, key, rerender) {
+  const span = k.querySelector('.kname');
+  const input = document.createElement('input');
+  input.className = 'k-rename';
+  input.value = propDef(key)?.label || '';
+  input.setAttribute('aria-label', 'Nom de la propriété');
+  span.replaceWith(input);
+  input.focus(); input.select();
+  let done = false;
+  const commit = save => {
+    if (done) return; done = true;
+    if (save && input.value.trim()) renameProp(key, input.value.trim());
+    rerender();
+  };
+  input.onclick = e => e.stopPropagation();
+  input.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') commit(true); if (e.key === 'Escape') commit(false); };
+  input.onblur = () => commit(true);
+}
+
+// « Modifier la propriété » : type, formule, rollup, streak, bouton, ID, options
+function openPropertyEditor(anchor, cp, S, id, rerender) {
+  openPop(anchor, [
+    { header: cp.name },
+    { icon: PROP_TYPES[cp.type].icon, label: 'Type', value: `${PROP_TYPES[cp.type].label} ▸`, keepOpen: true, onClick: row => openPop(row, [
+      { header: 'Changer le type' },
+      ...Object.entries(PROP_TYPES).map(([t, def]) => ({ icon: def.icon, label: def.label, checked: cp.type === t, onClick: () => {
+        if (t !== cp.type && !confirm(`Passer « ${cp.name} » en ${def.label} ? Les valeurs incompatibles seront effacées.`)) return;
+        changePropType(cp, t); rerender();
+        if (t === 'formula' && !cp.formula) { editFormula(cp, S.get(id)); rerender(); }
+        if (t === 'rollup') configureRollup(cp, rerender);
+      } })),
+    ]) },
+    ...(cp.type === 'formula' ? [{ icon: 'sigma', label: 'Modifier la formule', onClick: () => { editFormula(cp, S.get(id)); rerender(); } }] : []),
+    ...(cp.type === 'rollup' ? [{ icon: 'search', label: 'Configurer le rollup', keepOpen: true, onClick: () => configureRollup(cp, rerender) }] : []),
+    ...(cp.type === 'streak' ? [{ icon: 'streakUI', label: 'Occurrences affichées', value: String(cp.streakLength || 7), onClick: () => {
+      const n = parseInt(prompt('Nombre d\'occurrences affichées', cp.streakLength || 7), 10);
+      if (n > 0) { cp.streakLength = Math.min(60, n); saveCustomProps(); rerender(); }
+    } }] : []),
+    ...(cp.type === 'button' ? [{ header: 'Action du bouton' },
+      { icon: 'check', label: 'Valider le run (Set as Done)', checked: (cp.action?.type || 'run_done') === 'run_done', onClick: () => { cp.action = { type: 'run_done' }; saveCustomProps(); rerender(); } },
+      ...STATUSES.map(st => ({ html: `<span class="name">Passer en</span> ${pill(st)}`, checked: cp.action?.type === 'status' && cp.action.status === st.key, onClick: () => { cp.action = { type: 'status', status: st.key }; saveCustomProps(); rerender(); } })),
+    ] : []),
+    ...(cp.type === 'id' ? [{ icon: 'idUI', label: 'Préfixe', value: cp.prefix || '—', onClick: () => {
+      const pr = prompt('Préfixe de l\'ID (ex. : VIS-)', cp.prefix || '');
+      if (pr !== null) { cp.prefix = pr; saveCustomProps(); rerender(); }
+    } }] : []),
+    ...(PROP_TYPES[cp.type].options ? [{ icon: 'select', label: 'Modifier les options', keepOpen: true, onClick: () => {
+      closePop();
+      const btn = anchor.nextElementSibling?.querySelector('[data-pv-select]') || anchor.nextElementSibling;
+      btn?.click();
+    } }] : []),
+  ]);
+}
+
 /* ---------- Propriétés dans la page ouverte ---------- */
 function propEditorHTML(d, p) {
   const empty = '<span class="empty">Empty</span>';
   if (p.key === 'status') return `<button class="val" data-edit="status">${pill(statusDef(statusOf(d)))}</button>`;
   if (p.key === 'group') { const g = groupDef(groupOf(d)); return `<button class="val" data-edit="group"><span class="n-pill c-${g.color}" style="border-radius:4px">${esc(g.label)}</span></button>`; }
-  if (p.kind === 'story') return `<span class="v ro" title="Vient du storyboard (lecture seule)">${valueHTML(d, p.key, 'page') || empty}</span>`;
+  if (p.key === 'challenge') return `<button class="val" data-story="challenge"><span class="pills">${valueHTML(d, 'challenge', 'page') || empty}</span></button>`;
+  if (p.key === 'focus') return `<span class="pv-wrap"><input class="pv" data-story-field="focusProcess" value="${esc(d.focusProcess || '')}" placeholder="Empty"></span>`;
+  if (p.key === 'due') return `<span class="pv-wrap"><input class="pv" type="date" data-story-field="targetDate" value="${esc(d.targetDate || '')}"></span>`;
+  if (p.key === 'obstacle') return `<button class="val" data-story="obstacle"><span class="pills">${valueHTML(d, 'obstacle', 'page') || empty}</span></button>`;
+  if (p.key === 'experiments') return `<button class="val" data-story="goto-record" title="Aller à l'Experimenting Record"><span class="pills">${valueHTML(d, 'experiments', 'page') || empty}</span></button>`;
+  if (p.key === 'step') return `<button class="val" data-story="goto-step" title="Aller au time block"><span class="pills">${valueHTML(d, 'step', 'page') || empty}</span></button>`;
   if (p.key === 'runEvery') return `<span class="pv-wrap"><input class="pv" type="number" min="1" data-recur="every" value="${esc(d.recur?.every ?? '')}" placeholder="Empty">${d.recur?.every ? '<span class="pv-unit">jours</span>' : ''}</span>`;
   if (p.key === 'runDue') return `<span class="pv-wrap"><input class="pv" type="date" data-recur="due" value="${esc(d.recur?.due ?? '')}">${d.recur?.due ? `<span class="pv-unit">${esc(relDay(d.recur.due))}</span>` : ''}</span>`;
   const cp = customDef(p.key), v = d.props?.[p.key], t = cp.type;
@@ -145,46 +330,78 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
     executeButton(S, id, customDef(btn.dataset.btnProp)); rerender();
   });
 
-  // Status / Pro/Perso
-  root.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = e => {
+  // Propriétés du storyboard : modifiées ici, écrites dans le storyboard ouvert
+  const editBoard = fn => {
+    if (board && board.id === id) {
+      fn(board);
+      saveBoardNow();
+      const drawer = $('#drawer'), y = drawer.scrollTop;
+      renderBoard(board.id, SB_ROOT);
+      drawer.scrollTop = y;
+    } else { const doc = S.get(id); fn(doc); S.save(doc); }
+    rerender();
+  };
+  root.querySelectorAll('[data-story-field]').forEach(inp => inp.onchange = () => editBoard(b => { b[inp.dataset.storyField] = inp.value; }));
+  root.querySelectorAll('[data-story]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
-    if (btn.dataset.edit === 'status') openPop(btn, STATUSES.map(st => ({ html: pill(st), checked: statusOf(S.get(id)) === st.key, onClick: () => { setStatus(S, id, st.key); rerender(); } })));
-    else openPop(btn, GROUPS.map(gr => ({ html: `<span class="n-pill c-${gr.color}" style="border-radius:4px">${esc(gr.label)}</span>`, checked: groupOf(S.get(id)) === gr.key, onClick: () => { S.patch(id, { group: gr.key }); rerender(); } })));
+    const what = btn.dataset.story;
+    if (what === 'goto-record') return $('section.experiments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (what === 'goto-step') return $('#drawer').scrollTo({ top: SB_ROOT.offsetTop - 42, behavior: 'smooth' });
+    if (what === 'challenge') {
+      const b = board?.id === id ? board : S.get(id);
+      openPop(btn, [{ keepOpen: true, html: `<div class="ch-edit">
+        <label>D'ici <input data-ch="challengeBy" value="${esc(b.challengeBy || '')}" placeholder="avril 2027"></label>
+        <label><input data-ch="challengeResult" value="${esc(b.challengeResult || '')}" placeholder="résultat mesurable"></label>
+        <label>, afin de <input data-ch="challengeVision" value="${esc(b.challengeVision || '')}" placeholder="lien avec la Vision"></label></div>` }]);
+      $('#nPop').querySelectorAll('[data-ch]').forEach(inp => {
+        inp.onchange = () => editBoard(bb => { bb[inp.dataset.ch] = inp.value; });
+        inp.onkeydown = ev => { if (ev.key === 'Enter') { inp.blur(); closePop(); } };
+      });
+      $('#nPop [data-ch]').focus();
+      return;
+    }
+    if (what === 'obstacle') {
+      const b = () => board?.id === id ? board : S.get(id);
+      openOptionPicker(btn, {
+        state: () => ({ options: b().obstacles.filter(o => !o.done).map(o => ({ id: o.id, label: o.text || 'Obstacle sans titre', color: 'yellow' })), selected: b().obstacles.filter(o => o.focus && !o.done).map(o => o.id) }),
+        onSelect: oid => editBoard(bb => bb.obstacles.forEach(o => { o.focus = o.id === oid && !o.focus; })),
+        onRemove: () => editBoard(bb => bb.obstacles.forEach(o => { o.focus = false; })),
+        onCreate: label => { const nid = uid(); editBoard(bb => { bb.obstacles.forEach(o => { o.focus = false; }); bb.obstacles.push({ id: nid, text: label, done: false, focus: true }); }); return nid; },
+      });
+    }
   });
 
-  // Select / Multi-select / Status / Person
+  // Status / Pro/Perso : sélecteur d'options (comme Notion)
+  root.querySelectorAll('[data-edit]').forEach(btn => btn.onclick = e => {
+    e.stopPropagation();
+    if (btn.dataset.edit === 'status') {
+      return openOptionPicker(btn, {
+        state: () => ({ options: STATUSES.map(st => ({ id: st.key, label: `${st.emoji} ${st.label}`, color: st.color, dot: true })), selected: [statusOf(S.get(id))] }),
+        onSelect: k => { setStatus(S, id, k); rerender(); },
+      });
+    }
+    openOptionPicker(btn, groupPickerConfig(() => [groupOf(S.get(id))], k => { S.patch(id, { group: k }); rerender(); }, rerender));
+  });
+
+  // Select / Multi-select / Status / Person : sélecteur d'options (comme Notion)
   root.querySelectorAll('[data-pv-select]').forEach(btn => btn.onclick = e => {
     e.stopPropagation();
     const cp = customDef(btn.dataset.pvSelect), many = PROP_TYPES[cp.type].many;
-    const openList = () => {
-      const cur = getVal(cp.key);
-      const has = oid => many ? (cur || []).includes(oid) : cur === oid;
-      openPop(btn, [
-        { html: '<input class="pop-input" id="optInput" placeholder="Rechercher ou créer une option…" autocomplete="off">', keepOpen: true },
-        ...(cp.options.length ? [{ header: many ? 'Sélectionnez une ou plusieurs options' : 'Sélectionnez une option' }] : []),
-        ...cp.options.map(o => ({ html: optPillHTML(o), checked: has(o.id), keepOpen: many, onClick: () => {
-          if (many) { const list = getVal(cp.key) || []; setVal(cp.key, has(o.id) ? list.filter(x => x !== o.id) : [...list, o.id]); rerender(); openList(); }
-          else { setVal(cp.key, has(o.id) ? null : o.id); rerender(); }
-        } })),
-      ]);
-      const inp = $('#optInput');
-      inp.focus();
-      inp.oninput = () => {
-        const q = inp.value.trim().toLowerCase();
-        document.querySelectorAll('#nPop .row').forEach(r => { if (r.querySelector('.n-pill')) r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none'; });
-      };
-      inp.onkeydown = ev => {
-        if (ev.key !== 'Enter' || !inp.value.trim()) return;
-        const label = inp.value.trim();
-        let o = cp.options.find(x => x.label.toLowerCase() === label.toLowerCase());
-        if (!o) { o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] }; cp.options.push(o); saveCustomProps(); }
-        const list = getVal(cp.key) || [];
-        setVal(cp.key, many ? [...new Set([...list, o.id])] : o.id);
-        rerender();
-        if (many) openList(); else closePop();
-      };
-    };
-    openList();
+    const cur = () => { const v = getVal(cp.key); return many ? (v || []) : (v ? [v] : []); };
+    openOptionPicker(btn, {
+      many,
+      state: () => ({ options: cp.options, selected: cur() }),
+      onSelect: oid => { const list = cur(); setVal(cp.key, many ? (list.includes(oid) ? list.filter(x => x !== oid) : [...list, oid]) : (list[0] === oid ? null : oid)); rerender(); },
+      onRemove: oid => { setVal(cp.key, many ? cur().filter(x => x !== oid) : null); rerender(); },
+      onCreate: label => { const o = { id: uid(), label, color: GROUP_COLORS[cp.options.length % GROUP_COLORS.length] }; cp.options.push(o); saveCustomProps(); onSel(o.id); return o.id; },
+      onEdit: (oid, change) => {
+        const o = optOf(cp, oid);
+        if (change.delete) cp.options = cp.options.filter(x => x !== o); else Object.assign(o, change);
+        saveCustomProps(); rerender();
+      },
+      onReorder: ids => { cp.options = ids.map(i => optOf(cp, i)).filter(Boolean); saveCustomProps(); rerender(); },
+    });
+    function onSel(oid) { const list = cur(); setVal(cp.key, many ? [...new Set([...list, oid])] : oid); rerender(); }
   });
 
   // Files & media
@@ -260,64 +477,41 @@ function bindPropEditors(S, id, d, rerender, { toggleMore }) {
     setVal(key, { ...(getVal(key) || {}), every: Math.max(1, parseInt(inp.value, 10) || 1) }); rerender();
   });
 
-  // Menu d'une propriété
+  // Menu du nom d'une propriété (comme Notion) : Renommer, Modifier la propriété, Visibilité, Dupliquer, Supprimer
   root.querySelectorAll('[data-prop-menu]').forEach(k => k.onclick = e => {
     e.stopPropagation();
-    const key = k.dataset.propMenu, p = propDef(key), cp = customDef(key);
+    const key = k.dataset.propMenu, cp = customDef(key);
     const vis = pageVisOf(key);
-    const visItems = [{ header: 'Dans la page' },
-      ...[['show', 'Toujours afficher'], ['empty', 'Masquer si vide'], ['hide', 'Toujours masquer']].map(([v, l]) => ({ icon: v === 'hide' ? 'eyeOff' : 'eye', label: l, checked: vis === v, onClick: () => { setPageVis(key, v); rerender(); } }))];
-    if (!cp) {
-      return openPop(k, [{ header: p.label + (p.kind === 'story' ? ' · depuis le storyboard' : '') }, ...visItems]);
-    }
+    const view = loadView();
+    const onBoard = view.props.includes(key);
+    const canEdit = !!cp || key === 'group' || key === 'status';
     openPop(k, [
-      { html: `<input class="pop-input" id="propNameInput" value="${esc(cp.name)}" autocomplete="off">`, keepOpen: true },
-      { icon: PROP_TYPES[cp.type].icon, label: 'Type', value: `${PROP_TYPES[cp.type].label} ▸`, keepOpen: true, onClick: row => openPop(row, [
-        { header: 'Changer le type' },
-        ...Object.entries(PROP_TYPES).map(([t, def]) => ({ icon: def.icon, label: def.label, checked: cp.type === t, onClick: () => {
-          if (t !== cp.type && !confirm(`Passer « ${cp.name} » en ${def.label} ? Les valeurs incompatibles seront effacées.`)) return;
-          changePropType(cp, t); rerender();
-          if (t === 'formula' && !cp.formula) editFormula(cp, S.get(id)), rerender();
-          if (t === 'rollup') configureRollup(cp, rerender);
-        } })),
-      ]) },
-      ...(cp.type === 'formula' ? [{ icon: 'sigma', label: 'Modifier la formule', onClick: () => { editFormula(cp, S.get(id)); rerender(); } }] : []),
-      ...(cp.type === 'rollup' ? [{ icon: 'search', label: 'Configurer le rollup', keepOpen: true, onClick: () => configureRollup(cp, rerender) }] : []),
-      ...(cp.type === 'streak' ? [{ icon: 'streakUI', label: 'Occurrences affichées', value: String(cp.streakLength || 7), onClick: () => {
-        const n = parseInt(prompt('Nombre d\'occurrences affichées', cp.streakLength || 7), 10);
-        if (n > 0) { cp.streakLength = Math.min(60, n); saveCustomProps(); rerender(); }
+      { icon: 'edit', label: 'Renommer', onClick: () => inlineRenameProp(k, key, rerender) },
+      ...(canEdit ? [{ icon: 'sliders', label: 'Modifier la propriété', keepOpen: true, onClick: () => {
+        if (key === 'status') { closePop(); return openPanel('group'); }
+        if (key === 'group') { closePop(); return openOptionPicker(k.nextElementSibling, groupPickerConfig(() => [groupOf(S.get(id))], g => { S.patch(id, { group: g }); rerender(); }, rerender)); }
+        openPropertyEditor(k, cp, S, id, rerender);
       } }] : []),
-      ...(cp.type === 'button' ? [{ header: 'Action du bouton' },
-        { icon: 'check', label: 'Valider le run (Set as Done)', checked: (cp.action?.type || 'run_done') === 'run_done', onClick: () => { cp.action = { type: 'run_done' }; saveCustomProps(); rerender(); } },
-        ...STATUSES.map(st => ({ html: `<span class="name">Passer en</span> ${pill(st)}`, checked: cp.action?.type === 'status' && cp.action.status === st.key, onClick: () => { cp.action = { type: 'status', status: st.key }; saveCustomProps(); rerender(); } })),
-      ] : []),
-      ...(cp.type === 'id' ? [{ icon: 'idUI', label: 'Préfixe', value: cp.prefix || '—', onClick: () => {
-        const pr = prompt('Préfixe de l\'ID (ex. : VIS-)', cp.prefix || '');
-        if (pr !== null) { cp.prefix = pr; saveCustomProps(); rerender(); }
-      } }] : []),
-      ...(PROP_TYPES[cp.type].options ? [{ header: 'Options' }, ...cp.options.map(o => ({ html: optPillHTML(o), value: '▸', keepOpen: true, onClick: row => openPop(row, [
-        { icon: 'pencil', label: 'Renommer', onClick: () => { const l = prompt('Nom de l\'option', o.label); if (l && l.trim()) { o.label = l.trim(); saveCustomProps(); rerender(); } } },
-        { header: 'Couleur' },
-        ...GROUP_COLORS.map(c => ({ html: `<span class="n-pill c-${c}" style="border-radius:4px">${esc(o.label)}</span>`, checked: o.color === c, onClick: () => { o.color = c; saveCustomProps(); rerender(); } })),
-        { sep: true },
-        { icon: 'trash', label: 'Supprimer l\'option', danger: true, onClick: () => { cp.options = cp.options.filter(x => x !== o); saveCustomProps(); rerender(); } },
-      ]) }))] : []),
-      ...visItems,
       { sep: true },
-      { icon: 'copy', label: 'Dupliquer la propriété', onClick: () => {
-        const copy = { ...JSON.parse(JSON.stringify(cp)), key: 'p-' + uid() + uid(), name: cp.name + ' (copie)' };
-        CUSTOM_PROPS.splice(CUSTOM_PROPS.indexOf(cp) + 1, 0, copy); saveCustomProps();
-        [Store, Templates].forEach(St => St.list().forEach(doc => { if (doc.props && cp.key in doc.props) St.patch(doc.id, { props: { ...doc.props, [copy.key]: JSON.parse(JSON.stringify(doc.props[cp.key])) } }); }));
-        rerender();
-      } },
-      { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
-        if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les pages ?`)) return;
-        CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); rerender();
-      } },
+      { icon: 'eyeOff', label: 'Visibilité de la propriété', value: '▸', keepOpen: true, onClick: row => openPop(row, [
+        { header: 'Dans la page' },
+        ...[['show', 'Toujours afficher'], ['empty', 'Masquer si vide'], ['hide', 'Toujours masquer']].map(([v, l]) => ({ icon: v === 'hide' ? 'eyeOff' : 'eye', label: l, checked: vis === v, onClick: () => { setPageVis(key, v); rerender(); } })),
+        { sep: true },
+        { icon: 'board', label: 'Afficher sur le tableau', switch: onBoard, onClick: () => { const v = loadView(); v.props = onBoard ? v.props.filter(x => x !== key) : [...v.props, key]; saveView(v); } },
+      ]) },
+      ...(cp ? [
+        { icon: 'copy', label: 'Dupliquer la propriété', onClick: () => {
+          const copy = { ...JSON.parse(JSON.stringify(cp)), key: 'p-' + uid() + uid(), name: cp.name + ' (copie)' };
+          CUSTOM_PROPS.splice(CUSTOM_PROPS.indexOf(cp) + 1, 0, copy); saveCustomProps();
+          [Store, Templates].forEach(St => St.list().forEach(doc => { if (doc.props && cp.key in doc.props) St.patch(doc.id, { props: { ...doc.props, [copy.key]: JSON.parse(JSON.stringify(doc.props[cp.key])) } }); }));
+          rerender();
+        } },
+        { icon: 'trash', label: 'Supprimer la propriété', danger: true, onClick: () => {
+          if (!confirm(`Supprimer la propriété « ${cp.name} » de toutes les pages ?`)) return;
+          CUSTOM_PROPS = CUSTOM_PROPS.filter(x => x !== cp); saveCustomProps(); rerender();
+        } },
+      ] : []),
     ]);
-    const ni = $('#propNameInput');
-    ni.oninput = () => { if (ni.value.trim()) { cp.name = ni.value.trim(); saveCustomProps(); k.querySelector('.kname').textContent = cp.name; } };
-    ni.onkeydown = ev => { if (ev.key === 'Enter') { closePop(); rerender(); } };
   });
 
   $('#moreProps')?.addEventListener('click', e => { e.stopPropagation(); toggleMore(); });
@@ -397,7 +591,7 @@ function openPeek(kind, id, { isNew = false } = {}) {
     });
     const shown = rowsAll.filter(r => !r.hidden), more = rowsAll.filter(r => r.hidden);
     const rowHTML = ({ p }) => `
-      <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname">${esc(p.label)}</span></span>
+      <span class="k custom" data-prop-menu="${p.key}" title="Options de la propriété">${icon(p.icon)}<span class="kname"${p.kind === 'custom' || p.renamed ? ' data-user' : ''}>${esc(p.label)}</span></span>
       ${propEditorHTML(d, p)}`;
     $('#peekProps').innerHTML = shown.map(rowHTML).join('')
       + (more.length ? `<button class="more-props" id="moreProps">${icon(showMore ? 'chevron' : 'chevRight')} ${showMore ? `Masquer ${more.length} propriété${more.length > 1 ? 's' : ''}` : `${more.length} more propert${more.length > 1 ? 'ies' : 'y'}`}</button>${showMore ? more.map(rowHTML).join('') : ''}` : '')

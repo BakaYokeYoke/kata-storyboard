@@ -114,6 +114,10 @@ const I18N = [
   ['Rother : la Target Condition se construit en copiant la Current Condition', 'Rother: the Target Condition is built by copying the Current Condition'],
   ['Le diagramme As Is est vide', 'The As Is diagram is empty'], ['Étape', 'Step'], ['valeur', 'value'], ['Marquer comme obstacle', 'Mark as obstacle'], ['Monter', 'Move up'], ['Descendre', 'Move down'],
   ['+ attente', '+ wait'], ['Attente', 'Wait'], ['durée', 'duration'], ['Retirer l\'attente', 'Remove wait'], ['+ Bloc', '+ Block'], ['+ Obstacle', '+ Obstacle'],
+  ['Modifier la propriété', 'Edit property'], ['Visibilité de la propriété', 'Property visibility'], ['Afficher sur le tableau', 'Show in board'],
+  ['Sélectionnez une option ou créez-en une', 'Select an option or create one'], ['Créer', 'Create'], ['Modifier l\'option', 'Edit option'], ['Modifier les options', 'Edit options'],
+  ['Rechercher une option', 'Search options'], ['Nom de l\'option', 'Option name'], ['Aller à l\'Experimenting Record', 'Go to the Experimenting Record'], ['Aller au time block', 'Go to the time block'],
+  ["D'ici", 'By'], ['Obstacle sans titre', 'Untitled obstacle'],
   // Suivi des indicateurs
   ['Suivi des indicateurs', 'Metric tracking'], ['Cible', 'Target'], ['Unité', 'Unit'], ['Sens d\'amélioration', 'Direction of improvement'], ['↓ plus bas = mieux', '↓ lower is better'],
   ['↑ plus haut = mieux', '↑ higher is better'], ['Valeur', 'Value'], ['Note', 'Note'], ['Note (facultatif)', 'Note (optional)'], ['Ajouter la mesure', 'Add measurement'],

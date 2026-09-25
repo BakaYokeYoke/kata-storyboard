@@ -214,3 +214,23 @@ test('accessibilité : aucune violation grave (axe) sur le Kanban et la page ouv
   const peekScan = await new AxeBuilder({ page }).include('#drawer').disableRules(['color-contrast']).analyze();
   expect(serious(peekScan)).toEqual([]);
 });
+
+test('page : propriétés du storyboard modifiables, sélecteur d\'options, renommage', async ({ page }) => {
+  await card(page, 'demo-usine').click();
+  const value = name => page.locator('#peekProps [data-prop-menu]', { hasText: name }).locator('xpath=following-sibling::*[1]');
+  // Pro/Perso : créer une option depuis le sélecteur
+  await value('Pro/Perso').click();
+  await page.locator('.op-input').fill('Famille');
+  await page.keyboard.press('Enter');
+  await expect(value('Pro/Perso')).toContainText('Famille');
+  // Focus Process : modifié depuis la page, reporté dans le storyboard
+  await value('Focus Process').locator('input').fill('Presse P12');
+  await value('Focus Process').locator('input').press('Tab');
+  await expect(page.locator('#focusProcess')).toHaveValue('Presse P12');
+  // Renommer la propriété sur place
+  await page.locator('#peekProps [data-prop-menu]', { hasText: 'Focus Process' }).click();
+  await page.locator('#nPop .row', { hasText: 'Renommer' }).click();
+  await page.locator('.k-rename').fill('Processus');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#peekProps .kname', { hasText: 'Processus' })).toBeVisible();
+});

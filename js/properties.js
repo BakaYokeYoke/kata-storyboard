@@ -113,7 +113,21 @@ function loadCustomProps() { try { return JSON.parse(localStorage.getItem(CUSTOM
 let CUSTOM_PROPS = loadCustomProps();
 function saveCustomProps() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM_PROPS)); } catch (e) {} }
 const customDef = k => CUSTOM_PROPS.find(p => p.key === k);
-const allProps = () => [...BUILTIN_PROPS, ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon, kind: 'custom' }))];
+// Les propriétés intégrées peuvent être renommées (le nouveau nom est gardé à part)
+const PROP_NAMES_KEY = 'kata-prop-names';
+const propNameOverrides = () => { try { return JSON.parse(localStorage.getItem(PROP_NAMES_KEY) || '{}'); } catch (e) { return {}; } };
+const allProps = () => {
+  const o = propNameOverrides();
+  return [...BUILTIN_PROPS.map(p => o[p.key] ? { ...p, label: o[p.key], renamed: true } : p),
+    ...CUSTOM_PROPS.map(p => ({ key: p.key, label: p.name, icon: PROP_TYPES[p.type].icon, kind: 'custom' }))];
+};
+function renameProp(key, name) {
+  const cp = customDef(key);
+  if (cp) { cp.name = name; return saveCustomProps(); }
+  const o = propNameOverrides();
+  o[key] = name;
+  try { localStorage.setItem(PROP_NAMES_KEY, JSON.stringify(o)); } catch (e) {}
+}
 const propDef = k => allProps().find(p => p.key === k);
 const PROPS = BUILTIN_PROPS;   // compatibilité
 

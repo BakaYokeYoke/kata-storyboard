@@ -533,6 +533,7 @@ function renderKanban() {
   document.onclick = () => { $('#tplMenu').hidden = true; closeIconPicker(); closePop(); closePanel(); };
   document.onkeydown = e => {
     if (e.key !== 'Escape') return;
+    if ($('#optPicker')) return closeOptionPicker();
     if ($('#nPop') || !$('#tplMenu').hidden || $('#iconPicker')) { closePop(); $('#tplMenu').hidden = true; closeIconPicker(); return; }
     if (panelPage) return closePanel();
     closePeek();
